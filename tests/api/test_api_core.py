@@ -64,7 +64,10 @@ def test_compare_presets_returns_shared_thresholds_meta_and_hashes(client):
     ids = [p["plan_id"] for p in body["plans"]]
     assert ids == ["corn_soy__no_cover", "soy_corn__no_cover", "corn_soy__rye", "soy_corn__rye"]
     t = body["thresholds"]
-    assert t["heavy_rain"]["parameters"]["assumed"] is True
+    hr = t["heavy_rain"]
+    assert hr["value"] == 76.2 and hr["parameters"]["assumed"] is False
+    assert hr["source"]["rule_id"] == "fc_v2_ref_very_heavy_rain" and hr["source"]["url"]
+    assert "Local Solar Time" in hr["note"] and "soil loss" in hr["note"]
     assert "05-12" in t["dry_spring"] and "04-15" in t["dry_spring"]
     assert body["shared_eligible_years"]["spring"] == list(range(1981, 2026))
     assert body["shared_eligible_years"]["winter"] == list(range(1982, 2026))  # 44 winters

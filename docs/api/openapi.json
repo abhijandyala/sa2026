@@ -1852,6 +1852,16 @@
             "title": "Reference Span",
             "type": "string"
           },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ThresholdSource"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "status": {
             "$ref": "#/components/schemas/Status",
             "default": "complete"
@@ -1881,6 +1891,47 @@
           "n_reference"
         ],
         "title": "Threshold",
+        "type": "object"
+      },
+      "ThresholdSource": {
+        "additionalProperties": false,
+        "description": "Where a published threshold comes from (a catalog reference row).",
+        "properties": {
+          "locator": {
+            "title": "Locator",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "verified_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Date"
+          }
+        },
+        "required": [
+          "rule_id",
+          "title",
+          "url",
+          "locator"
+        ],
+        "title": "ThresholdSource",
         "type": "object"
       },
       "ThresholdsView": {

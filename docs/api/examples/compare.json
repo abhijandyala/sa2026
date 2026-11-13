@@ -100,7 +100,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
@@ -108,21 +108,21 @@
         "winter_heavy_rain_outside_cover": {
           "basis": "own_evaluable_seasons",
           "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
-          "diff_pp": 5.5,
+          "diff_pp": 4.7,
           "earlier": {
             "end": 2000,
             "evaluable": 19,
-            "events": 17,
+            "events": 1,
             "not_evaluable": [
               {
                 "reason": "record_starts_after_window_start",
                 "year": 1981
               }
             ],
-            "pct": 89.5,
+            "pct": 5.3,
             "seasons": 20,
             "start": 1981,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "excluded_from_eras": [
             2001,
@@ -136,19 +136,19 @@
           "recent": {
             "end": 2025,
             "evaluable": 20,
-            "events": 19,
+            "events": 2,
             "not_evaluable": [],
-            "pct": 95.0,
+            "pct": 10.0,
             "seasons": 20,
             "start": 2006,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
-            "heavy_rain_mm": 29.757
+            "heavy_rain_mm": 76.2
           }
         }
       },
@@ -189,7 +189,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
@@ -197,21 +197,21 @@
         "winter_heavy_rain_outside_cover": {
           "basis": "shared_evaluable_seasons",
           "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
-          "diff_pp": 5.5,
+          "diff_pp": 4.7,
           "earlier": {
             "end": 2000,
             "evaluable": 19,
-            "events": 17,
+            "events": 1,
             "not_evaluable": [
               {
                 "reason": "not_evaluable_for_every_compared_plan",
                 "year": 1981
               }
             ],
-            "pct": 89.5,
+            "pct": 5.3,
             "seasons": 20,
             "start": 1981,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "excluded_from_eras": [
             2001,
@@ -225,19 +225,19 @@
           "recent": {
             "end": 2025,
             "evaluable": 20,
-            "events": 19,
+            "events": 2,
             "not_evaluable": [],
-            "pct": 95.0,
+            "pct": 10.0,
             "seasons": 20,
             "start": 2006,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
-            "heavy_rain_mm": 29.757
+            "heavy_rain_mm": 76.2
           }
         }
       },
@@ -494,7 +494,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 721.43,
           "spring_is_dry": false,
           "spring_rank": 19,
@@ -507,7 +507,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 877.01,
           "spring_is_dry": true,
           "spring_rank": 9,
@@ -520,7 +520,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 10,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 1027.09,
           "spring_is_dry": false,
           "spring_rank": 36,
@@ -533,7 +533,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 530.3,
           "spring_is_dry": false,
           "spring_rank": 18,
@@ -546,7 +546,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 538.74,
           "spring_is_dry": true,
           "spring_rank": 1,
@@ -559,7 +559,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 805.51,
           "spring_is_dry": false,
           "spring_rank": 12,
@@ -585,7 +585,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 726.07,
           "spring_is_dry": false,
           "spring_rank": 41,
@@ -598,7 +598,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 6,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 888.89,
           "spring_is_dry": false,
           "spring_rank": 26,
@@ -611,7 +611,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 10,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 1037.63,
           "spring_is_dry": false,
           "spring_rank": 39,
@@ -624,7 +624,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 5,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 668.63,
           "spring_is_dry": false,
           "spring_rank": 42,
@@ -637,7 +637,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 8,
+          "heavy_rain_days_outside_cover": 1,
           "rain_outside_cover_mm": 1100.63,
           "spring_is_dry": true,
           "spring_rank": 7,
@@ -650,7 +650,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 686.44,
           "spring_is_dry": false,
           "spring_rank": 22,
@@ -663,7 +663,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 697.52,
           "spring_is_dry": false,
           "spring_rank": 10,
@@ -676,7 +676,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 809.96,
           "spring_is_dry": false,
           "spring_rank": 24,
@@ -689,7 +689,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 802.08,
           "spring_is_dry": false,
           "spring_rank": 44,
@@ -702,7 +702,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 7,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 1051.01,
           "spring_is_dry": false,
           "spring_rank": 43,
@@ -728,7 +728,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 675.2,
           "spring_is_dry": false,
           "spring_rank": 29,
@@ -741,7 +741,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 475.58,
           "spring_is_dry": true,
           "spring_rank": 2,
@@ -754,7 +754,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 526.78,
           "spring_is_dry": false,
           "spring_rank": 11,
@@ -767,7 +767,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 8,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 1035.98,
           "spring_is_dry": false,
           "spring_rank": 37,
@@ -793,7 +793,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 596.8,
           "spring_is_dry": false,
           "spring_rank": 13,
@@ -806,7 +806,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 566.19,
           "spring_is_dry": false,
           "spring_rank": 15,
@@ -819,7 +819,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 7,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 678.0,
           "spring_is_dry": false,
           "spring_rank": 23,
@@ -845,7 +845,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 675.72,
           "spring_is_dry": false,
           "spring_rank": 17,
@@ -858,7 +858,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 8,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 855.5,
           "spring_is_dry": true,
           "spring_rank": 3,
@@ -871,7 +871,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 548.62,
           "spring_is_dry": false,
           "spring_rank": 16,
@@ -884,7 +884,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 624.6,
           "spring_is_dry": false,
           "spring_rank": 20,
@@ -897,7 +897,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 5,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 649.13,
           "spring_is_dry": false,
           "spring_rank": 40,
@@ -910,7 +910,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 7,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 711.79,
           "spring_is_dry": false,
           "spring_rank": 28,
@@ -923,7 +923,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 572.23,
           "spring_is_dry": false,
           "spring_rank": 32,
@@ -936,7 +936,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 9,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 986.03,
           "spring_is_dry": false,
           "spring_rank": 31,
@@ -949,7 +949,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 623.38,
           "spring_is_dry": false,
           "spring_rank": 38,
@@ -962,7 +962,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 539.82,
           "spring_is_dry": false,
           "spring_rank": 33,
@@ -975,7 +975,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 5,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 980.74,
           "spring_is_dry": false,
           "spring_rank": 35,
@@ -988,7 +988,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 5,
+          "heavy_rain_days_outside_cover": 1,
           "rain_outside_cover_mm": 899.73,
           "spring_is_dry": false,
           "spring_rank": 45,
@@ -1001,7 +1001,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 744.63,
           "spring_is_dry": true,
           "spring_rank": 5,
@@ -1014,7 +1014,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 581.98,
           "spring_is_dry": true,
           "spring_rank": 6,
@@ -1027,7 +1027,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 6,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 776.31,
           "spring_is_dry": false,
           "spring_rank": 30,
@@ -1040,7 +1040,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 5,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 770.96,
           "spring_is_dry": false,
           "spring_rank": 34,
@@ -1053,7 +1053,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 1,
           "rain_outside_cover_mm": 610.34,
           "spring_is_dry": false,
           "spring_rank": 25,
@@ -1089,14 +1089,14 @@
       "winter": {
         "eligible_seasons": 44,
         "per_season_median": {
-          "heavy_rain_days_outside_cover": 3.0,
+          "heavy_rain_days_outside_cover": 0.0,
           "rain_mm_outside_cover": 682.22
         },
         "reasons": [
           "1 season(s) not complete: record_starts_after_window_start"
         ],
         "seasons": 45,
-        "seasons_with_heavy_rain_outside_cover": 40,
+        "seasons_with_heavy_rain_outside_cover": 3,
         "segments": [
           "no_planned_cover"
         ],
@@ -1164,7 +1164,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
@@ -1172,21 +1172,21 @@
         "winter_heavy_rain_outside_cover": {
           "basis": "own_evaluable_seasons",
           "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
-          "diff_pp": -4.5,
+          "diff_pp": 5.0,
           "earlier": {
             "end": 2000,
             "evaluable": 19,
-            "events": 17,
+            "events": 0,
             "not_evaluable": [
               {
                 "reason": "record_starts_after_window_start",
                 "year": 1981
               }
             ],
-            "pct": 89.5,
+            "pct": 0.0,
             "seasons": 20,
             "start": 1981,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "excluded_from_eras": [
             2001,
@@ -1200,19 +1200,19 @@
           "recent": {
             "end": 2025,
             "evaluable": 20,
-            "events": 17,
+            "events": 1,
             "not_evaluable": [],
-            "pct": 85.0,
+            "pct": 5.0,
             "seasons": 20,
             "start": 2006,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
-            "heavy_rain_mm": 29.757
+            "heavy_rain_mm": 76.2
           }
         }
       },
@@ -1253,7 +1253,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
@@ -1261,21 +1261,21 @@
         "winter_heavy_rain_outside_cover": {
           "basis": "shared_evaluable_seasons",
           "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
-          "diff_pp": -4.5,
+          "diff_pp": 5.0,
           "earlier": {
             "end": 2000,
             "evaluable": 19,
-            "events": 17,
+            "events": 0,
             "not_evaluable": [
               {
                 "reason": "not_evaluable_for_every_compared_plan",
                 "year": 1981
               }
             ],
-            "pct": 89.5,
+            "pct": 0.0,
             "seasons": 20,
             "start": 1981,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "excluded_from_eras": [
             2001,
@@ -1289,19 +1289,19 @@
           "recent": {
             "end": 2025,
             "evaluable": 20,
-            "events": 17,
+            "events": 1,
             "not_evaluable": [],
-            "pct": 85.0,
+            "pct": 5.0,
             "seasons": 20,
             "start": 2006,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
-            "heavy_rain_mm": 29.757
+            "heavy_rain_mm": 76.2
           }
         }
       },
@@ -1527,7 +1527,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 646.04,
           "spring_is_dry": true,
           "spring_rank": 7,
@@ -1540,7 +1540,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 747.99,
           "spring_is_dry": false,
           "spring_rank": 44,
@@ -1553,7 +1553,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 10,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 855.8,
           "spring_is_dry": false,
           "spring_rank": 41,
@@ -1566,7 +1566,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 426.06,
           "spring_is_dry": true,
           "spring_rank": 4,
@@ -1579,7 +1579,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 441.05,
           "spring_is_dry": true,
           "spring_rank": 2,
@@ -1592,7 +1592,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 680.71,
           "spring_is_dry": false,
           "spring_rank": 24,
@@ -1618,7 +1618,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 522.9,
           "spring_is_dry": false,
           "spring_rank": 39,
@@ -1631,7 +1631,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 586.8,
           "spring_is_dry": false,
           "spring_rank": 30,
@@ -1644,7 +1644,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 7,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 692.24,
           "spring_is_dry": false,
           "spring_rank": 38,
@@ -1657,7 +1657,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 482.49,
           "spring_is_dry": false,
           "spring_rank": 16,
@@ -1670,7 +1670,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 6,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 831.52,
           "spring_is_dry": false,
           "spring_rank": 43,
@@ -1683,7 +1683,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 598.04,
           "spring_is_dry": false,
           "spring_rank": 25,
@@ -1696,7 +1696,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 537.72,
           "spring_is_dry": true,
           "spring_rank": 1,
@@ -1709,7 +1709,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 569.8,
           "spring_is_dry": false,
           "spring_rank": 23,
@@ -1722,7 +1722,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 560.78,
           "spring_is_dry": false,
           "spring_rank": 18,
@@ -1735,7 +1735,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 6,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 828.33,
           "spring_is_dry": false,
           "spring_rank": 35,
@@ -1761,7 +1761,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 441.06,
           "spring_is_dry": false,
           "spring_rank": 36,
@@ -1774,7 +1774,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 381.42,
           "spring_is_dry": false,
           "spring_rank": 29,
@@ -1787,7 +1787,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 389.79,
           "spring_is_dry": false,
           "spring_rank": 19,
@@ -1800,7 +1800,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 6,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 810.12,
           "spring_is_dry": false,
           "spring_rank": 45,
@@ -1826,7 +1826,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 484.92,
           "spring_is_dry": false,
           "spring_rank": 42,
@@ -1839,7 +1839,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 368.95,
           "spring_is_dry": true,
           "spring_rank": 3,
@@ -1852,7 +1852,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 6,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 574.46,
           "spring_is_dry": true,
           "spring_rank": 8,
@@ -1878,7 +1878,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 531.03,
           "spring_is_dry": false,
           "spring_rank": 34,
@@ -1891,7 +1891,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 8,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 722.89,
           "spring_is_dry": false,
           "spring_rank": 11,
@@ -1930,7 +1930,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 473.97,
           "spring_is_dry": false,
           "spring_rank": 27,
@@ -1943,7 +1943,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 5,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 557.55,
           "spring_is_dry": false,
           "spring_rank": 32,
@@ -1956,7 +1956,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 426.7,
           "spring_is_dry": true,
           "spring_rank": 6,
@@ -1969,7 +1969,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 6,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 670.67,
           "spring_is_dry": false,
           "spring_rank": 10,
@@ -1982,7 +1982,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 364.71,
           "spring_is_dry": false,
           "spring_rank": 20,
@@ -1995,7 +1995,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 399.72,
           "spring_is_dry": true,
           "spring_rank": 9,
@@ -2008,7 +2008,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 791.06,
           "spring_is_dry": false,
           "spring_rank": 33,
@@ -2021,7 +2021,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 1,
           "rain_outside_cover_mm": 758.09,
           "spring_is_dry": false,
           "spring_rank": 31,
@@ -2034,7 +2034,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 598.18,
           "spring_is_dry": false,
           "spring_rank": 28,
@@ -2047,7 +2047,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 474.57,
           "spring_is_dry": false,
           "spring_rank": 40,
@@ -2060,7 +2060,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 4,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 617.86,
           "spring_is_dry": false,
           "spring_rank": 37,
@@ -2073,7 +2073,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 5,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 631.08,
           "spring_is_dry": false,
           "spring_rank": 21,
@@ -2086,7 +2086,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 390.04,
           "spring_is_dry": false,
           "spring_rank": 22,
@@ -2122,14 +2122,14 @@
       "winter": {
         "eligible_seasons": 44,
         "per_season_median": {
-          "heavy_rain_days_outside_cover": 2.0,
+          "heavy_rain_days_outside_cover": 0.0,
           "rain_mm_outside_cover": 534.375
         },
         "reasons": [
           "1 season(s) not complete: record_starts_after_window_start"
         ],
         "seasons": 45,
-        "seasons_with_heavy_rain_outside_cover": 38,
+        "seasons_with_heavy_rain_outside_cover": 1,
         "segments": [
           "no_planned_cover"
         ],
@@ -2194,7 +2194,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
@@ -2235,29 +2235,29 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
         },
         "winter_heavy_rain_outside_cover": {
           "basis": "own_evaluable_seasons",
-          "caveat": "This happened in a larger share of seasons in 2006-2025 than in 1981-2000. Descriptive comparison of two periods only; not a trend, cause, or forecast.",
-          "diff_pp": 34.2,
+          "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
+          "diff_pp": 5.0,
           "earlier": {
             "end": 2000,
             "evaluable": 19,
-            "events": 3,
+            "events": 0,
             "not_evaluable": [
               {
                 "reason": "record_starts_after_window_start",
                 "year": 1981
               }
             ],
-            "pct": 15.8,
+            "pct": 0.0,
             "seasons": 20,
             "start": 1981,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "excluded_from_eras": [
             2001,
@@ -2271,19 +2271,19 @@
           "recent": {
             "end": 2025,
             "evaluable": 20,
-            "events": 10,
+            "events": 1,
             "not_evaluable": [],
-            "pct": 50.0,
+            "pct": 5.0,
             "seasons": 20,
             "start": 2006,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
-          "result": "more_frequent_recent",
+          "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
-            "heavy_rain_mm": 29.757
+            "heavy_rain_mm": 76.2
           }
         }
       },
@@ -2324,29 +2324,29 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
         },
         "winter_heavy_rain_outside_cover": {
           "basis": "shared_evaluable_seasons",
-          "caveat": "This happened in a larger share of seasons in 2006-2025 than in 1981-2000. Descriptive comparison of two periods only; not a trend, cause, or forecast.",
-          "diff_pp": 34.2,
+          "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
+          "diff_pp": 5.0,
           "earlier": {
             "end": 2000,
             "evaluable": 19,
-            "events": 3,
+            "events": 0,
             "not_evaluable": [
               {
                 "reason": "not_evaluable_for_every_compared_plan",
                 "year": 1981
               }
             ],
-            "pct": 15.8,
+            "pct": 0.0,
             "seasons": 20,
             "start": 1981,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "excluded_from_eras": [
             2001,
@@ -2360,19 +2360,19 @@
           "recent": {
             "end": 2025,
             "evaluable": 20,
-            "events": 10,
+            "events": 1,
             "not_evaluable": [],
-            "pct": 50.0,
+            "pct": 5.0,
             "seasons": 20,
             "start": 2006,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
-          "result": "more_frequent_recent",
+          "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
-            "heavy_rain_mm": 29.757
+            "heavy_rain_mm": 76.2
           }
         }
       },
@@ -2879,7 +2879,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 201.83,
           "spring_is_dry": false,
           "spring_rank": 26,
@@ -2972,7 +2972,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 87.09,
           "spring_is_dry": false,
           "spring_rank": 44,
@@ -2985,7 +2985,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 135.8,
           "spring_is_dry": false,
           "spring_rank": 43,
@@ -3026,7 +3026,7 @@
             "cr_tt_03"
           ],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 74.36,
           "spring_is_dry": true,
           "spring_rank": 2,
@@ -3078,7 +3078,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 82.27,
           "spring_is_dry": false,
           "spring_rank": 13,
@@ -3132,7 +3132,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 98.03,
           "spring_is_dry": false,
           "spring_rank": 17,
@@ -3160,7 +3160,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 126.06,
           "spring_is_dry": false,
           "spring_rank": 16,
@@ -3173,7 +3173,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 138.44,
           "spring_is_dry": false,
           "spring_rank": 20,
@@ -3186,7 +3186,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 73.36,
           "spring_is_dry": false,
           "spring_rank": 40,
@@ -3199,7 +3199,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 58.41,
           "spring_is_dry": false,
           "spring_rank": 28,
@@ -3225,7 +3225,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 158.35,
           "spring_is_dry": false,
           "spring_rank": 31,
@@ -3277,7 +3277,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 67.45,
           "spring_is_dry": false,
           "spring_rank": 45,
@@ -3292,7 +3292,7 @@
             "cr_tt_03"
           ],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 87.34,
           "spring_is_dry": true,
           "spring_rank": 5,
@@ -3320,7 +3320,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 81.4,
           "spring_is_dry": false,
           "spring_rank": 30,
@@ -3346,7 +3346,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 2,
+          "heavy_rain_days_outside_cover": 1,
           "rain_outside_cover_mm": 208.2,
           "spring_is_dry": false,
           "spring_rank": 25,
@@ -3458,7 +3458,7 @@
           "1 season(s) not complete: record_starts_after_window_start"
         ],
         "seasons": 45,
-        "seasons_with_heavy_rain_outside_cover": 15,
+        "seasons_with_heavy_rain_outside_cover": 1,
         "segments": [
           "living_cover",
           "before_establishment",
@@ -3693,7 +3693,7 @@
           "result": "insufficient_data",
           "similarity_band_pp": 10.0,
           "status": "insufficient_data",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
@@ -3734,29 +3734,29 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
         },
         "winter_heavy_rain_outside_cover": {
           "basis": "own_evaluable_seasons",
-          "caveat": "This happened in a larger share of seasons in 2006-2025 than in 1981-2000. Descriptive comparison of two periods only; not a trend, cause, or forecast.",
-          "diff_pp": 14.7,
+          "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
+          "diff_pp": 0.0,
           "earlier": {
             "end": 2000,
             "evaluable": 19,
-            "events": 1,
+            "events": 0,
             "not_evaluable": [
               {
                 "reason": "record_starts_after_window_start",
                 "year": 1981
               }
             ],
-            "pct": 5.3,
+            "pct": 0.0,
             "seasons": 20,
             "start": 1981,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "excluded_from_eras": [
             2001,
@@ -3770,19 +3770,19 @@
           "recent": {
             "end": 2025,
             "evaluable": 20,
-            "events": 4,
+            "events": 0,
             "not_evaluable": [],
-            "pct": 20.0,
+            "pct": 0.0,
             "seasons": 20,
             "start": 2006,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
-          "result": "more_frequent_recent",
+          "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
-            "heavy_rain_mm": 29.757
+            "heavy_rain_mm": 76.2
           }
         }
       },
@@ -3823,29 +3823,29 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
         },
         "winter_heavy_rain_outside_cover": {
           "basis": "shared_evaluable_seasons",
-          "caveat": "This happened in a larger share of seasons in 2006-2025 than in 1981-2000. Descriptive comparison of two periods only; not a trend, cause, or forecast.",
-          "diff_pp": 14.7,
+          "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
+          "diff_pp": 0.0,
           "earlier": {
             "end": 2000,
             "evaluable": 19,
-            "events": 1,
+            "events": 0,
             "not_evaluable": [
               {
                 "reason": "not_evaluable_for_every_compared_plan",
                 "year": 1981
               }
             ],
-            "pct": 5.3,
+            "pct": 0.0,
             "seasons": 20,
             "start": 1981,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
           "excluded_from_eras": [
             2001,
@@ -3859,19 +3859,19 @@
           "recent": {
             "end": 2025,
             "evaluable": 20,
-            "events": 4,
+            "events": 0,
             "not_evaluable": [],
-            "pct": 20.0,
+            "pct": 0.0,
             "seasons": 20,
             "start": 2006,
-            "threshold_value": 29.757
+            "threshold_value": 76.2
           },
-          "result": "more_frequent_recent",
+          "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "c3177402ec444df9",
+          "threshold_set_id": "19aecbfb55a7bbfb",
           "thresholds": {
-            "heavy_rain_mm": 29.757
+            "heavy_rain_mm": 76.2
           }
         }
       },
@@ -4380,7 +4380,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 52.92,
           "spring_is_dry": false,
           "spring_rank": 43,
@@ -4510,7 +4510,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 3,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 165.94,
           "spring_is_dry": false,
           "spring_rank": 45,
@@ -4562,7 +4562,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 55.84,
           "spring_is_dry": true,
           "spring_rank": 8,
@@ -4731,7 +4731,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 90.8,
           "spring_is_dry": false,
           "spring_rank": 31,
@@ -4757,7 +4757,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 75.58,
           "spring_is_dry": false,
           "spring_rank": 40,
@@ -4770,7 +4770,7 @@
         {
           "flagged_rule_ids": [],
           "full_season_status": "complete",
-          "heavy_rain_days_outside_cover": 1,
+          "heavy_rain_days_outside_cover": 0,
           "rain_outside_cover_mm": 77.92,
           "spring_is_dry": false,
           "spring_rank": 37,
@@ -5087,7 +5087,7 @@
           "1 season(s) not complete: record_starts_after_window_start"
         ],
         "seasons": 45,
-        "seasons_with_heavy_rain_outside_cover": 6,
+        "seasons_with_heavy_rain_outside_cover": 0,
         "segments": [
           "living_cover",
           "before_establishment",
@@ -5140,7 +5140,7 @@
       "add_grain_crop"
     ]
   },
-  "result_id": "eaacb9d9bff8678e",
+  "result_id": "4c1caf2a36828c10",
   "shared_eligible_years": {
     "full_season": [
       1982,
@@ -5363,6 +5363,7 @@
           "window_days": 30
         },
         "reference_span": "1981..2025",
+        "source": null,
         "status": "complete",
         "unit": "mm",
         "value": 53.51
@@ -5428,38 +5429,38 @@
           "window_days": 30
         },
         "reference_span": "1981..2025",
+        "source": null,
         "status": "complete",
         "unit": "mm",
         "value": 64.18
       }
     },
     "heavy_rain": {
-      "method": "percentile_of_wet_days",
-      "n_reference": 3962,
+      "method": "published_fixed",
+      "n_reference": 16252,
       "name": "heavy_rain_mm",
-      "note": "ASSUMED relative rule (95th percentile of wet days, Sep-May, full record) because the handbook heavy-rain rule is not available yet.",
+      "note": "Applied to NASA POWER daily values, which are Local Solar Time days (time_standard=LST), not a rolling 24-hour window; a storm split across two solar days can fall below the value on each day. Rainfall-depth weather metric only: not erosion, runoff or soil loss. Zero-count winters are valid results.",
       "parameters": {
-        "assumed": true,
+        "assumed": false,
+        "comparison": "daily precip_mm >= value",
+        "daily_value_basis": "NASA POWER PRECTOTCORR, time_standard=LST (solar day)",
+        "depth_in": 3.0,
         "inclusive": true,
-        "months": [
-          9,
-          10,
-          11,
-          12,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "percentile": 95.0,
-        "wet_day_min_mm": 1.0
+        "reference_duration_h": 24.0,
+        "scope": "rainfall depth only; not erosion or soil loss"
       },
       "reference_span": "1981-01-01..2025-06-30",
+      "source": {
+        "locator": "PDF p. 4, precipitation discussion",
+        "rule_id": "fc_v2_ref_very_heavy_rain",
+        "title": "North Carolina Climate Science Report: Plain Language Summary; March 2020",
+        "url": "https://files.nc.gov/ncdeq/climate-change/climate-scinece-report/NC-Climate-Science-Report_Plain_Language_Summary.pdf",
+        "verified_date": "2026-11-13"
+      },
       "status": "complete",
       "unit": "mm/day",
-      "value": 29.757
+      "value": 76.2
     },
-    "threshold_set_id": "c3177402ec444df9"
+    "threshold_set_id": "19aecbfb55a7bbfb"
   }
 }

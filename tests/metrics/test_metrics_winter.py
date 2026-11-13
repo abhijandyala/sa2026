@@ -193,20 +193,91 @@ def union():
     return DailySeries(snap.daily), snap.snapshot_hash
 
 
-def test_heavy_rain_threshold_is_frozen_once_and_shared_across_plans(union):
+def test_heavy_rain_threshold_is_the_published_fixed_value_frozen_once_and_shared(union):
     series, h = union
     ts = build_threshold_set(series, h)
-    again = build_threshold_set(series, h)
-    assert ts.threshold_set_id == again.threshold_set_id
+    assert ts.threshold_set_id == build_threshold_set(series, h).threshold_set_id
     t = ts.get(HEAVY_RAIN_NAME)
-    assert t.method == "percentile_of_wet_days" and t.parameters["assumed"] is True
-    assert t.reference_span == "1981-01-01..2025-06-30" and t.n_reference > 1000
-    assert 25 < t.value < 35
+    assert t.value == 76.2 and t.unit == "mm/day" and t.method == "published_fixed"
+    assert t.parameters["assumed"] is False and t.parameters["inclusive"] is True
+    assert t.reference_span == "1981-01-01..2025-06-30" and t.n_reference == 16252
     # same set -> same threshold regardless of plan, year or era
     a = compute_winter(plan("none"), build_calendar(plan("none"), 1990), series, ts, h)
     b = compute_winter(plan("rye"), build_calendar(plan("rye"), 2015), series, ts, h)
-    assert a.heavy_rain_threshold_mm == b.heavy_rain_threshold_mm == t.value
+    assert a.heavy_rain_threshold_mm == b.heavy_rain_threshold_mm == 76.2
     assert a.threshold_set_id == b.threshold_set_id == ts.threshold_set_id
+
+
+def test_threshold_records_its_catalog_source_url_and_locator(union):
+    series, h = union
+    t = build_threshold_set(series, h).get(HEAVY_RAIN_NAME)
+    assert t.source.rule_id == "fc_v2_ref_very_heavy_rain"
+    assert t.source.url.startswith("https://files.nc.gov/") and t.source.url.endswith(".pdf")
+    assert "PDF p. 4" in t.source.locator and t.source.verified_date == "2026-11-13"
+    assert "North Carolina Climate Science Report" in t.source.title
+
+
+def test_threshold_note_states_time_convention_and_scope(union):
+    series, h = union
+    t = build_threshold_set(series, h).get(HEAVY_RAIN_NAME)
+    assert "Local Solar Time" in t.note and "LST" in t.note and "rolling 24-hour" in t.note
+    assert "not erosion, runoff or soil loss" in t.note and "Zero-count winters" in t.note
+    assert t.parameters["scope"] == "rainfall depth only; not erosion or soil loss"
+    assert "erosion" not in (t.parameters["comparison"] + t.parameters["daily_value_basis"])
+
+
+def test_the_threshold_is_independent_of_the_record_it_is_applied_to():
+    wet = weather(heavy_days=["2021-12-01"])  # 40 mm days
+    dry = weather()
+    a = build_threshold_set(wet, HASH).get(HEAVY_RAIN_NAME)
+    b = build_threshold_set(dry, HASH).get(HEAVY_RAIN_NAME)
+    assert a.value == b.value == 76.2
+
+
+def test_a_day_at_exactly_76_2_mm_is_heavy_and_76_199_is_not():
+    series = weather(light={"2021-11-01": 76.2, "2021-11-02": 76.199, "2021-11-03": 120.0})
+    ts = build_threshold_set(series, HASH)
+    w = compute_winter(plan("none"), build_calendar(plan("none"), 2022), series, ts, HASH)
+    assert [e.date for e in w.heavy_rain_events] == [date(2021, 11, 1), date(2021, 11, 3)]
+
+
+def test_zero_count_winters_are_valid_complete_results_with_known_rain(union):
+    series, h = union
+    ts = build_threshold_set(series, h)
+    w = compute_winter(plan("rye"), build_calendar(plan("rye"), 2010), series, ts, h)
+    assert w.status == Status.COMPLETE and w.eligible
+    assert w.heavy_rain_days == 0 and w.heavy_rain_days_outside_cover == 0  # real zero, not None
+    assert w.heavy_rain_events == [] and w.total_rain_mm > 0
+    # most winters have none: only 6 days >= 76.2 mm fall in Sep-May over the whole record
+    counts = [
+        compute_winter(plan("none"), build_calendar(plan("none"), y), series, ts, h)
+        for y in range(1982, 2026)
+    ]
+    assert sum(c.heavy_rain_days for c in counts) < 10
+    assert sum(c.heavy_rain_days == 0 for c in counts) >= 36
+
+
+
+def test_missing_reference_row_is_a_loud_error_not_a_silent_default(monkeypatch, tmp_path):
+    import fieldshift.metrics.thresholds as th
+
+    empty = tmp_path / "weather_references.csv"
+    empty.write_text("rule_id,operator,unit\n")
+    original = th.load_reference_row
+    monkeypatch.setattr(th, "load_reference_row", lambda rid, path=empty: original(rid, path))
+    with pytest.raises(th.ReferenceError):
+        build_threshold_set(weather(), HASH)
+
+
+def test_the_old_p95_rule_is_not_part_of_the_default_set_but_remains_an_explicit_option(union):
+    from fieldshift.metrics.thresholds import HeavyRainRule
+
+    series, h = union
+    assert "p95" not in str(build_threshold_set(series, h).thresholds).lower()
+    exp = build_threshold_set(series, h, heavy_rule=HeavyRainRule(method="percentile_of_wet_days"))
+    t = exp.get(HEAVY_RAIN_NAME)
+    assert t.parameters["assumed"] is True and 25 < t.value < 35  # labelled assumed, experiments only
+    assert exp.threshold_set_id != build_threshold_set(series, h).threshold_set_id
 
 
 def test_threshold_set_id_changes_when_threshold_changes(union):
@@ -229,10 +300,13 @@ def test_real_season_totals_are_consistent(union):
 
 
 def test_rain_totals_survive_when_no_heavy_rain_threshold_can_be_computed():
+    from fieldshift.metrics.thresholds import HeavyRainRule
+
     days = pd.date_range("1981-01-01", "2025-06-30", freq="D")
     series = DailySeries(pd.DataFrame({"date": days, "precip_mm": 0.0, "gwettop": 0.5,
                                        "gwetroot": 0.5}))
-    ts = build_threshold_set(series, HASH)  # all-zero record: no wet days
+    # an all-zero record has no wet days, so the (experimental) relative rule has no value
+    ts = build_threshold_set(series, HASH, heavy_rule=HeavyRainRule(method="percentile_of_wet_days"))
     assert ts.get(HEAVY_RAIN_NAME).value is None
     p = plan("rye")
     w = compute_winter(p, build_calendar(p, 2010), series, ts, HASH)

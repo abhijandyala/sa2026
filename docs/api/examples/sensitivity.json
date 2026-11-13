@@ -32,7 +32,7 @@
       "denominator": 45,
       "gap_days": 222,
       "gap_days_in_leap_years": 223,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 1,
       "rain_outside_cover_mm_median": 682.205,
       "terminate": "10-02"
@@ -42,7 +42,7 @@
       "denominator": 45,
       "gap_days": 221,
       "gap_days_in_leap_years": 222,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 2,
       "rain_outside_cover_mm_median": 682.205,
       "terminate": "10-03"
@@ -52,7 +52,7 @@
       "denominator": 45,
       "gap_days": 220,
       "gap_days_in_leap_years": 221,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 3,
       "rain_outside_cover_mm_median": 678.07,
       "terminate": "10-04"
@@ -62,7 +62,7 @@
       "denominator": 45,
       "gap_days": 219,
       "gap_days_in_leap_years": 220,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 4,
       "rain_outside_cover_mm_median": 677.3,
       "terminate": "10-05"
@@ -72,7 +72,7 @@
       "denominator": 45,
       "gap_days": 218,
       "gap_days_in_leap_years": 219,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 5,
       "rain_outside_cover_mm_median": 677.175,
       "terminate": "10-06"
@@ -82,7 +82,7 @@
       "denominator": 45,
       "gap_days": 217,
       "gap_days_in_leap_years": 218,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 6,
       "rain_outside_cover_mm_median": 676.675,
       "terminate": "10-07"
@@ -92,7 +92,7 @@
       "denominator": 45,
       "gap_days": 216,
       "gap_days_in_leap_years": 217,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 7,
       "rain_outside_cover_mm_median": 676.22,
       "terminate": "10-08"
@@ -102,7 +102,7 @@
       "denominator": 45,
       "gap_days": 215,
       "gap_days_in_leap_years": 216,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 8,
       "rain_outside_cover_mm_median": 671.81,
       "terminate": "10-09"
@@ -112,7 +112,7 @@
       "denominator": 45,
       "gap_days": 214,
       "gap_days_in_leap_years": 215,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 9,
       "rain_outside_cover_mm_median": 668.9,
       "terminate": "10-10"
@@ -122,7 +122,7 @@
       "denominator": 45,
       "gap_days": 213,
       "gap_days_in_leap_years": 214,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 10,
       "rain_outside_cover_mm_median": 663.12,
       "terminate": "10-11"
@@ -132,7 +132,7 @@
       "denominator": 45,
       "gap_days": 212,
       "gap_days_in_leap_years": 213,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 11,
       "rain_outside_cover_mm_median": 661.105,
       "terminate": "10-12"
@@ -142,7 +142,7 @@
       "denominator": 45,
       "gap_days": 211,
       "gap_days_in_leap_years": 212,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 12,
       "rain_outside_cover_mm_median": 661.04,
       "terminate": "10-13"
@@ -152,7 +152,7 @@
       "denominator": 45,
       "gap_days": 210,
       "gap_days_in_leap_years": 211,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 13,
       "rain_outside_cover_mm_median": 660.87,
       "terminate": "10-14"
@@ -162,7 +162,7 @@
       "denominator": 45,
       "gap_days": 209,
       "gap_days_in_leap_years": 210,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 14,
       "rain_outside_cover_mm_median": 660.87,
       "terminate": "10-15"
@@ -172,7 +172,7 @@
       "denominator": 45,
       "gap_days": 208,
       "gap_days_in_leap_years": 209,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 15,
       "rain_outside_cover_mm_median": 659.81,
       "terminate": "10-16"
@@ -182,7 +182,7 @@
       "denominator": 45,
       "gap_days": 207,
       "gap_days_in_leap_years": 208,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 16,
       "rain_outside_cover_mm_median": 657.78,
       "terminate": "10-17"
@@ -192,7 +192,7 @@
       "denominator": 45,
       "gap_days": 206,
       "gap_days_in_leap_years": 207,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 17,
       "rain_outside_cover_mm_median": 642.295,
       "terminate": "10-18"
@@ -202,7 +202,7 @@
       "denominator": 45,
       "gap_days": 205,
       "gap_days_in_leap_years": 206,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 18,
       "rain_outside_cover_mm_median": 641.605,
       "terminate": "10-19"
@@ -212,7 +212,7 @@
       "denominator": 45,
       "gap_days": 204,
       "gap_days_in_leap_years": 205,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 19,
       "rain_outside_cover_mm_median": 641.18,
       "terminate": "10-20"
@@ -222,7 +222,7 @@
       "denominator": 45,
       "gap_days": 203,
       "gap_days_in_leap_years": 204,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 20,
       "rain_outside_cover_mm_median": 641.18,
       "terminate": "10-21"
@@ -232,7 +232,7 @@
       "denominator": 45,
       "gap_days": 202,
       "gap_days_in_leap_years": 203,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 21,
       "rain_outside_cover_mm_median": 639.5,
       "terminate": "10-22"
@@ -242,7 +242,7 @@
       "denominator": 45,
       "gap_days": 201,
       "gap_days_in_leap_years": 202,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 22,
       "rain_outside_cover_mm_median": 639.5,
       "terminate": "10-23"
@@ -252,7 +252,7 @@
       "denominator": 45,
       "gap_days": 200,
       "gap_days_in_leap_years": 201,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 23,
       "rain_outside_cover_mm_median": 639.5,
       "terminate": "10-24"
@@ -262,7 +262,7 @@
       "denominator": 45,
       "gap_days": 199,
       "gap_days_in_leap_years": 200,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 24,
       "rain_outside_cover_mm_median": 637.215,
       "terminate": "10-25"
@@ -272,7 +272,7 @@
       "denominator": 45,
       "gap_days": 198,
       "gap_days_in_leap_years": 199,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 25,
       "rain_outside_cover_mm_median": 637.215,
       "terminate": "10-26"
@@ -282,7 +282,7 @@
       "denominator": 45,
       "gap_days": 197,
       "gap_days_in_leap_years": 198,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 26,
       "rain_outside_cover_mm_median": 630.92,
       "terminate": "10-27"
@@ -292,7 +292,7 @@
       "denominator": 45,
       "gap_days": 196,
       "gap_days_in_leap_years": 197,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 27,
       "rain_outside_cover_mm_median": 624.23,
       "terminate": "10-28"
@@ -302,7 +302,7 @@
       "denominator": 45,
       "gap_days": 195,
       "gap_days_in_leap_years": 196,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 28,
       "rain_outside_cover_mm_median": 624.23,
       "terminate": "10-29"
@@ -312,7 +312,7 @@
       "denominator": 45,
       "gap_days": 194,
       "gap_days_in_leap_years": 195,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 29,
       "rain_outside_cover_mm_median": 624.23,
       "terminate": "10-30"
@@ -322,7 +322,7 @@
       "denominator": 45,
       "gap_days": 193,
       "gap_days_in_leap_years": 194,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 30,
       "rain_outside_cover_mm_median": 616.27,
       "terminate": "10-31"
@@ -332,7 +332,7 @@
       "denominator": 45,
       "gap_days": 192,
       "gap_days_in_leap_years": 193,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 31,
       "rain_outside_cover_mm_median": 615.59,
       "terminate": "11-01"
@@ -342,7 +342,7 @@
       "denominator": 45,
       "gap_days": 191,
       "gap_days_in_leap_years": 192,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 32,
       "rain_outside_cover_mm_median": 615.585,
       "terminate": "11-02"
@@ -352,7 +352,7 @@
       "denominator": 45,
       "gap_days": 190,
       "gap_days_in_leap_years": 191,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 33,
       "rain_outside_cover_mm_median": 612.635,
       "terminate": "11-03"
@@ -362,7 +362,7 @@
       "denominator": 45,
       "gap_days": 189,
       "gap_days_in_leap_years": 190,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 34,
       "rain_outside_cover_mm_median": 611.675,
       "terminate": "11-04"
@@ -372,7 +372,7 @@
       "denominator": 45,
       "gap_days": 188,
       "gap_days_in_leap_years": 189,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 35,
       "rain_outside_cover_mm_median": 606.49,
       "terminate": "11-05"
@@ -382,7 +382,7 @@
       "denominator": 45,
       "gap_days": 187,
       "gap_days_in_leap_years": 188,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 36,
       "rain_outside_cover_mm_median": 605.14,
       "terminate": "11-06"
@@ -392,7 +392,7 @@
       "denominator": 45,
       "gap_days": 186,
       "gap_days_in_leap_years": 187,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 37,
       "rain_outside_cover_mm_median": 602.165,
       "terminate": "11-07"
@@ -402,7 +402,7 @@
       "denominator": 45,
       "gap_days": 185,
       "gap_days_in_leap_years": 186,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 38,
       "rain_outside_cover_mm_median": 602.165,
       "terminate": "11-08"
@@ -412,7 +412,7 @@
       "denominator": 45,
       "gap_days": 184,
       "gap_days_in_leap_years": 185,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 39,
       "rain_outside_cover_mm_median": 602.145,
       "terminate": "11-09"
@@ -422,7 +422,7 @@
       "denominator": 45,
       "gap_days": 183,
       "gap_days_in_leap_years": 184,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 40,
       "rain_outside_cover_mm_median": 602.145,
       "terminate": "11-10"
@@ -432,7 +432,7 @@
       "denominator": 45,
       "gap_days": 182,
       "gap_days_in_leap_years": 183,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 41,
       "rain_outside_cover_mm_median": 601.33,
       "terminate": "11-11"
@@ -442,7 +442,7 @@
       "denominator": 45,
       "gap_days": 181,
       "gap_days_in_leap_years": 182,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 42,
       "rain_outside_cover_mm_median": 601.31,
       "terminate": "11-12"
@@ -452,7 +452,7 @@
       "denominator": 45,
       "gap_days": 180,
       "gap_days_in_leap_years": 181,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 43,
       "rain_outside_cover_mm_median": 587.385,
       "terminate": "11-13"
@@ -462,7 +462,7 @@
       "denominator": 45,
       "gap_days": 179,
       "gap_days_in_leap_years": 180,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 44,
       "rain_outside_cover_mm_median": 587.385,
       "terminate": "11-14"
@@ -472,7 +472,7 @@
       "denominator": 45,
       "gap_days": 178,
       "gap_days_in_leap_years": 179,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 45,
       "rain_outside_cover_mm_median": 577.885,
       "terminate": "11-15"
@@ -482,7 +482,7 @@
       "denominator": 45,
       "gap_days": 177,
       "gap_days_in_leap_years": 178,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 46,
       "rain_outside_cover_mm_median": 576.565,
       "terminate": "11-16"
@@ -492,7 +492,7 @@
       "denominator": 45,
       "gap_days": 176,
       "gap_days_in_leap_years": 177,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 47,
       "rain_outside_cover_mm_median": 576.215,
       "terminate": "11-17"
@@ -502,7 +502,7 @@
       "denominator": 45,
       "gap_days": 175,
       "gap_days_in_leap_years": 176,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 48,
       "rain_outside_cover_mm_median": 576.18,
       "terminate": "11-18"
@@ -512,7 +512,7 @@
       "denominator": 45,
       "gap_days": 174,
       "gap_days_in_leap_years": 175,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 49,
       "rain_outside_cover_mm_median": 576.18,
       "terminate": "11-19"
@@ -522,7 +522,7 @@
       "denominator": 45,
       "gap_days": 173,
       "gap_days_in_leap_years": 174,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 50,
       "rain_outside_cover_mm_median": 576.18,
       "terminate": "11-20"
@@ -532,7 +532,7 @@
       "denominator": 45,
       "gap_days": 172,
       "gap_days_in_leap_years": 173,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 51,
       "rain_outside_cover_mm_median": 575.1,
       "terminate": "11-21"
@@ -542,7 +542,7 @@
       "denominator": 45,
       "gap_days": 171,
       "gap_days_in_leap_years": 172,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 52,
       "rain_outside_cover_mm_median": 574.795,
       "terminate": "11-22"
@@ -552,7 +552,7 @@
       "denominator": 45,
       "gap_days": 170,
       "gap_days_in_leap_years": 171,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 53,
       "rain_outside_cover_mm_median": 574.665,
       "terminate": "11-23"
@@ -562,7 +562,7 @@
       "denominator": 45,
       "gap_days": 169,
       "gap_days_in_leap_years": 170,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 54,
       "rain_outside_cover_mm_median": 574.645,
       "terminate": "11-24"
@@ -572,7 +572,7 @@
       "denominator": 45,
       "gap_days": 168,
       "gap_days_in_leap_years": 169,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 55,
       "rain_outside_cover_mm_median": 572.925,
       "terminate": "11-25"
@@ -582,7 +582,7 @@
       "denominator": 45,
       "gap_days": 167,
       "gap_days_in_leap_years": 168,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 56,
       "rain_outside_cover_mm_median": 572.525,
       "terminate": "11-26"
@@ -592,7 +592,7 @@
       "denominator": 45,
       "gap_days": 166,
       "gap_days_in_leap_years": 167,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 57,
       "rain_outside_cover_mm_median": 570.405,
       "terminate": "11-27"
@@ -602,7 +602,7 @@
       "denominator": 45,
       "gap_days": 165,
       "gap_days_in_leap_years": 166,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 58,
       "rain_outside_cover_mm_median": 550.925,
       "terminate": "11-28"
@@ -612,7 +612,7 @@
       "denominator": 45,
       "gap_days": 164,
       "gap_days_in_leap_years": 165,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 59,
       "rain_outside_cover_mm_median": 545.645,
       "terminate": "11-29"
@@ -622,7 +622,7 @@
       "denominator": 45,
       "gap_days": 163,
       "gap_days_in_leap_years": 164,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 60,
       "rain_outside_cover_mm_median": 545.645,
       "terminate": "11-30"
@@ -632,7 +632,7 @@
       "denominator": 45,
       "gap_days": 162,
       "gap_days_in_leap_years": 163,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 61,
       "rain_outside_cover_mm_median": 536.35,
       "terminate": "12-01"
@@ -642,7 +642,7 @@
       "denominator": 45,
       "gap_days": 161,
       "gap_days_in_leap_years": 162,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 62,
       "rain_outside_cover_mm_median": 536.215,
       "terminate": "12-02"
@@ -652,7 +652,7 @@
       "denominator": 45,
       "gap_days": 160,
       "gap_days_in_leap_years": 161,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 63,
       "rain_outside_cover_mm_median": 536.215,
       "terminate": "12-03"
@@ -662,7 +662,7 @@
       "denominator": 45,
       "gap_days": 159,
       "gap_days_in_leap_years": 160,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 64,
       "rain_outside_cover_mm_median": 536.215,
       "terminate": "12-04"
@@ -672,7 +672,7 @@
       "denominator": 45,
       "gap_days": 158,
       "gap_days_in_leap_years": 159,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 65,
       "rain_outside_cover_mm_median": 529.55,
       "terminate": "12-05"
@@ -682,7 +682,7 @@
       "denominator": 45,
       "gap_days": 157,
       "gap_days_in_leap_years": 158,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 66,
       "rain_outside_cover_mm_median": 529.52,
       "terminate": "12-06"
@@ -692,7 +692,7 @@
       "denominator": 45,
       "gap_days": 156,
       "gap_days_in_leap_years": 157,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 67,
       "rain_outside_cover_mm_median": 529.47,
       "terminate": "12-07"
@@ -702,7 +702,7 @@
       "denominator": 45,
       "gap_days": 155,
       "gap_days_in_leap_years": 156,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 68,
       "rain_outside_cover_mm_median": 529.095,
       "terminate": "12-08"
@@ -712,7 +712,7 @@
       "denominator": 45,
       "gap_days": 154,
       "gap_days_in_leap_years": 155,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 69,
       "rain_outside_cover_mm_median": 525.11,
       "terminate": "12-09"
@@ -722,7 +722,7 @@
       "denominator": 45,
       "gap_days": 153,
       "gap_days_in_leap_years": 154,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 70,
       "rain_outside_cover_mm_median": 522.03,
       "terminate": "12-10"
@@ -732,7 +732,7 @@
       "denominator": 45,
       "gap_days": 152,
       "gap_days_in_leap_years": 153,
-      "heavy_rain_days_outside_cover_median": 3.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 71,
       "rain_outside_cover_mm_median": 522.03,
       "terminate": "12-11"
@@ -742,7 +742,7 @@
       "denominator": 45,
       "gap_days": 151,
       "gap_days_in_leap_years": 152,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 72,
       "rain_outside_cover_mm_median": 503.045,
       "terminate": "12-12"
@@ -752,7 +752,7 @@
       "denominator": 45,
       "gap_days": 150,
       "gap_days_in_leap_years": 151,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 73,
       "rain_outside_cover_mm_median": 502.565,
       "terminate": "12-13"
@@ -762,7 +762,7 @@
       "denominator": 45,
       "gap_days": 149,
       "gap_days_in_leap_years": 150,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 74,
       "rain_outside_cover_mm_median": 500.08,
       "terminate": "12-14"
@@ -772,7 +772,7 @@
       "denominator": 45,
       "gap_days": 148,
       "gap_days_in_leap_years": 149,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 75,
       "rain_outside_cover_mm_median": 494.395,
       "terminate": "12-15"
@@ -782,7 +782,7 @@
       "denominator": 45,
       "gap_days": 147,
       "gap_days_in_leap_years": 148,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 76,
       "rain_outside_cover_mm_median": 494.38,
       "terminate": "12-16"
@@ -792,7 +792,7 @@
       "denominator": 45,
       "gap_days": 146,
       "gap_days_in_leap_years": 147,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 77,
       "rain_outside_cover_mm_median": 487.445,
       "terminate": "12-17"
@@ -802,7 +802,7 @@
       "denominator": 45,
       "gap_days": 145,
       "gap_days_in_leap_years": 146,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 78,
       "rain_outside_cover_mm_median": 487.18,
       "terminate": "12-18"
@@ -812,7 +812,7 @@
       "denominator": 45,
       "gap_days": 144,
       "gap_days_in_leap_years": 145,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 79,
       "rain_outside_cover_mm_median": 485.65,
       "terminate": "12-19"
@@ -822,7 +822,7 @@
       "denominator": 45,
       "gap_days": 143,
       "gap_days_in_leap_years": 144,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 80,
       "rain_outside_cover_mm_median": 481.72,
       "terminate": "12-20"
@@ -832,7 +832,7 @@
       "denominator": 45,
       "gap_days": 142,
       "gap_days_in_leap_years": 143,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 81,
       "rain_outside_cover_mm_median": 477.22,
       "terminate": "12-21"
@@ -842,7 +842,7 @@
       "denominator": 45,
       "gap_days": 141,
       "gap_days_in_leap_years": 142,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 82,
       "rain_outside_cover_mm_median": 475.595,
       "terminate": "12-22"
@@ -852,7 +852,7 @@
       "denominator": 45,
       "gap_days": 140,
       "gap_days_in_leap_years": 141,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 83,
       "rain_outside_cover_mm_median": 475.34,
       "terminate": "12-23"
@@ -862,7 +862,7 @@
       "denominator": 45,
       "gap_days": 139,
       "gap_days_in_leap_years": 140,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 84,
       "rain_outside_cover_mm_median": 471.62,
       "terminate": "12-24"
@@ -872,7 +872,7 @@
       "denominator": 45,
       "gap_days": 138,
       "gap_days_in_leap_years": 139,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 85,
       "rain_outside_cover_mm_median": 466.74,
       "terminate": "12-25"
@@ -882,7 +882,7 @@
       "denominator": 45,
       "gap_days": 137,
       "gap_days_in_leap_years": 138,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 86,
       "rain_outside_cover_mm_median": 464.005,
       "terminate": "12-26"
@@ -892,7 +892,7 @@
       "denominator": 45,
       "gap_days": 136,
       "gap_days_in_leap_years": 137,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 87,
       "rain_outside_cover_mm_median": 463.915,
       "terminate": "12-27"
@@ -902,7 +902,7 @@
       "denominator": 45,
       "gap_days": 135,
       "gap_days_in_leap_years": 136,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 88,
       "rain_outside_cover_mm_median": 463.855,
       "terminate": "12-28"
@@ -912,7 +912,7 @@
       "denominator": 45,
       "gap_days": 134,
       "gap_days_in_leap_years": 135,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 89,
       "rain_outside_cover_mm_median": 463.855,
       "terminate": "12-29"
@@ -922,7 +922,7 @@
       "denominator": 45,
       "gap_days": 133,
       "gap_days_in_leap_years": 134,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 90,
       "rain_outside_cover_mm_median": 451.615,
       "terminate": "12-30"
@@ -932,7 +932,7 @@
       "denominator": 45,
       "gap_days": 132,
       "gap_days_in_leap_years": 133,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 91,
       "rain_outside_cover_mm_median": 451.205,
       "terminate": "12-31"
@@ -942,7 +942,7 @@
       "denominator": 45,
       "gap_days": 131,
       "gap_days_in_leap_years": 132,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 92,
       "rain_outside_cover_mm_median": 445.855,
       "terminate": "01-01"
@@ -952,7 +952,7 @@
       "denominator": 45,
       "gap_days": 130,
       "gap_days_in_leap_years": 131,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 93,
       "rain_outside_cover_mm_median": 439.725,
       "terminate": "01-02"
@@ -962,7 +962,7 @@
       "denominator": 45,
       "gap_days": 129,
       "gap_days_in_leap_years": 130,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 94,
       "rain_outside_cover_mm_median": 430.76,
       "terminate": "01-03"
@@ -972,7 +972,7 @@
       "denominator": 45,
       "gap_days": 128,
       "gap_days_in_leap_years": 129,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 95,
       "rain_outside_cover_mm_median": 423.925,
       "terminate": "01-04"
@@ -982,7 +982,7 @@
       "denominator": 45,
       "gap_days": 127,
       "gap_days_in_leap_years": 128,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 96,
       "rain_outside_cover_mm_median": 423.925,
       "terminate": "01-05"
@@ -992,7 +992,7 @@
       "denominator": 45,
       "gap_days": 126,
       "gap_days_in_leap_years": 127,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 97,
       "rain_outside_cover_mm_median": 421.48,
       "terminate": "01-06"
@@ -1002,7 +1002,7 @@
       "denominator": 45,
       "gap_days": 125,
       "gap_days_in_leap_years": 126,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 98,
       "rain_outside_cover_mm_median": 417.835,
       "terminate": "01-07"
@@ -1012,7 +1012,7 @@
       "denominator": 45,
       "gap_days": 124,
       "gap_days_in_leap_years": 125,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 99,
       "rain_outside_cover_mm_median": 414.425,
       "terminate": "01-08"
@@ -1022,7 +1022,7 @@
       "denominator": 45,
       "gap_days": 123,
       "gap_days_in_leap_years": 124,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 100,
       "rain_outside_cover_mm_median": 413.555,
       "terminate": "01-09"
@@ -1032,7 +1032,7 @@
       "denominator": 45,
       "gap_days": 122,
       "gap_days_in_leap_years": 123,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 101,
       "rain_outside_cover_mm_median": 413.525,
       "terminate": "01-10"
@@ -1042,7 +1042,7 @@
       "denominator": 45,
       "gap_days": 121,
       "gap_days_in_leap_years": 122,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 102,
       "rain_outside_cover_mm_median": 406.795,
       "terminate": "01-11"
@@ -1052,7 +1052,7 @@
       "denominator": 45,
       "gap_days": 120,
       "gap_days_in_leap_years": 121,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 103,
       "rain_outside_cover_mm_median": 403.865,
       "terminate": "01-12"
@@ -1062,7 +1062,7 @@
       "denominator": 45,
       "gap_days": 119,
       "gap_days_in_leap_years": 120,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 104,
       "rain_outside_cover_mm_median": 396.115,
       "terminate": "01-13"
@@ -1072,7 +1072,7 @@
       "denominator": 45,
       "gap_days": 118,
       "gap_days_in_leap_years": 119,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 105,
       "rain_outside_cover_mm_median": 395.635,
       "terminate": "01-14"
@@ -1082,7 +1082,7 @@
       "denominator": 45,
       "gap_days": 117,
       "gap_days_in_leap_years": 118,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 106,
       "rain_outside_cover_mm_median": 387.83,
       "terminate": "01-15"
@@ -1092,7 +1092,7 @@
       "denominator": 45,
       "gap_days": 116,
       "gap_days_in_leap_years": 117,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 107,
       "rain_outside_cover_mm_median": 387.025,
       "terminate": "01-16"
@@ -1102,7 +1102,7 @@
       "denominator": 45,
       "gap_days": 115,
       "gap_days_in_leap_years": 116,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 108,
       "rain_outside_cover_mm_median": 386.765,
       "terminate": "01-17"
@@ -1112,7 +1112,7 @@
       "denominator": 45,
       "gap_days": 114,
       "gap_days_in_leap_years": 115,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 109,
       "rain_outside_cover_mm_median": 381.6,
       "terminate": "01-18"
@@ -1122,7 +1122,7 @@
       "denominator": 45,
       "gap_days": 113,
       "gap_days_in_leap_years": 114,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 110,
       "rain_outside_cover_mm_median": 381.245,
       "terminate": "01-19"
@@ -1132,7 +1132,7 @@
       "denominator": 45,
       "gap_days": 112,
       "gap_days_in_leap_years": 113,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 111,
       "rain_outside_cover_mm_median": 380.7,
       "terminate": "01-20"
@@ -1142,7 +1142,7 @@
       "denominator": 45,
       "gap_days": 111,
       "gap_days_in_leap_years": 112,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 112,
       "rain_outside_cover_mm_median": 378.43,
       "terminate": "01-21"
@@ -1152,7 +1152,7 @@
       "denominator": 45,
       "gap_days": 110,
       "gap_days_in_leap_years": 111,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 113,
       "rain_outside_cover_mm_median": 374.38,
       "terminate": "01-22"
@@ -1162,7 +1162,7 @@
       "denominator": 45,
       "gap_days": 109,
       "gap_days_in_leap_years": 110,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 114,
       "rain_outside_cover_mm_median": 369.575,
       "terminate": "01-23"
@@ -1172,7 +1172,7 @@
       "denominator": 45,
       "gap_days": 108,
       "gap_days_in_leap_years": 109,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 115,
       "rain_outside_cover_mm_median": 369.575,
       "terminate": "01-24"
@@ -1182,7 +1182,7 @@
       "denominator": 45,
       "gap_days": 107,
       "gap_days_in_leap_years": 108,
-      "heavy_rain_days_outside_cover_median": 2.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 116,
       "rain_outside_cover_mm_median": 368.765,
       "terminate": "01-25"
@@ -1192,7 +1192,7 @@
       "denominator": 45,
       "gap_days": 106,
       "gap_days_in_leap_years": 107,
-      "heavy_rain_days_outside_cover_median": 1.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 117,
       "rain_outside_cover_mm_median": 367.415,
       "terminate": "01-26"
@@ -1202,7 +1202,7 @@
       "denominator": 45,
       "gap_days": 105,
       "gap_days_in_leap_years": 106,
-      "heavy_rain_days_outside_cover_median": 1.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 118,
       "rain_outside_cover_mm_median": 367.06,
       "terminate": "01-27"
@@ -1212,7 +1212,7 @@
       "denominator": 45,
       "gap_days": 104,
       "gap_days_in_leap_years": 105,
-      "heavy_rain_days_outside_cover_median": 1.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 119,
       "rain_outside_cover_mm_median": 351.295,
       "terminate": "01-28"
@@ -1222,7 +1222,7 @@
       "denominator": 45,
       "gap_days": 103,
       "gap_days_in_leap_years": 104,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 120,
       "rain_outside_cover_mm_median": 349.115,
       "terminate": "01-29"
@@ -1232,7 +1232,7 @@
       "denominator": 45,
       "gap_days": 102,
       "gap_days_in_leap_years": 103,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 121,
       "rain_outside_cover_mm_median": 348.765,
       "terminate": "01-30"
@@ -1242,7 +1242,7 @@
       "denominator": 45,
       "gap_days": 101,
       "gap_days_in_leap_years": 102,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 122,
       "rain_outside_cover_mm_median": 345.73,
       "terminate": "01-31"
@@ -1252,7 +1252,7 @@
       "denominator": 45,
       "gap_days": 100,
       "gap_days_in_leap_years": 101,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 123,
       "rain_outside_cover_mm_median": 340.155,
       "terminate": "02-01"
@@ -1262,7 +1262,7 @@
       "denominator": 45,
       "gap_days": 99,
       "gap_days_in_leap_years": 100,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 124,
       "rain_outside_cover_mm_median": 337.895,
       "terminate": "02-02"
@@ -1272,7 +1272,7 @@
       "denominator": 45,
       "gap_days": 98,
       "gap_days_in_leap_years": 99,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 125,
       "rain_outside_cover_mm_median": 337.54,
       "terminate": "02-03"
@@ -1282,7 +1282,7 @@
       "denominator": 45,
       "gap_days": 97,
       "gap_days_in_leap_years": 98,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 126,
       "rain_outside_cover_mm_median": 337.54,
       "terminate": "02-04"
@@ -1292,7 +1292,7 @@
       "denominator": 45,
       "gap_days": 96,
       "gap_days_in_leap_years": 97,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 127,
       "rain_outside_cover_mm_median": 335.565,
       "terminate": "02-05"
@@ -1302,7 +1302,7 @@
       "denominator": 45,
       "gap_days": 95,
       "gap_days_in_leap_years": 96,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 128,
       "rain_outside_cover_mm_median": 333.04,
       "terminate": "02-06"
@@ -1312,7 +1312,7 @@
       "denominator": 45,
       "gap_days": 94,
       "gap_days_in_leap_years": 95,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 129,
       "rain_outside_cover_mm_median": 328.03,
       "terminate": "02-07"
@@ -1322,7 +1322,7 @@
       "denominator": 45,
       "gap_days": 93,
       "gap_days_in_leap_years": 94,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 130,
       "rain_outside_cover_mm_median": 322.905,
       "terminate": "02-08"
@@ -1332,7 +1332,7 @@
       "denominator": 45,
       "gap_days": 92,
       "gap_days_in_leap_years": 93,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 131,
       "rain_outside_cover_mm_median": 322.88,
       "terminate": "02-09"
@@ -1342,7 +1342,7 @@
       "denominator": 45,
       "gap_days": 91,
       "gap_days_in_leap_years": 92,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 132,
       "rain_outside_cover_mm_median": 321.785,
       "terminate": "02-10"
@@ -1352,7 +1352,7 @@
       "denominator": 45,
       "gap_days": 90,
       "gap_days_in_leap_years": 91,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 133,
       "rain_outside_cover_mm_median": 321.75,
       "terminate": "02-11"
@@ -1362,7 +1362,7 @@
       "denominator": 45,
       "gap_days": 89,
       "gap_days_in_leap_years": 90,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 134,
       "rain_outside_cover_mm_median": 315.935,
       "terminate": "02-12"
@@ -1372,7 +1372,7 @@
       "denominator": 45,
       "gap_days": 88,
       "gap_days_in_leap_years": 89,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 135,
       "rain_outside_cover_mm_median": 310.04,
       "terminate": "02-13"
@@ -1382,7 +1382,7 @@
       "denominator": 45,
       "gap_days": 87,
       "gap_days_in_leap_years": 88,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 136,
       "rain_outside_cover_mm_median": 309.825,
       "terminate": "02-14"
@@ -1392,7 +1392,7 @@
       "denominator": 45,
       "gap_days": 86,
       "gap_days_in_leap_years": 87,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 137,
       "rain_outside_cover_mm_median": 309.18,
       "terminate": "02-15"
@@ -1402,7 +1402,7 @@
       "denominator": 45,
       "gap_days": 85,
       "gap_days_in_leap_years": 86,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 138,
       "rain_outside_cover_mm_median": 307.42,
       "terminate": "02-16"
@@ -1412,7 +1412,7 @@
       "denominator": 45,
       "gap_days": 84,
       "gap_days_in_leap_years": 85,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 139,
       "rain_outside_cover_mm_median": 302.54,
       "terminate": "02-17"
@@ -1422,7 +1422,7 @@
       "denominator": 45,
       "gap_days": 83,
       "gap_days_in_leap_years": 84,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 140,
       "rain_outside_cover_mm_median": 302.25,
       "terminate": "02-18"
@@ -1432,7 +1432,7 @@
       "denominator": 45,
       "gap_days": 82,
       "gap_days_in_leap_years": 83,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 141,
       "rain_outside_cover_mm_median": 300.31,
       "terminate": "02-19"
@@ -1442,7 +1442,7 @@
       "denominator": 45,
       "gap_days": 81,
       "gap_days_in_leap_years": 82,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 142,
       "rain_outside_cover_mm_median": 297.655,
       "terminate": "02-20"
@@ -1452,7 +1452,7 @@
       "denominator": 45,
       "gap_days": 80,
       "gap_days_in_leap_years": 81,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 143,
       "rain_outside_cover_mm_median": 297.65,
       "terminate": "02-21"
@@ -1462,7 +1462,7 @@
       "denominator": 45,
       "gap_days": 79,
       "gap_days_in_leap_years": 80,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 144,
       "rain_outside_cover_mm_median": 295.835,
       "terminate": "02-22"
@@ -1472,7 +1472,7 @@
       "denominator": 45,
       "gap_days": 78,
       "gap_days_in_leap_years": 79,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 145,
       "rain_outside_cover_mm_median": 293.205,
       "terminate": "02-23"
@@ -1482,7 +1482,7 @@
       "denominator": 45,
       "gap_days": 77,
       "gap_days_in_leap_years": 78,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 146,
       "rain_outside_cover_mm_median": 291.685,
       "terminate": "02-24"
@@ -1492,7 +1492,7 @@
       "denominator": 45,
       "gap_days": 76,
       "gap_days_in_leap_years": 77,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 147,
       "rain_outside_cover_mm_median": 286.755,
       "terminate": "02-25"
@@ -1502,7 +1502,7 @@
       "denominator": 45,
       "gap_days": 75,
       "gap_days_in_leap_years": 76,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 148,
       "rain_outside_cover_mm_median": 285.845,
       "terminate": "02-26"
@@ -1512,7 +1512,7 @@
       "denominator": 45,
       "gap_days": 74,
       "gap_days_in_leap_years": 75,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 149,
       "rain_outside_cover_mm_median": 278.31,
       "terminate": "02-27"
@@ -1522,7 +1522,7 @@
       "denominator": 45,
       "gap_days": 73,
       "gap_days_in_leap_years": 74,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 150,
       "rain_outside_cover_mm_median": 276.92,
       "terminate": "02-28"
@@ -1532,7 +1532,7 @@
       "denominator": 45,
       "gap_days": 72,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 151,
       "rain_outside_cover_mm_median": 272.6,
       "terminate": "03-01"
@@ -1542,7 +1542,7 @@
       "denominator": 45,
       "gap_days": 71,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 152,
       "rain_outside_cover_mm_median": 260.71,
       "terminate": "03-02"
@@ -1552,7 +1552,7 @@
       "denominator": 45,
       "gap_days": 70,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 153,
       "rain_outside_cover_mm_median": 259.08,
       "terminate": "03-03"
@@ -1562,7 +1562,7 @@
       "denominator": 45,
       "gap_days": 69,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 154,
       "rain_outside_cover_mm_median": 252.015,
       "terminate": "03-04"
@@ -1572,7 +1572,7 @@
       "denominator": 45,
       "gap_days": 68,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 155,
       "rain_outside_cover_mm_median": 250.81,
       "terminate": "03-05"
@@ -1582,7 +1582,7 @@
       "denominator": 45,
       "gap_days": 67,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 156,
       "rain_outside_cover_mm_median": 250.805,
       "terminate": "03-06"
@@ -1592,7 +1592,7 @@
       "denominator": 45,
       "gap_days": 66,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 157,
       "rain_outside_cover_mm_median": 238.045,
       "terminate": "03-07"
@@ -1602,7 +1602,7 @@
       "denominator": 45,
       "gap_days": 65,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 158,
       "rain_outside_cover_mm_median": 237.555,
       "terminate": "03-08"
@@ -1612,7 +1612,7 @@
       "denominator": 45,
       "gap_days": 64,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 159,
       "rain_outside_cover_mm_median": 235.045,
       "terminate": "03-09"
@@ -1622,7 +1622,7 @@
       "denominator": 45,
       "gap_days": 63,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 160,
       "rain_outside_cover_mm_median": 231.075,
       "terminate": "03-10"
@@ -1632,7 +1632,7 @@
       "denominator": 45,
       "gap_days": 62,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 161,
       "rain_outside_cover_mm_median": 231.07,
       "terminate": "03-11"
@@ -1642,7 +1642,7 @@
       "denominator": 45,
       "gap_days": 61,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 162,
       "rain_outside_cover_mm_median": 231.065,
       "terminate": "03-12"
@@ -1652,7 +1652,7 @@
       "denominator": 45,
       "gap_days": 60,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 163,
       "rain_outside_cover_mm_median": 224.82,
       "terminate": "03-13"
@@ -1662,7 +1662,7 @@
       "denominator": 45,
       "gap_days": 59,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 164,
       "rain_outside_cover_mm_median": 224.68,
       "terminate": "03-14"
@@ -1672,7 +1672,7 @@
       "denominator": 45,
       "gap_days": 58,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 165,
       "rain_outside_cover_mm_median": 223.325,
       "terminate": "03-15"
@@ -1682,7 +1682,7 @@
       "denominator": 45,
       "gap_days": 57,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 166,
       "rain_outside_cover_mm_median": 222.755,
       "terminate": "03-16"
@@ -1692,7 +1692,7 @@
       "denominator": 45,
       "gap_days": 56,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 167,
       "rain_outside_cover_mm_median": 212.055,
       "terminate": "03-17"
@@ -1702,7 +1702,7 @@
       "denominator": 45,
       "gap_days": 55,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 168,
       "rain_outside_cover_mm_median": 206.21,
       "terminate": "03-18"
@@ -1712,7 +1712,7 @@
       "denominator": 45,
       "gap_days": 54,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 169,
       "rain_outside_cover_mm_median": 205.09,
       "terminate": "03-19"
@@ -1722,7 +1722,7 @@
       "denominator": 45,
       "gap_days": 53,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 170,
       "rain_outside_cover_mm_median": 204.805,
       "terminate": "03-20"
@@ -1732,7 +1732,7 @@
       "denominator": 45,
       "gap_days": 52,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 171,
       "rain_outside_cover_mm_median": 202.745,
       "terminate": "03-21"
@@ -1742,7 +1742,7 @@
       "denominator": 45,
       "gap_days": 51,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 172,
       "rain_outside_cover_mm_median": 201.04,
       "terminate": "03-22"
@@ -1752,7 +1752,7 @@
       "denominator": 45,
       "gap_days": 50,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 173,
       "rain_outside_cover_mm_median": 200.845,
       "terminate": "03-23"
@@ -1762,7 +1762,7 @@
       "denominator": 45,
       "gap_days": 49,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 174,
       "rain_outside_cover_mm_median": 198.51,
       "terminate": "03-24"
@@ -1772,7 +1772,7 @@
       "denominator": 45,
       "gap_days": 48,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 175,
       "rain_outside_cover_mm_median": 187.815,
       "terminate": "03-25"
@@ -1782,7 +1782,7 @@
       "denominator": 45,
       "gap_days": 47,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 176,
       "rain_outside_cover_mm_median": 185.845,
       "terminate": "03-26"
@@ -1792,7 +1792,7 @@
       "denominator": 45,
       "gap_days": 46,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 177,
       "rain_outside_cover_mm_median": 183.51,
       "terminate": "03-27"
@@ -1802,7 +1802,7 @@
       "denominator": 45,
       "gap_days": 45,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 178,
       "rain_outside_cover_mm_median": 172.33,
       "terminate": "03-28"
@@ -1812,7 +1812,7 @@
       "denominator": 45,
       "gap_days": 44,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 179,
       "rain_outside_cover_mm_median": 166.06,
       "terminate": "03-29"
@@ -1822,7 +1822,7 @@
       "denominator": 45,
       "gap_days": 43,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 180,
       "rain_outside_cover_mm_median": 166.06,
       "terminate": "03-30"
@@ -1832,7 +1832,7 @@
       "denominator": 45,
       "gap_days": 42,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 181,
       "rain_outside_cover_mm_median": 166.055,
       "terminate": "03-31"
@@ -1842,7 +1842,7 @@
       "denominator": 45,
       "gap_days": 41,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 182,
       "rain_outside_cover_mm_median": 158.26,
       "terminate": "04-01"
@@ -1852,7 +1852,7 @@
       "denominator": 45,
       "gap_days": 40,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 183,
       "rain_outside_cover_mm_median": 157.5,
       "terminate": "04-02"
@@ -1862,7 +1862,7 @@
       "denominator": 45,
       "gap_days": 39,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 184,
       "rain_outside_cover_mm_median": 151.675,
       "terminate": "04-03"
@@ -1872,7 +1872,7 @@
       "denominator": 45,
       "gap_days": 38,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 185,
       "rain_outside_cover_mm_median": 150.935,
       "terminate": "04-04"
@@ -1882,7 +1882,7 @@
       "denominator": 45,
       "gap_days": 37,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 1.0,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 186,
       "rain_outside_cover_mm_median": 150.92,
       "terminate": "04-05"
@@ -1892,7 +1892,7 @@
       "denominator": 45,
       "gap_days": 36,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 187,
       "rain_outside_cover_mm_median": 137.46,
       "terminate": "04-06"
@@ -1902,7 +1902,7 @@
       "denominator": 45,
       "gap_days": 35,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 188,
       "rain_outside_cover_mm_median": 135.77,
       "terminate": "04-07"
@@ -1912,7 +1912,7 @@
       "denominator": 45,
       "gap_days": 34,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 189,
       "rain_outside_cover_mm_median": 135.005,
       "terminate": "04-08"
@@ -1922,7 +1922,7 @@
       "denominator": 45,
       "gap_days": 33,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 190,
       "rain_outside_cover_mm_median": 132.735,
       "terminate": "04-09"
@@ -1932,7 +1932,7 @@
       "denominator": 45,
       "gap_days": 32,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 191,
       "rain_outside_cover_mm_median": 129.485,
       "terminate": "04-10"
@@ -1942,7 +1942,7 @@
       "denominator": 45,
       "gap_days": 31,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 192,
       "rain_outside_cover_mm_median": 123.635,
       "terminate": "04-11"
@@ -1952,7 +1952,7 @@
       "denominator": 45,
       "gap_days": 30,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 193,
       "rain_outside_cover_mm_median": 120.615,
       "terminate": "04-12"
@@ -1962,7 +1962,7 @@
       "denominator": 45,
       "gap_days": 29,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 194,
       "rain_outside_cover_mm_median": 118.3,
       "terminate": "04-13"
@@ -1972,7 +1972,7 @@
       "denominator": 45,
       "gap_days": 28,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 195,
       "rain_outside_cover_mm_median": 114.37,
       "terminate": "04-14"
@@ -1982,7 +1982,7 @@
       "denominator": 45,
       "gap_days": 27,
       "gap_days_in_leap_years": null,
-      "heavy_rain_days_outside_cover_median": 0.5,
+      "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 196,
       "rain_outside_cover_mm_median": 112.375,
       "terminate": "04-15"
@@ -2326,39 +2326,39 @@
           "window_days": 30
         },
         "reference_span": "1981..2025",
+        "source": null,
         "status": "complete",
         "unit": "mm",
         "value": 64.18
       }
     },
     "heavy_rain": {
-      "method": "percentile_of_wet_days",
-      "n_reference": 3962,
+      "method": "published_fixed",
+      "n_reference": 16252,
       "name": "heavy_rain_mm",
-      "note": "ASSUMED relative rule (95th percentile of wet days, Sep-May, full record) because the handbook heavy-rain rule is not available yet.",
+      "note": "Applied to NASA POWER daily values, which are Local Solar Time days (time_standard=LST), not a rolling 24-hour window; a storm split across two solar days can fall below the value on each day. Rainfall-depth weather metric only: not erosion, runoff or soil loss. Zero-count winters are valid results.",
       "parameters": {
-        "assumed": true,
+        "assumed": false,
+        "comparison": "daily precip_mm >= value",
+        "daily_value_basis": "NASA POWER PRECTOTCORR, time_standard=LST (solar day)",
+        "depth_in": 3.0,
         "inclusive": true,
-        "months": [
-          9,
-          10,
-          11,
-          12,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "percentile": 95.0,
-        "wet_day_min_mm": 1.0
+        "reference_duration_h": 24.0,
+        "scope": "rainfall depth only; not erosion or soil loss"
       },
       "reference_span": "1981-01-01..2025-06-30",
+      "source": {
+        "locator": "PDF p. 4, precipitation discussion",
+        "rule_id": "fc_v2_ref_very_heavy_rain",
+        "title": "North Carolina Climate Science Report: Plain Language Summary; March 2020",
+        "url": "https://files.nc.gov/ncdeq/climate-change/climate-scinece-report/NC-Climate-Science-Report_Plain_Language_Summary.pdf",
+        "verified_date": "2026-11-13"
+      },
       "status": "complete",
       "unit": "mm/day",
-      "value": 29.757
+      "value": 76.2
     },
-    "threshold_set_id": "a7df1ac41b488a5e"
+    "threshold_set_id": "d00101e09f5cae7e"
   },
   "varied": "terminate"
 }

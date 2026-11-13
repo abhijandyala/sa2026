@@ -5,7 +5,7 @@
         --plans data/samples/union_plans.json --plan corn_soy__rye --year 2008
 
 It does not import ``fieldshift`` and does not use the API. It re-derives, from ``raw/``:
-the heavy-rain threshold (P95 of wet days >= 1 mm, Sep-May, 1981-2025 record), the fixed
+the heavy-rain threshold (published fixed value: 3 in = 76.2 mm per daily value), the fixed
 bottom-20% spring cutoff (ceil(0.2 n)-th smallest of the complete 30-day windows), the spring
 total and rank, and the winter rain by segment. Missing/fill/negative values are treated
 exactly as in ``fieldshift/weather/normalize.py``. Prints JSON.
@@ -19,6 +19,7 @@ import math
 from datetime import date, timedelta
 
 FILL = -999.0
+HEAVY_RAIN_MM = round(3 * 25.4, 3)  # catalog v2 fc_v2_ref_very_heavy_rain; daily value >= 76.2
 BASELINE = range(1981, 2026)
 
 
@@ -52,13 +53,6 @@ def _leap(y: int) -> bool:
     return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)
 
 
-def percentile(values: list[float], q: float) -> float:
-    v = sorted(values)
-    pos = (len(v) - 1) * q / 100
-    lo, hi = math.floor(pos), math.ceil(pos)
-    return v[lo] + (v[hi] - v[lo]) * (pos - lo)
-
-
 def window_total(p: dict[date, float | None], start: date, end_incl: date) -> float | None:
     total, d = 0.0, start
     while d <= end_incl:
@@ -88,11 +82,7 @@ def main() -> None:
         plan = next(s["plan"] for s in json.load(fh)["samples"] if s["plan_id"] == a.plan)
     plant_md, harvest_md = plan["next_plant"], plan["prev_harvest"]
 
-    wet = [
-        v for d, v in precip.items()
-        if v is not None and d.month in (9, 10, 11, 12, 1, 2, 3, 4, 5) and v >= 1.0
-    ]
-    heavy = round(percentile(wet, 95.0), 3)
+    heavy = HEAVY_RAIN_MM  # published: NC Climate Science Report, 3 in (76.2 mm), daily value
 
     totals = {}
     for y in BASELINE:

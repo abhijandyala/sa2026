@@ -3411,39 +3411,39 @@
           "window_days": 30
         },
         "reference_span": "1981..2025",
+        "source": null,
         "status": "complete",
         "unit": "mm",
         "value": 64.18
       }
     },
     "heavy_rain": {
-      "method": "percentile_of_wet_days",
-      "n_reference": 3962,
+      "method": "published_fixed",
+      "n_reference": 16252,
       "name": "heavy_rain_mm",
-      "note": "ASSUMED relative rule (95th percentile of wet days, Sep-May, full record) because the handbook heavy-rain rule is not available yet.",
+      "note": "Applied to NASA POWER daily values, which are Local Solar Time days (time_standard=LST), not a rolling 24-hour window; a storm split across two solar days can fall below the value on each day. Rainfall-depth weather metric only: not erosion, runoff or soil loss. Zero-count winters are valid results.",
       "parameters": {
-        "assumed": true,
+        "assumed": false,
+        "comparison": "daily precip_mm >= value",
+        "daily_value_basis": "NASA POWER PRECTOTCORR, time_standard=LST (solar day)",
+        "depth_in": 3.0,
         "inclusive": true,
-        "months": [
-          9,
-          10,
-          11,
-          12,
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "percentile": 95.0,
-        "wet_day_min_mm": 1.0
+        "reference_duration_h": 24.0,
+        "scope": "rainfall depth only; not erosion or soil loss"
       },
       "reference_span": "1981-01-01..2025-06-30",
+      "source": {
+        "locator": "PDF p. 4, precipitation discussion",
+        "rule_id": "fc_v2_ref_very_heavy_rain",
+        "title": "North Carolina Climate Science Report: Plain Language Summary; March 2020",
+        "url": "https://files.nc.gov/ncdeq/climate-change/climate-scinece-report/NC-Climate-Science-Report_Plain_Language_Summary.pdf",
+        "verified_date": "2026-11-13"
+      },
       "status": "complete",
       "unit": "mm/day",
-      "value": 29.757
+      "value": 76.2
     },
-    "threshold_set_id": "a7df1ac41b488a5e"
+    "threshold_set_id": "d00101e09f5cae7e"
   },
   "wetness": {
     "gwetroot_window_mean": 0.6293,
@@ -3458,7 +3458,7 @@
     "eligible": true,
     "heavy_rain_days": 0,
     "heavy_rain_days_outside_cover": 0,
-    "heavy_rain_threshold_mm": 29.757,
+    "heavy_rain_threshold_mm": 76.2,
     "living_cover_days": 212,
     "plan_id": "corn_soy__rye",
     "rain_outside_cover_mm": 22.64,
@@ -3499,7 +3499,7 @@
     },
     "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
     "status": "complete",
-    "threshold_set_id": "a7df1ac41b488a5e",
+    "threshold_set_id": "d00101e09f5cae7e",
     "total_rain_mm": 549.45,
     "window_days": 235,
     "window_end_exclusive": "2008-05-12",

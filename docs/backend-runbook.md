@@ -46,7 +46,7 @@ python scripts/reproduce_replay.py --raw data/snapshots/union_county/raw/power_d
 **Windows.** Plans are `MM-DD` anchored per year; Feb 29 resolves to Feb 28 in non-leap years. Winter window `[prev_harvest, next_plant)`; living-cover interval `[seed, terminate)` labelled `planned` (establishment uncertain; the termination day is not cover); spring window `[next_plant - 30 d, next_plant - 1 d]`; termination gap `next_plant - terminate`.
 
 **Frozen thresholds.** Computed once per request from the whole 1981-2025 record, held in an immutable `ThresholdSet`, and shared by every plan and both eras.
-- Heavy-rain day: `precip_mm >= P95 of wet days (>= 1 mm), Sep-May, full record` (29.757 mm). **Assumed** until the handbook rule arrives; change `HEAVY_RAIN_RULE` in `fieldshift/metrics/thresholds.py`.
+- Heavy-rain day: daily `precip_mm >= 76.2` (3 in), the published "very heavy rain" definition (catalog v2 `fc_v2_ref_very_heavy_rain`, `data/catalogs/v2/weather_references.csv`; NC Climate Science Report: Plain Language Summary, March 2020, PDF p. 4). Source URL and locator are frozen into `thresholds.heavy_rain.source`. POWER daily values are Local Solar Time days, not a rolling 24 h window, so a storm split across two solar days can miss the line; the threshold note says so. It is a rainfall-depth weather metric only, never erosion, runoff or soil loss. Most winters have zero qualifying days (6 days >= 76.2 mm fall in Sep-May over 1981-2025); a zero is a real result, and total rain outside living cover is the main winter indicator. The earlier relative P95 rule was dropped from the ThresholdSet (still available as an explicit `HeavyRainRule` option for experiments).
 - Dry spring: the `ceil(20% of n)`-th smallest 30-day total among complete 1981-2025 windows for that planting date (45 eligible years gives the 9th smallest). Years equal to the cutoff count as dry.
 - Rank 1 = driest; ties share the lowest rank; percentile is the share of eligible years at or below the total.
 
@@ -90,7 +90,7 @@ The access log records method, path (no query string), status and duration only;
 - NASA POWER Daily API and parameter metadata: https://power.larc.nasa.gov/docs/services/api/temporal/daily/
 - Catalogs v1 (`data/catalogs/v1/`, verbatim from Perplexity, each row with `source_url`, `source_locator`, `verified_date`).
 - USDA NRCS Soil Data Access, NWS API, US Drought Monitor (Agent B's `fieldshift/field`).
-- Handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-2.pdf`): **not in the workspace yet**; the Union County point, sample plan dates and heavy-rain rule are assumptions until they land.
+- Handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-2.pdf`): the team's original documents, local only (gitignored), reference only. The Union County point and sample plan dates remain labelled assumptions; the heavy-rain rule is the published 76.2 mm definition above.
 
 ## 8. Known gaps
 

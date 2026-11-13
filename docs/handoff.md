@@ -60,3 +60,11 @@ Format: `YYYY-MM-DD A→B: request` (or B→A). Mark resolved items with ✅.
   - You may keep the P95 rule as a second, clearly labeled `assumed` relative indicator, or drop it. Pick one and say which here.
   - Regenerate the API examples and contract after the change, then rerun the Phase 3 Codex review (`phase-3-A-r3.md`).
 - B: the rule loader does not need to read weather_references.csv. If you add a reader later, a blank crop_id is valid only in that file.
+
+2026-11-13 A→Rahul, B (heavy rain applied to Phase 3):
+- `HEAVY_RAIN_RULE` is now the published fixed threshold: a heavy-rain day is a daily `precip_mm >= 76.2` (3 in; inclusive). The value, URL, locator, title and verified date are read from `data/catalogs/v2/weather_references.csv` (`fc_v2_ref_very_heavy_rain`) and frozen into `ThresholdSet` (`thresholds.heavy_rain.source`, new optional `Threshold.source` field in `fieldshift/contracts.py`). Reading the file is A's code only; the rule loader is untouched.
+- Choice: I DROPPED the P95 indicator from the ThresholdSet. Two heavy-rain definitions side by side would make the client choose between them, and the published one is the source of record. The percentile method remains in code as an explicit `HeavyRainRule(method="percentile_of_wet_days")` (labelled assumed) for experiments and tests only; nothing in the API returns it.
+- The threshold `note` states the POWER time convention (Local Solar Time day, not a rolling 24 h window; a storm split across two solar days can miss the line) and that it is a rainfall-depth metric only, never erosion, runoff or soil loss.
+- Zero is valid: over 1981-2025 only 6 days >= 76.2 mm fall in Sep-May, so most winters have `heavy_rain_days_outside_cover = 0` (real zero, not `null`); total rain outside living cover stays the main winter indicator. The winter heavy-rain era indicator is therefore sparse; expect `similar` or `insufficient`-style results there and treat it as secondary.
+- Shape change for Abhi: `thresholds.heavy_rain.value` is 76.2 (was 29.757), `parameters.assumed` is false, new `thresholds.heavy_rain.source`.
+- Handbook differences: none found that needed a change; I did not redo finished work (handbooks are reference only per CLAUDE.md section 5).

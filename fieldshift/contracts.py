@@ -220,6 +220,16 @@ class SeasonCalendar(_Model):
 # --------------------------------------------------------------------------- thresholds
 
 
+class ThresholdSource(_Model):
+    """Where a published threshold comes from (a catalog reference row)."""
+
+    rule_id: str
+    title: str
+    url: str
+    locator: str
+    verified_date: str | None = None
+
+
 class Threshold(_Model):
     """One frozen threshold with the method and reference span that produced it."""
 
@@ -232,6 +242,7 @@ class Threshold(_Model):
     n_reference: int
     status: Status = Status.COMPLETE
     note: str | None = None
+    source: ThresholdSource | None = None  # set for published (non-computed) thresholds
 
 
 class ThresholdSet(_Model):
