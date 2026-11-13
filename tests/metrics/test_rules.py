@@ -152,7 +152,7 @@ def test_sb_pw_conflict_only_when_both_regions_apply(index):
         season_facts(
             sequence=("field_corn", "soybean"),
             gap_days=None,
-            region="Coastal Plain",
+            region="Tidewater",
             plant=date(2010, 5, 25),
         ),
         index,
@@ -210,17 +210,26 @@ def test_clover_after_late_corn_harvest_is_a_chronology_conflict(index):
     assert ck(ev, "cc_soil_02").status == "manual_check"  # Piedmont clay manual check
 
 
-def test_clover_seeded_in_window_after_early_harvest_is_fine(index):
+def test_clover_seeded_in_window_after_early_harvest_is_clear(index):
     facts = season_facts(
         sequence=CLOVER, gap_days=None, harvest=date(2009, 9, 5), seed=date(2009, 9, 15)
     )
     c = ck(evaluate_season(facts, index), "cc_rc_02")
-    assert (c.chronology_conflict, c.flagged, c.condition_met) == (
+    assert (c.chronology_conflict, c.flagged, c.condition_met, c.verdict) == (
+        False,
         False,
         True,
-        True,
-    )  # caution rule met
-    assert c.verdict == "caution"  # it is a caution row; the date fits but the catalog says compare
+        None,
+    )
+
+
+def test_clover_seeded_after_oct_1_is_flagged_even_after_a_timely_harvest(index):
+    facts = season_facts(
+        sequence=CLOVER, gap_days=None, harvest=date(2009, 9, 5), seed=date(2009, 10, 5)
+    )
+    c = ck(evaluate_season(facts, index), "cc_rc_02")
+    assert (c.flagged, c.condition_met, c.chronology_conflict) == (True, False, False)
+    assert "outside 08-25 to 10-01" in c.reason
 
 
 def test_seed_before_harvest_is_a_chronology_conflict(index):
@@ -341,3 +350,84 @@ def test_accepts_the_real_season_facts_contract(index):
     ev = evaluate_season(facts, index)
     assert ck(ev, "cr_tt_03").flagged and ck(ev, "cr_tt_04").flagged
     assert ev.model_dump() == evaluate_season(d, index).model_dump()
+
+
+# ---------------------------------------------------------------- review fixes (phase-4b-B)
+
+
+def test_wheat_before_soybean_matches_sb_rc_03_and_warns_on_low_maturity_group(index):
+    seq = ("field_corn", "winter_wheat", "soybean")
+    ev = evaluate_season(season_facts(sequence=seq), index, inputs={"maturity_group": 3})
+    c = ck(ev, "sb_rc_03")
+    assert (c.status, c.flagged, c.verdict) == ("complete", True, "caution")
+    ok = evaluate_season(season_facts(sequence=seq), index, inputs={"maturity_group": 5})
+    assert ck(ok, "sb_rc_03").flagged is False
+    assert ck(evaluate_season(season_facts(sequence=seq), index), "sb_rc_03").status == "unknown"
+    # soybean after wheat is not "soybean after corn"
+    assert ck(ev, "sb_rc_01").status == "inapplicable"
+
+
+def test_gap_at_or_above_14_clears_even_when_dryness_is_missing(index):
+    facts = season_facts(gap_days=19, spring_status="unavailable", is_dry=None, concern=None)
+    c = ck(evaluate_season(facts, index), "cr_tt_03")
+    assert (c.status, c.flagged, c.condition_met, c.gate_active) == ("complete", False, True, None)
+    assert c.verdict == "preferred"
+    short = season_facts(gap_days=10, spring_status="unavailable", is_dry=None, concern=None)
+    assert ck(evaluate_season(short, index), "cr_tt_03").status == "unknown"
+
+
+def test_northeast_rules_need_a_tidewater_field(index):
+    def run(region):
+        facts = season_facts(
+            sequence=("field_corn", "soybean"),
+            gap_days=None,
+            region=region,
+            plant=date(2010, 5, 25),
+        )
+        return evaluate_season(facts, index)
+
+    assert ck(run("Piedmont"), "sb_pw_04").status == "inapplicable"
+    unsure = ck(run("Coastal Plain"), "sb_pw_04")
+    assert unsure.status == "unknown" and "sub-region" in unsure.reason
+    assert not ck(run("Coastal Plain"), "sb_pw_01").conflict  # undecided rules are not conflicts
+    assert ck(run("Tidewater"), "sb_pw_04").status == "complete"
+    # "NC outside Tidewater" cannot be decided for a generic Coastal Plain field either
+    assert ck(run("Coastal Plain"), "sb_pw_02").status in ("manual_check", "unknown")
+    assert ck(run("Piedmont"), "sb_pw_02").status == "manual_check"
+
+
+@pytest.mark.parametrize("bad", ["", "  ", None])
+def test_blank_numeric_inputs_are_missing_not_errors(index, bad):
+    facts = season_facts(sequence=("soybean", "cereal_rye", "field_corn"))
+    c = ck(evaluate_season(facts, index, inputs={"soil_temp_f": bad}), "fc_pw_01")
+    assert c.status == "unknown" and c.missing_inputs == ["soil_temp_f"]
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), "warm", True])
+def test_non_finite_or_non_numeric_inputs_are_invalid_not_clear(index, bad):
+    facts = season_facts(sequence=("soybean", "cereal_rye", "field_corn"))
+    ev = evaluate_season(facts, index, inputs={"soil_temp_f": bad})
+    for rid in ("fc_pw_01", "fc_pw_02"):
+        assert ck(ev, rid).status == "invalid_input" and not ck(ev, rid).flagged
+
+
+def test_a_real_zero_input_is_evaluated_not_treated_as_missing(index):
+    facts = season_facts(sequence=("soybean", "cereal_rye", "field_corn"))
+    ev = evaluate_season(facts, index, inputs={"soil_temp_f": 0})
+    assert ck(ev, "fc_pw_02").flagged and ck(ev, "fc_pw_02").status == "complete"
+
+
+def test_sb_rc_01_states_its_value_is_a_published_result(index):
+    c = ck(evaluate_season(season_facts(), index), "sb_rc_01")
+    assert c.verdict == "preferred" and "published result" in c.reason
+
+
+def test_combined_count_needs_every_requested_component(index):
+    evs = evaluate_seasons([season_facts(year=2001, gap_days=12, is_dry=False)], index)
+    only03 = [
+        ev.model_copy(update={"checks": [c for c in ev.checks if c.rule_id == "cr_tt_03"]})
+        for ev in evs
+    ]
+    both = combine_checks(only03, ["cr_tt_03", "cr_tt_04"])
+    assert both.denominator == 0  # cr_tt_04 was never evaluated for the season
+    assert combine_checks(evs, ["cr_tt_03", "cr_tt_04"]).denominator == 1

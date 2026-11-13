@@ -29,6 +29,9 @@ class RegionRule:
     scope: Literal["nc_all", "nc_tags", "outside_nc", "us_general"]
     tags: frozenset[str] = frozenset()  # for nc_tags
     exclude: frozenset[str] = frozenset()  # for nc_all
+    # Field tags too coarse to decide: a "coastal_plain" field may or may not be in the sub-region
+    # the rule is written for, so the answer is ``unknown`` rather than a guess.
+    ambiguous: frozenset[str] = frozenset()
     note: str = ""
 
 
@@ -52,12 +55,19 @@ REGION_MAP: dict[str, RegionRule] = {
     "NC Piedmont and mountains": RegionRule("nc_tags", _tags("piedmont", "mountains")),
     "NC Piedmont and western NC": RegionRule("nc_tags", _tags("piedmont", "mountains")),
     "NC Coastal Plain": RegionRule("nc_tags", _tags("coastal_plain", "tidewater")),
-    "Hertford County NC (northeastern)": RegionRule("nc_tags", _tags("coastal_plain", "tidewater")),
-    "Northeastern NC (Hertford County article)": RegionRule(
-        "nc_tags", _tags("coastal_plain", "tidewater")
+    # Northeastern NC is the eastern edge of the Coastal Plain: only a "tidewater" field matches.
+    "Hertford County NC (northeastern)": RegionRule(
+        "nc_tags", _tags("tidewater"), ambiguous=_tags("coastal_plain")
     ),
-    "NC outside Tidewater": RegionRule("nc_all", exclude=_tags("tidewater")),
-    "NC excluding Tidewater": RegionRule("nc_all", exclude=_tags("tidewater")),
+    "Northeastern NC (Hertford County article)": RegionRule(
+        "nc_tags", _tags("tidewater"), ambiguous=_tags("coastal_plain")
+    ),
+    "NC outside Tidewater": RegionRule(
+        "nc_all", exclude=_tags("tidewater"), ambiguous=_tags("coastal_plain")
+    ),
+    "NC excluding Tidewater": RegionRule(
+        "nc_all", exclude=_tags("tidewater"), ambiguous=_tags("coastal_plain")
+    ),
     # Broad multi-state regions that include North Carolina.
     "General US": RegionRule("us_general"),
     "Southern US": RegionRule("us_general"),
@@ -110,6 +120,11 @@ def region_match(rule_region: str | None, field_region: str | None) -> tuple[Reg
                     "and the field region is not known",
                 )
             return "match", f"rule region '{rule_region}' covers all of North Carolina"
+        if tag in rule.ambiguous:
+            return "unknown", (
+                f"rule region '{rule_region}' excludes {sorted(rule.exclude)}; a {tag} field "
+                "may or may not be there, so the sub-region is needed"
+            )
         if _IMPLIES.get(tag, {tag}) & rule.exclude:
             return "no_match", f"rule region '{rule_region}' excludes the field's region ({tag})"
         return "match", f"rule region '{rule_region}' covers the field's region ({tag})"
@@ -118,6 +133,11 @@ def region_match(rule_region: str | None, field_region: str | None) -> tuple[Reg
         return "unknown", (
             f"rule region '{rule_region}' is specific to {sorted(rule.tags)}; "
             "the field region is not known"
+        )
+    if tag in rule.ambiguous:
+        return "unknown", (
+            f"rule region '{rule_region}' is specific to {sorted(rule.tags)}; a {tag} field "
+            "may or may not be there, so the sub-region is needed"
         )
     if _IMPLIES.get(tag, {tag}) & rule.tags:
         return "match", f"rule region '{rule_region}' covers the field's region ({tag})"

@@ -29,6 +29,7 @@ Semantics of a completed check
 
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
@@ -327,10 +328,15 @@ def _crop_applicability(rule: CropRule, view: SeasonView, index: CatalogIndex) -
     if rule.previous_crop_id:
         prev_role = index.crop(rule.previous_crop_id)
         is_cover_prev = prev_role is not None and prev_role.crop_role == "cover_crop"
-        if rule.crop_id == view.winter_crop or not is_cover_prev:
+        winter = index.crop(view.winter_crop) if view.winter_crop else None
+        winter_is_grain = winter is not None and winter.crop_role == "cash_crop"
+        if rule.crop_id == view.winter_crop:
             actual = view.previous_cash
-        else:
+        elif is_cover_prev or winter_is_grain:
+            # the winter crop (cover or harvested winter grain) is the immediate predecessor
             actual = view.winter_crop
+        else:
+            actual = view.previous_cash
         if actual != rule.previous_crop_id:
             return (
                 f"rule needs previous crop {rule.previous_crop_id}; "
@@ -429,10 +435,18 @@ def _eval_numeric(rule: CropRule, view: SeasonView) -> _Outcome:
         return _Outcome(
             "invalid_input", f"rule unit '{rule.unit}' does not match expected '{unit}'"
         )
-    value = view.inputs.get(name)
-    if value is None:
+    raw = view.inputs.get(name)
+    if raw is None or (isinstance(raw, str) and not raw.strip()):
         return _Outcome("unknown", f"input '{name}' is not available", missing=[name])
-    met = _compare(rule, float(value))
+    try:
+        if isinstance(raw, bool):
+            raise ValueError(raw)
+        value = float(raw)
+        if not math.isfinite(value):
+            raise ValueError(raw)
+    except (TypeError, ValueError):
+        return _Outcome("invalid_input", f"input '{name}'={raw!r} is not a finite number")
+    met = _compare(rule, value)
     verb = "meets" if met else "does not meet"
     return _Outcome(
         "complete", f"{name}={value:g} {unit} {verb} the rule ({_describe(rule)})", met=met,
@@ -525,6 +539,18 @@ def _sequence_rule(rule: CropRule) -> bool:
     )
 
 
+def _eval_sequence(rule: CropRule, view: SeasonView) -> _Outcome:
+    note = ""
+    if rule.condition_key:  # e.g. sb_rc_01 yield_gain_vs_continuous: a published result
+        note = (
+            f" ({rule.condition_key} {rule.value_min:g} {rule.unit or ''} is the source's "
+            "published result, not a measurement on this field)"
+            if rule.value_min is not None
+            else f" ({rule.condition_key} is context from the source, not measured here)"
+        )
+    return _Outcome("complete", "crop sequence matches the rule" + note, met=True)
+
+
 def _choose_evaluator(rule: CropRule) -> Callable[[CropRule, SeasonView], _Outcome] | None:
     if rule.condition_key == "days_between_termination_and_planting" and rule.operator:
         return _eval_gap
@@ -533,7 +559,7 @@ def _choose_evaluator(rule: CropRule) -> Callable[[CropRule, SeasonView], _Outco
     if rule.condition_key is None and rule.window_start_mm_dd and rule.window_end_mm_dd:
         return _eval_window
     if _sequence_rule(rule):
-        return lambda r, v: _Outcome("complete", "crop sequence matches the rule", met=True)
+        return _eval_sequence
     return None
 
 
@@ -565,6 +591,10 @@ def _check(rule: CropRule, status: Status, reason: str, **kw: Any) -> RuleCheck:
 
 def _verdict(rule: CropRule, met: bool) -> tuple[Verdict | None, bool]:
     suit = rule.suitability
+    if rule.management_action == "seed_after_harvest":
+        # cc_rc_01/02: "seeding must follow harvest and fall within the window" is a requirement
+        # (the caution is to compare actual dates). Violated -> caution; satisfied -> clear.
+        return (None, False) if met else ("caution", True)
     if suit in ("preferred", "acceptable"):
         return (suit, False) if met else ("caution", True)  # type: ignore[return-value]
     if suit in ("caution", "avoid"):
@@ -636,13 +666,17 @@ def evaluate_rule(
         gate_active, gate_reason, gate_inputs = _gate_state(gate, view)
         inputs.update(gate_inputs)
         reason = f"{reason}; applies_when {gate_reason}"
-        if gate_active is None:
+        if gate_active is None and out.met and rule.suitability in ("preferred", "acceptable"):
+            # The recommended condition is met, so the gated prompt cannot fire whatever the
+            # gate is (handbook: at gap >= 14 the check clears). Dryness is not needed.
+            reason += "; gate not needed because the recommended condition is met"
+        elif gate_active is None:
             return _check(
                 rule, "unknown", reason, verdict="unknown", condition_met=out.met,
                 gate_active=None, inputs_used=inputs,
                 missing_inputs=["spring.is_dry or grower.low_moisture_concern"],
             )  # fmt: skip
-        if gate_active is False:
+        elif gate_active is False:
             return _check(
                 rule, "complete", reason, verdict=None, condition_met=out.met,
                 gate_active=False, flagged=False, inputs_used=inputs,
@@ -663,7 +697,14 @@ def evaluate_rule(
 
 def _mark_conflicts(checks: list[RuleCheck], index: CatalogIndex) -> None:
     by_id = {c.rule_id: c for c in checks}
-    live = {rid for rid, c in by_id.items() if c.status != "inapplicable"}
+    # A rule is "live" when it applies, or might: missing location/system leaves it undecided,
+    # so it cannot yet be declared in conflict.
+    undecided = {"region", "production_system"}
+    live = {
+        rid
+        for rid, c in by_id.items()
+        if c.status != "inapplicable" and not (undecided & set(c.missing_inputs))
+    }
     for rid in list(live):
         rule = index.rule(rid)
         if rule is None or not rule.guidance:
@@ -809,7 +850,10 @@ def combine_checks(
         flagged = [c.rule_id for c in checks if c.flagged]
         if flagged:
             components[ev.year] = flagged  # type: ignore[index]
-        if flagged or (checks and all(c.status == "complete" for c in checks)):
+        every_component = len(checks) == len(rule_ids) and all(
+            c.status == "complete" for c in checks
+        )
+        if flagged or every_component:
             denominator += 1
     return CombinedCount(
         rule_ids=list(rule_ids),
