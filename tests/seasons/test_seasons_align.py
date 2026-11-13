@@ -155,13 +155,13 @@ def test_build_calendars_validates_before_building_any_year():
 
 
 def test_record_gives_45_planting_years_1981_to_2025(series):
-    years = planting_years("05-12", series)
+    years = planting_years(series)
     assert years[0] == 1981 and years[-1] == 2025 and len(years) == 45
 
 
 def test_1981_spring_complete_1981_winter_partial_and_44_complete_winters(series):
     p = plan()
-    cov = {y: season_coverage(build_calendar(p, y), series) for y in planting_years("05-12", series)}
+    cov = {y: season_coverage(build_calendar(p, y), series) for y in planting_years(series)}
     assert cov[1981].metrics["spring"].status == Status.COMPLETE
     w81 = cov[1981].metrics["winter"]
     assert w81.status == Status.PARTIAL and not w81.eligible
@@ -199,3 +199,55 @@ def test_one_missing_precip_day_makes_window_partial_not_complete():
     assert cov.metrics["winter"].status == Status.PARTIAL
     assert cov.metrics["winter"].missing_days == 1
     assert cov.metrics["winter"].eligible is False
+
+
+# --- Phase 2 review fixes --------------------------------------------------------------------
+
+
+def test_feb_29_harvest_with_feb_28_planting_is_valid_across_leap_and_non_leap_years():
+    p = plan(harvest="02-29", plant="02-28")
+    leap = build_calendar(p, 2020)  # harvest 2019-02-28 (non-leap) -> plant 2020-02-28
+    assert leap.prev_harvest == date(2019, 2, 28) and leap.winter_days == 365
+    normal = build_calendar(p, 2021)  # harvest 2020-02-29 -> plant 2021-02-28
+    assert normal.prev_harvest == date(2020, 2, 29) and normal.winter_days == 365
+
+
+def test_feb_29_collapsing_two_dates_raises_typed_error_for_that_year_only():
+    p = plan(rye(seed="02-28", terminate="02-29"), harvest="09-25", plant="05-12")
+    with pytest.raises(InvalidPlanError):
+        build_calendar(p, 2021)  # both resolve to Feb 28: empty cover interval
+    assert build_calendar(p, 2020).cover.days == 1
+
+
+def test_late_planting_keeps_2025_with_unavailable_coverage(series):
+    years = planting_years(series)
+    assert years[-1] == 2025 and len(years) == 45
+    cal = build_calendar(plan(harvest="09-05", plant="09-10"), 2025)
+    assert season_coverage(cal, series).metrics["spring"].status == Status.UNAVAILABLE
+
+
+def test_blank_crop_ids_are_validation_errors_not_assertion_errors():
+    with pytest.raises(ValidationError):
+        WinterManagement(kind="cover", crop_id="", seed="10-15", terminate="04-30")
+    with pytest.raises(ValidationError):
+        WinterManagement(kind="cover", crop_id="   ", seed="10-15", terminate="04-30")
+    with pytest.raises(ValidationError):
+        Plan(plan_id="x", previous_crop_id="", prev_harvest="09-25", next_crop_id="soybean",
+             next_plant="05-12")
+
+
+def test_threshold_set_is_deeply_immutable():
+    from fieldshift.contracts import Threshold, ThresholdSet
+
+    t = Threshold(name="heavy_rain_mm", method="m", value=1.0, unit="mm/day", reference_span="x",
+                  n_reference=1, parameters={"months": [1, 2], "nested": {"a": 1}})
+    ts = ThresholdSet(snapshot_hash="h", thresholds={"heavy_rain_mm": t})
+    before = ts.threshold_set_id
+    with pytest.raises(TypeError):
+        ts.thresholds["x"] = t
+    with pytest.raises(TypeError):
+        ts.thresholds["heavy_rain_mm"].parameters["nested"]["a"] = 2
+    with pytest.raises(TypeError):
+        ts.thresholds["heavy_rain_mm"].parameters["extra"] = 1
+    assert isinstance(ts.thresholds["heavy_rain_mm"].parameters["months"], tuple)
+    assert ts.threshold_set_id == before

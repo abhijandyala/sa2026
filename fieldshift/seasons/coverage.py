@@ -95,16 +95,10 @@ def season_coverage(cal: SeasonCalendar, series: DailySeries) -> SeasonCoverage:
     return SeasonCoverage(year=cal.year, metrics=out)
 
 
-def planting_years(plan_next_plant_md: str, series: DailySeries) -> list[int]:
-    """Planting years whose planting day lies inside the record (1981..2025 for Union County).
+def planting_years(series: DailySeries) -> list[int]:
+    """Every planting year from the record's first calendar year to its last (1981..2025).
 
-    The first year is the record's first calendar year (its winter may still be partial);
-    the last is the latest year whose planting day is on or before the last record date.
+    The mapping is fixed by the record span, not by the plan: a planting date after the end of
+    the record keeps its year and simply reports ``partial``/``unavailable`` coverage.
     """
-    from fieldshift.seasons.dates import resolve_md
-
-    years = []
-    for y in range(series.first_date.year, series.last_date.year + 1):
-        if resolve_md(y, plan_next_plant_md) <= series.last_date:
-            years.append(y)
-    return years
+    return list(range(series.first_date.year, series.last_date.year + 1))

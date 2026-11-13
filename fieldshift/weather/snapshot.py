@@ -235,7 +235,10 @@ def load_snapshot(directory: Path | str = DEFAULT_SNAPSHOT_DIR) -> Snapshot:
     if not manifest_path.exists() or not parquet_path.exists():
         raise SnapshotError(f"snapshot not found in {d}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    daily = pd.read_parquet(parquet_path)
+    parquet_bytes = parquet_path.read_bytes()
+    if sha256_bytes(parquet_bytes) != manifest["hashes"]["daily_parquet_sha256"]:
+        raise SnapshotError("daily.parquet does not match the manifest hash")
+    daily = pd.read_parquet(io.BytesIO(parquet_bytes))
     daily["date"] = pd.to_datetime(daily["date"])
     return Snapshot(daily=daily, manifest=manifest, directory=d)
 

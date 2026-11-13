@@ -130,3 +130,11 @@ def test_health_endpoint_reads_only_the_snapshot(no_network, monkeypatch):
     body = TestClient(create_app()).get("/health").json()
     assert body["offline"] is True and body["weather"]["first_date"] == "1981-01-01"
     assert body["snapshot_hash"] == load_snapshot().snapshot_hash
+
+
+def test_stale_parquet_is_rejected_on_load(tmp_path):
+    write_snapshot(_fixture_fetch(), tmp_path, start="2024-01-01", end="2024-01-05")
+    (tmp_path / "daily.parquet").write_bytes(
+        daily_to_parquet_bytes(load_snapshot(tmp_path).daily.assign(precip_mm=9.0)))
+    with pytest.raises(SnapshotError, match="does not match the manifest"):
+        load_snapshot(tmp_path)

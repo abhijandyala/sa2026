@@ -5,7 +5,7 @@ Order inside one season, anchored on the previous harvest ``H`` and next plantin
     H <= seed < terminate <= P          (cover)
     H <= grain_plant < grain_harvest <= P   (winter grain)
 
-``L = days from H forward to P`` around the 365-day cycle is the winter length. A date whose
+``L = days from H forward to P`` around the 366-day cycle is the winter length. A date whose
 forward offset from ``H`` is >= ``L`` (cover/seed) lies outside the winter window; whether
 that is "before harvest" or "after planting" is decided by which side it is nearer.
 """

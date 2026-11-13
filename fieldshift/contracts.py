@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Mapping
 from datetime import date
 from enum import StrEnum
 from typing import Annotated, Any, Literal
@@ -53,6 +54,29 @@ MonthDay = Annotated[str, AfterValidator(_check_month_day)]
 """``MM-DD``. ``02-29`` is allowed and resolves to Feb 28 in non-leap years."""
 
 
+class FrozenDict(dict):
+    """A dict that rejects mutation, so frozen thresholds cannot change after creation."""
+
+    def _blocked(self, *args: Any, **kwargs: Any) -> None:
+        raise TypeError("FrozenDict is immutable")
+
+    __setitem__ = __delitem__ = clear = pop = popitem = setdefault = update = _blocked  # type: ignore[assignment]
+
+    def __ior__(self, other: Any) -> Any:  # type: ignore[override]
+        raise TypeError("FrozenDict is immutable")
+
+
+def _deep_freeze(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return FrozenDict({k: _deep_freeze(v) for k, v in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_deep_freeze(v) for v in value)
+    return value
+
+
+FrozenMap = Annotated[dict[str, Any], AfterValidator(_deep_freeze)]
+
+
 class _Model(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -84,6 +108,10 @@ class InvalidPlanError(ValueError):
 # --------------------------------------------------------------------------- plan
 
 
+def _blank(value: Any) -> bool:
+    return value is None or (isinstance(value, str) and not value.strip())
+
+
 class WinterManagement(_Model):
     """What occupies the field between the previous harvest and the next planting.
 
@@ -106,7 +134,7 @@ class WinterManagement(_Model):
             "cover": ("crop_id", "seed", "terminate"),
             "winter_grain": ("crop_id", "plant", "harvest"),
         }[self.kind]
-        missing = [f for f in needs if getattr(self, f) is None]
+        missing = [f for f in needs if _blank(getattr(self, f))]
         if missing:
             raise ValueError(f"winter kind '{self.kind}' requires {', '.join(missing)}")
         stray = {
@@ -131,12 +159,12 @@ class GrowerInputs(_Model):
 class Plan(_Model):
     """One crop sequence: previous crop -> winter management -> next crop."""
 
-    plan_id: str
+    plan_id: Annotated[str, Field(min_length=1)]
     label: str | None = None
-    previous_crop_id: str
+    previous_crop_id: Annotated[str, Field(min_length=1)]
     prev_harvest: MonthDay
     winter: WinterManagement = Field(default_factory=WinterManagement)
-    next_crop_id: str
+    next_crop_id: Annotated[str, Field(min_length=1)]
     next_plant: MonthDay
     region: str | None = None
     production_system: str | None = None
@@ -191,7 +219,7 @@ class Threshold(_Model):
     method: str
     value: float | None
     unit: str
-    parameters: dict[str, Any] = Field(default_factory=dict)
+    parameters: FrozenMap = Field(default_factory=dict)
     reference_span: str
     n_reference: int
     status: Status = Status.COMPLETE
@@ -202,7 +230,7 @@ class ThresholdSet(_Model):
     """All thresholds for one weather snapshot, computed once and shared by every plan and era."""
 
     snapshot_hash: str
-    thresholds: dict[str, Threshold]
+    thresholds: Annotated[dict[str, Threshold], AfterValidator(_deep_freeze)]
 
     @property
     def threshold_set_id(self) -> str:
