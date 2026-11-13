@@ -15,6 +15,8 @@ import argparse
 import json
 import os
 import sys
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -62,8 +64,21 @@ def _sample_plan(plan_id: str) -> dict[str, Any]:
     return next(s["plan"] for s in doc["samples"] if s["plan_id"] == plan_id)
 
 
-def build_openapi() -> dict[str, Any]:
+@contextmanager
+def offline() -> Iterator[None]:
+    """FIELDSHIFT_OFFLINE=1 for the duration only; the caller's environment is restored."""
+    previous = os.environ.get("FIELDSHIFT_OFFLINE")
     os.environ["FIELDSHIFT_OFFLINE"] = "1"
+    try:
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop("FIELDSHIFT_OFFLINE", None)
+        else:
+            os.environ["FIELDSHIFT_OFFLINE"] = previous
+
+
+def build_openapi() -> dict[str, Any]:
     from fieldshift.api.app import create_app
 
     spec = create_app().openapi()
@@ -86,7 +101,11 @@ def _normalize(body: Any) -> Any:
 
 
 def build_examples() -> dict[str, tuple[Example, dict[str, Any] | None, Any]]:
-    os.environ["FIELDSHIFT_OFFLINE"] = "1"
+    with offline():
+        return _build_examples()
+
+
+def _build_examples() -> dict[str, tuple[Example, dict[str, Any] | None, Any]]:
     from fastapi.testclient import TestClient
 
     from fieldshift.api.app import create_app
@@ -107,7 +126,8 @@ def _dump(obj: Any) -> str:
 
 def render() -> dict[Path, str]:
     """Every file this module owns, as ``{path: text}``."""
-    files: dict[Path, str] = {OPENAPI_PATH: _dump(build_openapi())}
+    with offline():
+        files: dict[Path, str] = {OPENAPI_PATH: _dump(build_openapi())}
     for name, (ex, body, resp) in build_examples().items():
         files[EXAMPLES_DIR / f"{name}.json"] = _dump(resp)
         files[REQUESTS_DIR / f"{name}.json"] = _dump(

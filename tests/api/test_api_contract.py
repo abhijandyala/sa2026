@@ -150,3 +150,11 @@ print('offline-ok')
     out = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True,
                          cwd=ROOT)
     assert out.returncode == 0 and "offline-ok" in out.stdout, out.stderr[-800:]
+
+
+def test_generating_the_contract_does_not_leak_offline_mode_into_the_environment(monkeypatch):
+    monkeypatch.delenv("FIELDSHIFT_OFFLINE", raising=False)
+    contract.render()
+    import os
+
+    assert "FIELDSHIFT_OFFLINE" not in os.environ
