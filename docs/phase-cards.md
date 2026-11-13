@@ -172,7 +172,7 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - A grower residue report stays visible and does not change any count.
 - No cover vs. rye: identical total winter rain and identical event dates; only the segment labels differ.
 
-**Status (A, 2026-11-13): done.** `metrics/thresholds.py` (frozen `ThresholdSet`), `metrics/winter.py`. Heavy-rain rule is ASSUMED (P95 of wet days >= 1 mm, Sep-May, full record) because the handbook is missing; one constant (`HEAVY_RAIN_RULE`) to change. Codex r1 (2 medium) fixed; r2 PASS.
+**Status (A, 2026-11-13): done.** `metrics/thresholds.py` (frozen `ThresholdSet`), `metrics/winter.py`. Heavy-rain rule is ASSUMED (P95 of wet days >= 1 mm, Sep-May, full record) because the handbook is missing; one constant (`HEAVY_RAIN_RULE`) to change. Codex r1 (2 medium) fixed; r2 PASS. **2026-11-13 update: the ASSUMED P95 rule is replaced by the published fixed threshold (daily precip >= 76.2 mm, catalog v2 `fc_v2_ref_very_heavy_rain`, source/URL/locator frozen in the ThresholdSet, POWER LST convention in the note); r3 PASS.**
 
 ---
 
