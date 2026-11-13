@@ -264,6 +264,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - The sensitivity curve is flat on both sides of 14 days, and the step size equals the dry-year count.
 - One replay can be reproduced by a standalone script from `raw/` alone, without the API (a reproducibility test).
 
+**Status (A, 2026-11-13): Phase 5 done; Phase 6 done.** Phase 5: `compare/eras.py` (constants EARLIER 1981-2000, RECENT 2006-2025, MIN 15 of 20 evaluable, similarity band 10 pp, fixed caveat text, shared-year cross-plan helper); Codex r1 (2 medium) fixed, r2 PASS. Phase 6: `api/{app,routes,samples}.py`, `compare/{engine,models,replay,sensitivity,years,context}.py`, `data/samples/union_plans.json` (dates ASSUMED per docs/api/presets.md), `scripts/reproduce_replay.py` (stdlib-only reproduction of the replay from `raw/`); endpoints `POST /v1/plans/compare`, `GET|POST /v1/seasons/{year}/replay`, `POST /v1/plans/sensitivity`, `GET /v1/years`, `GET /v1/rotations`; B's routers mounted. Codex r1 (8 medium/low) and r2 (1 high, 3 medium) fixed with tests; no r3. See docs/handoff.md for shape differences from the drafts.
+
 ---
 
 ## Phase 7 — Crop and date checker
