@@ -116,6 +116,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
   - a real 0.0 mm day
 - If the series starts on 1981-01-01, the manifest says so. Phase 2 must then mark winter 1981 incomplete.
 
+**Status (A, 2026-11-13): done.** `weather/{sources,power_client,normalize,snapshot,coverage}.py`, `python -m fieldshift.weather {build,verify,report}`, committed snapshot `data/snapshots/union_county/` (POWER AG daily, 1981-01-01..2025-06-30, 16,252 days, no gaps; series starts 1981-01-01 so winter 1981 is partial). Point = Monroe NC ASSUMED (handbook missing). `/health` stub serves `offline-demo` from the snapshot only. Codex r1 and r2 fixed; parquet bytes only reproducible on the same pyarrow version (canonical hash always enforced; see review reply).
+
 ---
 
 ## Phase 2 — Season alignment and coverage
@@ -146,6 +148,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - Leap-year fixture: the winter window that crosses 2020-02-29 is one day longer than the one that crosses 2019-02-28.
 - Invalid chronology returns a typed error, not an exception trace.
 
+**Status (A, 2026-11-13): done.** `fieldshift/contracts.py` (Plan, SeasonCalendar, SeasonFacts, ThresholdSet, MetricResult, `Status`), `seasons/{dates,validate,align,coverage,facts}.py`, `weather/series.py`. 45 planting years 1981-2025; 1981 spring complete, 1981 winter partial (44 complete winters); leap-day rule documented in `seasons/dates.py`; typed `invalid_input` errors. Codex r1 (4 medium) and r2 (1 medium) fixed with tests.
+
 ---
 
 ## Phase 3 — Winter soil-protection exposure
@@ -167,6 +171,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - A fixture heavy-rain day on the termination day counts as `after_termination`, because the termination day is outside the `[seed, terminate)` interval.
 - A grower residue report stays visible and does not change any count.
 - No cover vs. rye: identical total winter rain and identical event dates; only the segment labels differ.
+
+**Status (A, 2026-11-13): done.** `metrics/thresholds.py` (frozen `ThresholdSet`), `metrics/winter.py`. Heavy-rain rule is ASSUMED (P95 of wet days >= 1 mm, Sep-May, full record) because the handbook is missing; one constant (`HEAVY_RAIN_RULE`) to change. Codex r1 (2 medium) fixed; r2 PASS.
 
 ---
 
@@ -201,6 +207,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 
 
 **Status (B, 2026-11-13): 4b (rule engine) done; 4a and the regression cases are A's.** `fieldshift/metrics/rules.py` (+ `field/regions.py`) covers applicability, `manual_check`/`unknown`, catalog-declared conflicts, `cr_tt_03` (gap < 14 and (dry or concern); clears at gap >= 14 even with dryness missing) and optional `cr_tt_04`, and per-check qualifying/skipped/count/denominator. It reads the real `SeasonFacts`. Codex r1 (7 medium) and r2 (4 medium) fixed with tests; no r3 run. A: pass regression cases 1-5 once 4a lands (see docs/handoff.md).
+
+**Status (A, 2026-11-13): 4a done; regression cases 1-5 pass** against B's rule engine (`tests/metrics/test_metrics_spring.py`). `metrics/spring.py`: fixed 1981-2025 baseline, bottom-20% cutoff = ceil(20% n)-th smallest, ties at the cutoff are dry, modeled wetness. Codex r1 (4 medium) and r2 (2 medium) fixed with tests; no r3 run.
 ---
 
 ## Phase 5 — Two-period comparison (1981–2000 vs 2006–2025)
