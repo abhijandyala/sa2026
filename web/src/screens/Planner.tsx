@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { APP_NAME, TAGLINE, TASK_TITLE } from "../config";
-import { CARDS, cardByKey } from "../content/strategies";
+import { cardByKey } from "../content/strategies";
 import type { Client } from "../api/client";
 import { sameForm, sampleForm } from "../state/form";
 import { hasPendingEdits, initialState, reducer } from "../state/model";
@@ -8,6 +8,7 @@ import { applyUrlView, fromHash, toHash } from "../state/url";
 import { useReplay, type ApplyOutcome, type Loaded } from "../state/useData";
 import { buildView, validYears } from "../view/build";
 import { Banner, Button, StatusPill } from "../ui/components";
+import { G } from "../ui/Glossary";
 import { EvidenceDrawer } from "./planner/EvidenceDrawer";
 import { FarmFormDrawer } from "./planner/FarmFormDrawer";
 import { StrategyCard } from "./planner/StrategyCard";
@@ -15,6 +16,7 @@ import { Timeline } from "./planner/Timeline";
 import { YearStrip } from "./planner/YearStrip";
 import { WeatherDetail } from "./planner/WeatherDetail";
 import { FarmView } from "./planner/FarmView";
+import { RyeDeepDive } from "./planner/RyeDeepDive";
 
 /*
   Layout B (decided Nov 12): header, weather control (years strip), 3D band capped near
@@ -37,8 +39,13 @@ export function Planner({
 }) {
   const sample = useMemo(() => sampleForm(data.compare), [data.compare]);
   const years = useMemo(() => validYears(data.compare), [data.compare]);
-  const [state, dispatch] = useReducer(reducer, sample, (s) => applyUrlView(initialState(s), fromHash(window.location.hash, years)));
+  const ryeEnds = useMemo(() => new Set((data.sensitivity?.points ?? []).map((p) => p.terminate)), [data.sensitivity]);
+  const [state, dispatch] = useReducer(reducer, sample, (s) =>
+    applyUrlView(initialState(s), fromHash(window.location.hash, years, ryeEnds)),
+  );
+  const ryeRef = useRef<HTMLElement>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [audit, setAudit] = useState(false);
   const formBtn = useRef<HTMLButtonElement>(null);
   const evidenceBtn = useRef<HTMLButtonElement>(null);
 
@@ -49,12 +56,24 @@ export function Planner({
 
   // Follow the link when only the hash changes (a pasted share link, Back/Forward).
   useEffect(() => {
-    const onHash = () => dispatch({ type: "applyLink", view: fromHash(window.location.hash, years) });
+    const onHash = () => dispatch({ type: "applyLink", view: fromHash(window.location.hash, years, ryeEnds) });
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
-  }, [years]);
+  }, [years, ryeEnds]);
 
-  const view = useMemo(() => buildView(data, { card: state.card, year: state.year }), [data, state.card, state.year]);
+  // Bring the deep-dive into view and move focus to it when it opens.
+  useEffect(() => {
+    if (!state.ryeOpen) return;
+    // Show the 3D view and the slider together, so dragging visibly moves the rye field.
+    const band = document.querySelector<HTMLElement>(".world-band");
+    (band ?? ryeRef.current)?.scrollIntoView({ block: "start" });
+    ryeRef.current?.focus({ preventScroll: true });
+  }, [state.ryeOpen]);
+
+  const view = useMemo(
+    () => buildView(data, { card: state.card, year: state.year, ryeEnd: state.ryeEnd }),
+    [data, state.card, state.year, state.ryeEnd],
+  );
   const selectedCard = view.cards.find((c) => c.key === state.card) ?? view.cards[0]!;
   const rye19 = data.compare.plans.find((p) => p.plan_id === "rye_19d") ?? null;
   const rye19Check = rye19?.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture");
@@ -82,7 +101,7 @@ export function Planner({
     );
 
   return (
-    <div className="planner">
+    <div className={`planner${audit ? " audit-on" : ""}`}>
       <header className="app-header">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true" />
@@ -97,6 +116,12 @@ export function Planner({
             {view.locationLabel.replace(/\s*\(sample\)$/i, "")} · {sameForm(state.applied, state.sample) ? "Sample field" : "Your dates"}
           </span>
           {status}
+          <a className="header-link header-link-small" href="?view=methods">
+            How it works
+          </a>
+          <a className="header-link header-link-small" href="?view=credits">
+            Credits
+          </a>
         </div>
         <nav className="header-actions" aria-label="Plan actions">
           <span className="control-label">Change the plan:</span>
@@ -115,6 +140,9 @@ export function Planner({
             }}
           >
             Reset example
+          </Button>
+          <Button variant="quiet" aria-pressed={audit} onClick={() => setAudit((a) => !a)}>
+            {audit ? "Hide sources" : "Show sources"}
           </Button>
         </nav>
       </header>
@@ -138,6 +166,17 @@ export function Planner({
 
       <FarmView strips={view.strips} onSelectCard={(card) => dispatch({ type: "selectCard", card })} />
 
+      {state.ryeOpen && view.rye ? (
+        <RyeDeepDive
+          ref={ryeRef}
+          rye={view.rye}
+          emphasis={state.emphasis}
+          onEmphasis={(emphasis) => dispatch({ type: "setEmphasis", emphasis })}
+          onChoose={(md) => dispatch({ type: "setRyeEnd", md })}
+          onClose={() => dispatch({ type: "closeRye" })}
+        />
+      ) : null}
+
       <section className="cards" aria-label="Three winter plans">
         {view.cards.map((c, i) => (
           <StrategyCard
@@ -151,6 +190,8 @@ export function Planner({
                 : null
             }
             onSelect={() => dispatch({ type: "selectCard", card: c.key })}
+            onAdjust={c.key === "cover" && view.rye ? () => dispatch({ type: "openRye" }) : undefined}
+            planSource={sameForm(state.applied, state.sample) ? "sample" : "farmer"}
             onEvidence={() => {
               dispatch({ type: "selectCard", card: c.key });
               dispatch({ type: "openEvidence" });
@@ -166,14 +207,14 @@ export function Planner({
           The plans on one calendar
         </h2>
         <Timeline
-          rows={CARDS.map((c) => ({ name: c.name, plan: data.compare.plans.find((p) => p.plan_id === c.planId) ?? null }))}
+          rows={view.cards.map((c) => ({ name: c.content.name, plan: c.plan }))}
         />
       </section>
 
       <footer className="planner-foot">
         <p>
-          {APP_NAME} supports a conversation with your Extension agent. It replays past weather; it does not forecast next spring
-          or measure your field.
+          {APP_NAME} supports a conversation with your <G id="extension">Extension agent</G>. It replays past weather; it does not
+          forecast next spring or measure your field.
         </p>
       </footer>
 
@@ -198,6 +239,9 @@ export function Planner({
         view={view}
         card={selectedCard}
         form={state.applied}
+        replay={replay}
+        priorities={state.priorities}
+        emphasis={state.emphasis}
         onClose={() => dispatch({ type: "closeEvidence" })}
         returnFocusRef={evidenceBtn}
       />

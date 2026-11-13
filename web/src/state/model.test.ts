@@ -149,3 +149,35 @@ describe("following a link in an open tab", () => {
     expect(s).toMatchObject({ card: "cover", year: null, priorities: [] });
   });
 });
+
+describe("rye end date", () => {
+  it("moving the date keeps the year, the plan and the card", () => {
+    let s = reducer(base, { type: "selectYear", year: 2014 });
+    s = reducer(s, { type: "setRyeEnd", md: "04-23" });
+    expect(s).toMatchObject({ ryeEnd: "04-23", year: 2014, card: "cover" });
+    expect(s.applied).toEqual(base.applied);
+  });
+
+  it("opening the deep-dive selects the cover plan", () => {
+    const s = reducer(reducer(base, { type: "selectCard", card: "grain" }), { type: "openRye" });
+    expect(s).toMatchObject({ ryeOpen: true, card: "cover" });
+  });
+
+  it("applying new dates returns the slider to the proposed date", () => {
+    let s = reducer(base, { type: "setRyeEnd", md: "04-10" });
+    s = reducer(reducer(s, { type: "openForm" }), { type: "applied", form: { ...sample, soyPlant: "2027-05-18" } });
+    expect(s.ryeEnd).toBeNull();
+  });
+
+  it("reset clears the chosen date and closes the deep-dive", () => {
+    const s = reducer(reducer(base, { type: "openRye" }), { type: "setRyeEnd", md: "04-10" });
+    expect(reducer(s, { type: "reset" })).toEqual(base);
+  });
+
+  it("round-trips in a link and ignores a date outside the sweep", () => {
+    const s = reducer(base, { type: "setRyeEnd", md: "04-23" });
+    const ok = fromHash(toHash(s), validYears(compare), new Set(["04-23", "04-30"]));
+    expect(ok.ryeEnd).toBe("04-23");
+    expect(fromHash("#s=cover&r=12-25", validYears(compare), new Set(["04-23"])).ryeEnd).toBeUndefined();
+  });
+});

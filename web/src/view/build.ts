@@ -13,6 +13,29 @@ export type DataKind = "draft" | "saved" | "live";
 export interface Selection {
   card: CardKey;
   year: number | null;
+  /** Rye end date from the slider, MM-DD; null = the plan's proposed date. */
+  ryeEnd?: string | null;
+}
+
+export type SweepPoint = SensitivityResponse["points"][number];
+
+/** The rye deep-dive (Phase 5). Every number is a value from the backend's sweep. */
+export interface RyeVM {
+  points: SweepPoint[];
+  denominator: number;
+  index: number;
+  proposedIndex: number;
+  earlierIndex: number | null;
+  /** Last point with a gap of 14 days or more (the boundary of NC State's guidance). */
+  boundaryIndex: number | null;
+  chosen: SweepPoint;
+  proposed: SweepPoint;
+  plant: string;
+  seed: string;
+  changed: boolean;
+  thisYear: { year: number; flagged: boolean | null } | null;
+  era: EraVM | null;
+  rule: { label: string; source: { title: string; url: string } | null };
 }
 
 export interface TileVM {
@@ -115,7 +138,10 @@ export interface ViewModel {
   dataKind: DataKind;
   locationLabel: string;
   gridNote: string;
+  grid: { lat: number; lon: number; source: string };
   requestId: string;
+  snapshotHash: string;
+  catalogVersion: string;
   window: SpringWindow | null;
   windowLabel: string;
   windowEra: EraVM | null;
@@ -130,6 +156,7 @@ export interface ViewModel {
   wetness: WetnessVM;
   cards: CardVM[];
   strips: StripVM[];
+  rye: RyeVM | null;
   thresholds: CompareResponse["thresholds"];
   eraSpans: { earlier: string; recent: string };
 }
@@ -309,16 +336,91 @@ export function buildView(
     };
   });
 
+  // ---------------------------------------------------------------- rye slider (Phase 5)
+  const sens = data.sensitivity;
+  const rye12 = planById.get("rye_12d") ?? null;
+  const rye19 = planById.get("rye_19d") ?? null;
+  let rye: RyeVM | null = null;
+  if (sens && rye12 && rye12.sequence.winter.type === "cover" && sens.points.length) {
+    const pts = sens.points;
+    const proposedMd = rye12.sequence.winter.terminate;
+    const proposedIndex = Math.max(0, pts.findIndex((p) => p.terminate === proposedMd));
+    const chosenIndex = sel.ryeEnd ? pts.findIndex((p) => p.terminate === sel.ryeEnd) : -1;
+    const index = chosenIndex >= 0 ? chosenIndex : proposedIndex;
+    const chosen = pts[index]!;
+    const earlierMd = rye19?.sequence.winter.type === "cover" ? rye19.sequence.winter.terminate : null;
+    const earlierIndex = earlierMd ? pts.findIndex((p) => p.terminate === earlierMd) : -1;
+    let boundaryIndex: number | null = null;
+    pts.forEach((p, i) => {
+      if (p.gap_days >= 14) boundaryIndex = i;
+    });
+    const check12 = rye12.spring_checks.find((c) => c.check_id === sens.check_id);
+    rye = {
+      points: pts,
+      denominator: sens.denominator,
+      index,
+      proposedIndex,
+      earlierIndex: earlierIndex >= 0 ? earlierIndex : null,
+      boundaryIndex,
+      chosen,
+      proposed: pts[proposedIndex]!,
+      plant: sens.fixed.next_plant,
+      seed: sens.fixed.seed,
+      changed: index !== proposedIndex,
+      thisYear:
+        year === null ? null : { year, flagged: chosen.qualifying_years ? chosen.qualifying_years.includes(year) : null },
+      era: eraVM(chosen.eras, spans),
+      rule: { label: check12?.fires_when ?? "gap < 14 days AND (dry replay OR grower low-moisture concern)", source: check12?.source ?? null },
+    };
+
+    // The cover card, its 3D field and its calendar row follow the chosen date.
+    if (rye.changed) {
+      const ci = cards.findIndex((c) => c.key === "cover" && c.plan?.plan_id === "rye_12d");
+      const card = cards[ci];
+      if (card && card.plan && card.plan.sequence.winter.type === "cover") {
+        const plan: Plan = {
+          ...card.plan,
+          sequence: { ...card.plan.sequence, winter: { ...card.plan.sequence.winter, terminate: chosen.terminate } },
+          calendar: {
+            ...card.plan.calendar,
+            termination_gap_days: chosen.gap_days,
+            living_cover_days_planned: chosen.living_cover_days_planned,
+          },
+        };
+        const w = windowFor(compare, plan);
+        const yr = w?.years.find((y) => y.year === year);
+        let status: CardStatus = null;
+        if (!yr || yr.status !== "complete") status = { kind: "unavailable", text: "Weather unavailable for this year" };
+        else if (!chosen.qualifying_years) status = { kind: "unavailable", text: "This spring's check is not available for this date" };
+        else if (chosen.qualifying_years.includes(year ?? -1)) status = { kind: "check", text: "Check field moisture" };
+        const eraBase = eraVM(chosen.eras, spans);
+        cards[ci] = {
+          ...card,
+          plan,
+          soil: { ...card.soil, mm: chosen.rain_mm_without_cover_median },
+          check: { applies: true, count: chosen.checks_count, denominator: sens.denominator },
+          era: eraBase ? { ...eraBase, measure: "Springs with a field-moisture check" } : null,
+          metrics: [`${chosen.gap_days} days before soybean planting`, `${chosen.living_cover_days_planned} planned days with living rye`],
+          status,
+        };
+      }
+    }
+  }
+
   return {
     dataKind: data.origin === "live" ? "live" : compare.meta.draft ? "draft" : "saved",
     locationLabel: years.location.label,
     gridNote: years.location.grid.note,
+    grid: { lat: years.location.grid.lat, lon: years.location.grid.lon, source: years.location.grid.source },
     requestId: compare.meta.request_id,
+    snapshotHash: compare.meta.snapshot_hash,
+    catalogVersion: compare.meta.catalog_version,
     window,
     windowLabel: window ? window.label : "Planting window",
     windowEra: labelsWithheld ? null : eraVM(window?.eras.dry_spring, spans),
     tiles,
     selectedYear,
+    rye,
     strips: cards.map((c) => {
       const w = windowFor(compare, c.plan);
       const yr = w?.years.find((r) => r.year === year) ?? null;

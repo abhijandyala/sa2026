@@ -105,7 +105,7 @@ export function StatusPill({ kind, children }: { kind: StatusKind; children: Rea
 
 /* ---------------------------------------------------------------- Source chip */
 
-export type SourceKind = "nasa" | "usda" | "ncstate" | "farmer" | "calculated" | "sample";
+export type SourceKind = "nasa" | "usda" | "ncstate" | "farmer" | "calculated" | "sample" | "model";
 const SOURCE_LABEL: Record<SourceKind, string> = {
   nasa: "NASA",
   usda: "USDA",
@@ -113,7 +113,25 @@ const SOURCE_LABEL: Record<SourceKind, string> = {
   farmer: "Farmer reported",
   calculated: "Calculated",
   sample: "Sample",
+  model: "NASA model",
 };
+
+/**
+ * Source tags for "Show sources" (card 6.3). Hidden, including from screen readers,
+ * until the planner turns on audit mode; then every number shows where it came from.
+ */
+export function Src({ k }: { k: SourceKind | SourceKind[] }) {
+  const kinds = Array.isArray(k) ? k : [k];
+  return (
+    <span className="src-group">
+      {kinds.map((kind) => (
+        <span key={kind} className={`src chip chip-${kind}`}>
+          {SOURCE_LABEL[kind]}
+        </span>
+      ))}
+    </span>
+  );
+}
 
 export function SourceChip({ kind, href, title }: { kind: SourceKind; href?: string; title?: string }) {
   const text = SOURCE_LABEL[kind];

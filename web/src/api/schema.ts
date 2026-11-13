@@ -244,6 +244,8 @@ export const SensitivityResponse = z
             living_cover_days_planned: z.number().int(),
             rain_mm_without_cover_median: z.number().nullable(),
             checks_count: z.number().int().nullable(),
+            qualifying_years: z.array(z.number().int()).optional(), // REQUESTED
+            eras: Era.optional(), // REQUESTED
           })
           .passthrough(),
       )

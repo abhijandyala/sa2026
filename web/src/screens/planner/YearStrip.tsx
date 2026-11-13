@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { historicalWindow, mm, monthDay, wetness } from "../../data/format";
 import type { ViewModel } from "../../view/build";
-import { YearTile } from "../../ui/components";
+import { Src, YearTile } from "../../ui/components";
+import { G } from "../../ui/Glossary";
 
 /*
   The weather control (cards 1.2 and 3.1). Changing the year changes weather only.
@@ -25,6 +26,20 @@ export function YearStrip({ view, onSelect }: { view: ViewModel; onSelect: (year
     strip.scrollLeft = tile.offsetLeft - strip.clientWidth / 2 + tile.offsetWidth / 2;
   }, [selected, view.window?.id]);
 
+  // Re-center when the strip changes width (a phone rotating, a window resized).
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      const tile = strip.querySelector<HTMLElement>(".year-tile.is-selected");
+      if (tile && strip.scrollWidth > strip.clientWidth) {
+        strip.scrollLeft = tile.offsetLeft - strip.clientWidth / 2 + tile.offsetWidth / 2;
+      }
+    });
+    ro.observe(strip);
+    return () => ro.disconnect();
+  }, []);
+
   const move = (dir: number) => {
     const i = view.tiles.findIndex((t) => t.year === selected);
     const next = view.tiles[Math.min(view.tiles.length - 1, Math.max(0, i + dir))];
@@ -45,7 +60,7 @@ export function YearStrip({ view, onSelect }: { view: ViewModel; onSelect: (year
             Change the weather: pick a past spring
           </h2>
           <p className="strip-context">
-            {view.windowLabel} ({plant}) · {first}–{last} · historical replay, not a forecast
+            {view.windowLabel} ({plant}) · {first}–{last} · <G id="replay">historical replay</G>, not a forecast
           </p>
         </div>
         <div className="strip-shortcuts" role="group" aria-label="Jump to a year">
@@ -100,14 +115,24 @@ export function YearStrip({ view, onSelect }: { view: ViewModel; onSelect: (year
           {y ? (
             y.status === "complete" ? (
               <>
-                <strong>Spring {y.year}</strong> · {y.totalMm === 0 ? "0.0 mm (no rain)" : mm(y.totalMm)} in the 30 days before {plant} (
-                {historicalWindow(y.window)}) · regional estimate
+                <strong>Spring {y.year}</strong> · {y.totalMm === 0 ? "0.0 mm (no rain)" : mm(y.totalMm)}
+                <Src k="nasa" /> in the 30 days before {plant} ({historicalWindow(y.window)}) · <G id="regional-estimate">regional estimate</G>
                 {view.labelsWithheld ? null : (
                   <>
-                    {y.isDry ? " · one of the driest 20% on record here" : ""} · rank {y.rank} of {y.of} (1 = driest)
+                    {y.isDry ? (
+                      <>
+                        {" "}
+                        · one of the <G id="driest-20">driest 20%</G> on record here
+                      </>
+                    ) : (
+                      ""
+                    )}{" "}
+                    · <G id="rank">rank</G> {y.rank} of {y.of} (1 = driest)
+                    <Src k="calculated" />
                   </>
                 )}{" "}
-                · modeled soil wetness {y.wetnessRoot === null ? "not available" : wetness(y.wetnessRoot)}
+                · <G id="soil-wetness">modeled soil wetness</G> {y.wetnessRoot === null ? "not available" : wetness(y.wetnessRoot)}
+                <Src k="model" />
               </>
             ) : y.status === "partial" ? (
               <>

@@ -481,3 +481,27 @@ a.chip:hover {
   gap: var(--sp-2);
   align-self: end;
 }
+
+/* Source tags (Show sources). Not displayed, and not read, until audit mode is on. */
+.src-group {
+  display: none;
+}
+.audit-on .src-group {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-left: 4px;
+  vertical-align: 2px;
+}
+.src.chip {
+  font-size: 10.5px;
+  padding: 0 6px;
+}
+.chip-model {
+  color: var(--soy);
+  background: var(--cover-soft);
+  border-color: transparent;
+}
+.term-pop strong {
+  color: inherit;
+}

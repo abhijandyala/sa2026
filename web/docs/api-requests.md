@@ -43,7 +43,20 @@ Cards show three plans: `no_cover`, `rye_12d` (with `rye_19d` as the earlier end
 
 `plans[].winter.per_season`: `[{ "year": 2007, "rain_mm_without_cover": 41.2, "status": "complete" }, …]`, so the strip can show the selected winter's value next to the median.
 
-## 5. Two-year presets
+## 5. Per-date detail in the sensitivity sweep (needed for the rye slider)
+
+As the grower drags the rye end date, the card, the 3D field and the year strip follow the chosen date. To mark "check this spring" and show earlier vs recent for any date without the UI applying the rule itself, each `points[]` entry could also carry:
+
+```json
+{ "terminate": "04-30", "gap_days": 12, "living_cover_days_planned": 211,
+  "rain_mm_without_cover_median": 46.3, "checks_count": 9,
+  "qualifying_years": [1986, 1988, …],
+  "eras": { "earlier": {…}, "recent": {…}, "diff_pp": 5.0, "result": "similar", "caveat": "…" } }
+```
+
+Without them, the slider still shows counts, gaps and rain, and the per-year mark and the period split say "not available for this date".
+
+## 6. Two-year presets
 
 Still open: the cards describe two-year rotations, but the API evaluates one winter (corn → winter → soybean). The UI currently shows the first winter and lists the second winter as a gap. Tell us how the second winter (soybean → rye or clover → corn) will be represented.
 

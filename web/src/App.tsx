@@ -1,12 +1,15 @@
 import { useData } from "./state/useData";
 import { Planner } from "./screens/Planner";
 import { Gallery } from "./screens/Gallery";
+import { CreditsPage, MethodsPage } from "./screens/Pages";
 import { Banner, Button } from "./ui/components";
 import { APP_NAME } from "./config";
 
 export function App() {
   const view = new URLSearchParams(window.location.search).get("view");
   if (view === "gallery") return <Gallery />;
+  if (view === "methods") return <MethodsPage />;
+  if (view === "credits") return <CreditsPage />;
   return <PlannerRoute />;
 }
 

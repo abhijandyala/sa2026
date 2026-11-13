@@ -173,3 +173,55 @@ describe("3D field strips", () => {
     expect(v.strips[1]!.status).toEqual(v.cards[1]!.status);
   });
 });
+
+describe("rye slider", () => {
+  const point = (md: string) => sensitivity.points.find((p) => p.terminate === md)!;
+
+  it("starts on the proposed date and finds the earlier date and the 14-day boundary", () => {
+    const r = buildView(data, { card: "cover", year: 2014 }).rye!;
+    expect(r.chosen.terminate).toBe("04-30");
+    expect(r.changed).toBe(false);
+    expect(r.points[r.earlierIndex!]!.terminate).toBe("04-23");
+    expect(r.points[r.boundaryIndex!]!.gap_days).toBe(14);
+    expect(r.points[r.boundaryIndex! + 1]!.gap_days).toBe(13);
+  });
+
+  it("moves the cover card to the chosen date using the sweep's values only", () => {
+    const v = buildView(data, { card: "cover", year: 2014, ryeEnd: "04-23" });
+    const cover = v.cards.find((c) => c.key === "cover")!;
+    const p = point("04-23");
+    expect(v.rye!.changed).toBe(true);
+    expect(cover.check).toEqual({ applies: true, count: p.checks_count, denominator: sensitivity.denominator });
+    expect(cover.soil.mm).toBe(p.rain_mm_without_cover_median);
+    expect(cover.metrics).toEqual([`${p.gap_days} days before soybean planting`, `${p.living_cover_days_planned} planned days with living rye`]);
+    expect(cover.plan!.sequence.winter).toMatchObject({ terminate: "04-23" });
+  });
+
+  it("clears the check in a dry spring once the gap reaches 14 days (case C)", () => {
+    const dry = rye12.spring_checks[0]!.qualifying_years[0]!;
+    const before = buildView(data, { card: "cover", year: dry }).cards.find((c) => c.key === "cover")!;
+    const after = buildView(data, { card: "cover", year: dry, ryeEnd: "04-23" }).cards.find((c) => c.key === "cover")!;
+    expect(before.status?.kind).toBe("check");
+    expect(after.status).toBeNull();
+  });
+
+  it("keeps the spring rainfall, rank and the other cards unchanged", () => {
+    const a = buildView(data, { card: "cover", year: 2014 });
+    const b = buildView(data, { card: "cover", year: 2014, ryeEnd: "04-10" });
+    expect(b.selectedYear).toEqual(a.selectedYear);
+    expect(b.chart).toEqual(a.chart);
+    expect(b.cards.filter((c) => c.key !== "cover")).toEqual(a.cards.filter((c) => c.key !== "cover"));
+  });
+
+  it("the 3D field and its plan follow the chosen date", () => {
+    const v = buildView(data, { card: "cover", year: 2014, ryeEnd: "04-10" });
+    expect(v.strips[1]!.plan!.sequence.winter).toMatchObject({ terminate: "04-10" });
+  });
+
+  it("says the per-year mark is not available when the sweep lacks qualifying years", () => {
+    const thin = { ...data, sensitivity: { ...sensitivity, points: sensitivity.points.map(({ qualifying_years: _q, eras: _e, ...p }) => p) } };
+    const cover = buildView(thin, { card: "cover", year: 2014, ryeEnd: "04-10" }).cards.find((c) => c.key === "cover")!;
+    expect(cover.status).toEqual({ kind: "unavailable", text: "This spring's check is not available for this date" });
+    expect(cover.era).toBeNull();
+  });
+});

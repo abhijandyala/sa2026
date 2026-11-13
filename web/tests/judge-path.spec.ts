@@ -53,3 +53,16 @@ test("reset and broken links return to the sample", async ({ page }) => {
   await page.goto("/#s=nope&y=1850");
   await expect(page.getByRole("heading", { name: "Compare winter crop plans" })).toBeVisible();
 });
+
+test("moving the rye date clears the check and keeps the spring (case C)", async ({ page }) => {
+  await page.goto("/#s=cover&y=2014");
+  await page.getByRole("article", { name: "Add winter cover" }).getByRole("button", { name: "Adjust rye timing" }).click();
+  const panel = page.getByRole("region", { name: "Adjust rye timing" });
+  await expect(panel).toBeVisible();
+  const spring = await page.locator(".strip-summary").innerText();
+  await panel.getByRole("button", { name: /^Earlier/ }).click();
+  await expect(panel.getByText("Spring 2014: no field-moisture check at this date")).toBeVisible();
+  await expect(page.getByRole("article", { name: "Add winter cover" }).getByText("No check in this spring")).toBeVisible();
+  expect(await page.locator(".strip-summary").innerText()).toBe(spring);
+  await expect(page).toHaveURL(/r=04-23/);
+});

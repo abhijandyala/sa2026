@@ -2,7 +2,8 @@ import type { OtherCheck, Plan } from "../../api/schema";
 import { SOURCES, type Claim } from "../../content/strategies";
 import { monthDay } from "../../data/format";
 import type { CardVM, EraVM } from "../../view/build";
-import { Button, SourceChip, StatusPill } from "../../ui/components";
+import { Button, SourceChip, Src, StatusPill } from "../../ui/components";
+import { G } from "../../ui/Glossary";
 
 /*
   One strategy card (Phase 2). Fixed slot order so the three cards line up (playbook p.40):
@@ -63,6 +64,8 @@ export function StrategyCard({
   earlier,
   onSelect,
   onEvidence,
+  onAdjust,
+  planSource = "sample",
 }: {
   card: CardVM;
   index: number;
@@ -70,6 +73,8 @@ export function StrategyCard({
   earlier?: { plan: Plan; count: number | null; denominator: number | null } | null;
   onSelect: () => void;
   onEvidence: () => void;
+  onAdjust?: () => void;
+  planSource?: "sample" | "farmer";
 }) {
   const { content, soil, check, era, status } = card;
   const h = content.headings;
@@ -95,9 +100,10 @@ export function StrategyCard({
           <span className={`sc-count${soil.mm === null ? " sc-count-muted" : ""}`}>
             {soil.mm === null ? "—" : soil.mm.toFixed(0)}
             {soil.mm === null ? null : <span className="sc-of"> mm</span>}
+            <Src k={["nasa", "calculated"]} />
           </span>
           <span className="sc-meaning">
-            median winter rain on ground with no living cover
+            median winter rain on ground with no <G id="living-cover">living cover</G>
             {soil.seasons ? <span className="sc-basis"> · {soil.seasons} winters</span> : null}
           </span>
         </div>
@@ -105,6 +111,7 @@ export function StrategyCard({
           {check.applies ? (
             <span className="sc-count">
               {check.count} <span className="sc-of">of {check.denominator}</span>
+              <Src k={["nasa", "ncstate", "calculated"]} />
             </span>
           ) : (
             <span className="sc-count sc-count-muted sc-na">Does not apply</span>
@@ -117,7 +124,10 @@ export function StrategyCard({
 
       {era ? (
         <div className="sc-era" aria-label={`${era.measure}, earlier and recent periods`}>
-          <span className="sc-era-measure">{era.measure}</span>
+          <span className="sc-era-measure">
+            {era.measure}
+            <Src k="calculated" />
+          </span>
           <span className="tabular">
             {era.earlier.label}: <strong>{era.earlier.count}</strong> of {era.earlier.denominator}
           </span>
@@ -130,7 +140,10 @@ export function StrategyCard({
         <div className="sc-era sc-era-empty">Earlier vs recent: not available</div>
       )}
 
-      <p className="sc-sequence">{sequenceText(card.plan)}</p>
+      <p className="sc-sequence">
+        {sequenceText(card.plan)}
+        <Src k={planSource} />
+      </p>
 
       <ul className="sc-metrics">
         {card.metrics.map((m) => (
@@ -203,6 +216,7 @@ export function StrategyCard({
         <Button variant={selected ? "primary" : "secondary"} aria-pressed={selected} onClick={onSelect}>
           {selected ? "Viewing this plan" : "View this plan"}
         </Button>
+        {onAdjust ? <Button onClick={onAdjust}>Adjust rye timing</Button> : null}
         <Button onClick={onEvidence}>Show evidence</Button>
       </div>
     </article>

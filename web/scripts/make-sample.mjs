@@ -285,6 +285,9 @@ for (let t = "2007-03-01"; t <= "2007-05-11"; t = add(t, 1)) {
     living_cover_days_planned: plan.calendar.living_cover_days_planned,
     rain_mm_without_cover_median: plan.winter.per_season_median.rain_mm_without_cover,
     checks_count: plan.spring_checks[0].count,
+    // REQUESTED: lets the UI mark this spring and show earlier vs recent for any date.
+    qualifying_years: plan.spring_checks[0].qualifying_years,
+    eras: plan.eras.rye_soy_short_gap_moisture,
   });
 }
 const sensitivity = {

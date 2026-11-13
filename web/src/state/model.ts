@@ -19,6 +19,9 @@ export interface AppState {
   draft: FarmForm | null;
   card: CardKey;
   year: number | null; // null = the window's typical year
+  /** Rye end date chosen on the slider, MM-DD. null = the plan's proposed date. */
+  ryeEnd: string | null;
+  ryeOpen: boolean;
   priorities: Priority[];
   emphasis: Emphasis;
   evidenceOpen: boolean;
@@ -28,6 +31,9 @@ export interface AppState {
 export type Action =
   | { type: "selectCard"; card: CardKey }
   | { type: "selectYear"; year: number | null }
+  | { type: "setRyeEnd"; md: string | null }
+  | { type: "openRye" }
+  | { type: "closeRye" }
   | { type: "openForm" }
   | { type: "closeForm" }
   | { type: "editDraft"; patch: Partial<FarmForm> }
@@ -37,7 +43,7 @@ export type Action =
   | { type: "setEmphasis"; emphasis: Emphasis }
   | { type: "openEvidence" }
   | { type: "closeEvidence" }
-  | { type: "applyLink"; view: { card?: CardKey; year?: number; priorities?: Priority[]; emphasis?: Emphasis } }
+  | { type: "applyLink"; view: { card?: CardKey; year?: number; ryeEnd?: string; priorities?: Priority[]; emphasis?: Emphasis } }
   | { type: "reset" };
 
 export const MAX_PRIORITIES = 2;
@@ -49,6 +55,8 @@ export function initialState(sample: FarmForm): AppState {
     draft: null,
     card: "cover",
     year: null,
+    ryeEnd: null,
+    ryeOpen: false,
     priorities: [],
     emphasis: "buffer",
     evidenceOpen: false,
@@ -63,6 +71,13 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, card: action.card, year: action.card === state.card ? state.year : null };
     case "selectYear":
       return { ...state, year: action.year };
+    case "setRyeEnd":
+      // Moving the rye date never changes the year, the soybean date or anything else.
+      return { ...state, ryeEnd: action.md };
+    case "openRye":
+      return { ...state, ryeOpen: true, card: "cover", year: state.card === "cover" ? state.year : null };
+    case "closeRye":
+      return { ...state, ryeOpen: false };
     case "openForm":
       return { ...state, formOpen: true, draft: state.draft ?? state.applied };
     case "closeForm":
@@ -70,7 +85,8 @@ export function reducer(state: AppState, action: Action): AppState {
     case "editDraft":
       return { ...state, draft: { ...(state.draft ?? state.applied), ...action.patch } };
     case "applied":
-      return { ...state, applied: action.form, draft: null, formOpen: false };
+      // New dates come with a new sweep, so the slider returns to the proposed date.
+      return { ...state, applied: action.form, draft: null, formOpen: false, ryeEnd: null };
     case "discardDraft":
       return { ...state, draft: null, formOpen: false };
     case "togglePriority": {
@@ -92,6 +108,7 @@ export function reducer(state: AppState, action: Action): AppState {
         ...state,
         card: v.card ?? "cover",
         year: v.year ?? null,
+        ryeEnd: v.ryeEnd ?? null,
         priorities: v.priorities ?? [],
         emphasis: v.emphasis ?? "buffer",
       };

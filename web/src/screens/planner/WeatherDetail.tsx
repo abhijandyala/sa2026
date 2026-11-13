@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { historicalDate, historicalWindow, mm, monthDay, wetness as fmtWet } from "../../data/format";
 import type { ReplayState } from "../../state/useData";
 import type { ViewModel } from "../../view/build";
+import { Src } from "../../ui/components";
+import { G } from "../../ui/Glossary";
 
 /*
   Past springs in detail (cards 3.3 and 3.4). Hand-drawn SVG from the design tokens:
@@ -90,6 +92,7 @@ function RainfallChart({ view, onSelectYear }: { view: ViewModel; onSelectYear: 
       <figcaption>
         <h3 id="rain-chart-title" className="chart-title">
           Rainfall in the 30 days before planting (mm)
+          <Src k={["nasa", "calculated"]} />
         </h3>
       </figcaption>
       <div className="chart-scroll" ref={scrollRef}>
@@ -244,6 +247,7 @@ function DailyRain({ replay }: { replay: ReplayState }) {
       <figcaption className="daily-head">
         <h3 id="daily-title" className="chart-title">
           Spring {r.year}, day by day
+          <Src k={["nasa", "model"]} />
         </h3>
         <p className="daily-sub">
           {historicalWindow([win.start, win.end])} · total {mm(r.spring.total_mm)} · {valid} of {days.length} days with a value
@@ -324,7 +328,8 @@ function WetnessPanel({ view, replay }: { view: ViewModel; replay: ReplayState }
   return (
     <aside className="wetness" aria-labelledby="wet-title">
       <h3 id="wet-title" className="chart-title">
-        Soil wetness, {label}
+        <G id="soil-wetness">Soil wetness</G>, {label}
+        <Src k="model" />
       </h3>
       <p className="wet-value">
         {selectedYear ? (

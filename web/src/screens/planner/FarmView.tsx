@@ -245,8 +245,8 @@ export function FarmView({
         </Button>
       </div>
       <p className="world-legend">
-        Planned dates, the selected past spring's NASA rain (falling only in each field's 30 days before planting), and modeled soil
-        wetness: topsoil color and the blue water line on the cut face. Plant heights are stages, not measured growth.
+        Illustration: planned dates, the selected spring's NASA rain (only in each field's 30 days before planting) and modeled soil
+        wetness (topsoil color, blue water line). Plant heights are stages, not measurements.
       </p>
     </section>
   );
