@@ -171,6 +171,14 @@ class Plan(_Model):
     grower: GrowerInputs = Field(default_factory=GrowerInputs)
 
 
+class Rotation(_Model):
+    """A preset: two plan legs (corn->soybean winter, soybean->corn winter). Never summed."""
+
+    rotation_id: str
+    label: str
+    legs: list[str]  # plan_ids, in leg order
+
+
 # --------------------------------------------------------------------------- calendar
 
 

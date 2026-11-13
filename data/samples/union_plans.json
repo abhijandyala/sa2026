@@ -1,0 +1,202 @@
+{
+  "_label": "SAMPLE PLANS (synthetic). Dates are ASSUMED until the handbook lands; each plan is flagged dates_assumed. Source: docs/api/presets.md.",
+  "location_id": "union_county_sample",
+  "samples": [
+    {
+      "plan_id": "corn_soy__no_cover",
+      "rotation_id": "current_practice",
+      "leg": 1,
+      "dates_assumed": true,
+      "editable": [
+        "prev_harvest",
+        "next_plant"
+      ],
+      "plan": {
+        "plan_id": "corn_soy__no_cover",
+        "label": "No planted winter cover",
+        "previous_crop_id": "field_corn",
+        "prev_harvest": "09-20",
+        "winter": {
+          "kind": "none"
+        },
+        "next_crop_id": "soybean",
+        "next_plant": "05-12",
+        "region": "NC Piedmont",
+        "production_system": null,
+        "grower": {
+          "low_moisture_concern": null,
+          "residue_report": null,
+          "observations": []
+        }
+      }
+    },
+    {
+      "plan_id": "corn_soy__rye",
+      "rotation_id": "winter_cover",
+      "leg": 1,
+      "dates_assumed": true,
+      "editable": [
+        "prev_harvest",
+        "winter.seed",
+        "winter.terminate",
+        "next_plant"
+      ],
+      "plan": {
+        "plan_id": "corn_soy__rye",
+        "label": "Cereal rye before soybean",
+        "previous_crop_id": "field_corn",
+        "prev_harvest": "09-20",
+        "winter": {
+          "kind": "cover",
+          "crop_id": "cereal_rye",
+          "seed": "10-01",
+          "terminate": "04-30"
+        },
+        "next_crop_id": "soybean",
+        "next_plant": "05-12",
+        "region": "NC Piedmont",
+        "production_system": null,
+        "grower": {
+          "low_moisture_concern": null,
+          "residue_report": null,
+          "observations": []
+        }
+      }
+    },
+    {
+      "plan_id": "corn_soy__clover",
+      "rotation_id": null,
+      "leg": 1,
+      "dates_assumed": true,
+      "editable": [
+        "prev_harvest",
+        "winter.seed",
+        "winter.terminate",
+        "next_plant"
+      ],
+      "note": "Checker example (plan with problems); not a preset. Seed 10-15 (after the Oct 1 end of the Piedmont window) so cc_rc_02 flags, per the Phase 6 card; docs/api/presets.md lists 10-01.",
+      "plan": {
+        "plan_id": "corn_soy__clover",
+        "label": "Crimson clover before soybean",
+        "previous_crop_id": "field_corn",
+        "prev_harvest": "09-20",
+        "winter": {
+          "kind": "cover",
+          "crop_id": "crimson_clover",
+          "seed": "10-15",
+          "terminate": "04-20"
+        },
+        "next_crop_id": "soybean",
+        "next_plant": "05-12",
+        "region": "NC Piedmont",
+        "production_system": null,
+        "grower": {
+          "low_moisture_concern": null,
+          "residue_report": null,
+          "observations": []
+        }
+      }
+    },
+    {
+      "plan_id": "soy_corn__no_cover",
+      "rotation_id": "current_practice",
+      "leg": 2,
+      "dates_assumed": true,
+      "editable": [
+        "prev_harvest",
+        "next_plant"
+      ],
+      "plan": {
+        "plan_id": "soy_corn__no_cover",
+        "label": "No planted winter cover",
+        "previous_crop_id": "soybean",
+        "prev_harvest": "10-15",
+        "winter": {
+          "kind": "none"
+        },
+        "next_crop_id": "field_corn",
+        "next_plant": "04-15",
+        "region": "NC Piedmont",
+        "production_system": null,
+        "grower": {
+          "low_moisture_concern": null,
+          "residue_report": null,
+          "observations": []
+        }
+      }
+    },
+    {
+      "plan_id": "soy_corn__rye",
+      "rotation_id": "winter_cover",
+      "leg": 2,
+      "dates_assumed": true,
+      "editable": [
+        "prev_harvest",
+        "winter.seed",
+        "winter.terminate",
+        "next_plant"
+      ],
+      "plan": {
+        "plan_id": "soy_corn__rye",
+        "label": "Cereal rye before corn",
+        "previous_crop_id": "soybean",
+        "prev_harvest": "10-15",
+        "winter": {
+          "kind": "cover",
+          "crop_id": "cereal_rye",
+          "seed": "10-20",
+          "terminate": "04-05"
+        },
+        "next_crop_id": "field_corn",
+        "next_plant": "04-15",
+        "region": "NC Piedmont",
+        "production_system": null,
+        "grower": {
+          "low_moisture_concern": null,
+          "residue_report": null,
+          "observations": []
+        }
+      }
+    },
+    {
+      "plan_id": "corn_soy__wheat_dc",
+      "rotation_id": "add_grain_crop",
+      "leg": 1,
+      "dates_assumed": true,
+      "editable": [],
+      "label": "Winter wheat, then double-crop soybean",
+      "plan": null,
+      "unavailable": {
+        "status": "unavailable",
+        "reason": "catalog_missing",
+        "detail": "Winter wheat planting/harvest and double-crop soybean window rows are not in the catalog yet (Phase 12)."
+      }
+    }
+  ],
+  "rotations": [
+    {
+      "rotation_id": "current_practice",
+      "label": "Current practice",
+      "legs": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover"
+      ]
+    },
+    {
+      "rotation_id": "winter_cover",
+      "label": "Winter cover",
+      "legs": [
+        "corn_soy__rye",
+        "soy_corn__rye"
+      ]
+    },
+    {
+      "rotation_id": "add_grain_crop",
+      "label": "Add a grain crop",
+      "legs": [
+        "corn_soy__wheat_dc",
+        "soy_corn__no_cover"
+      ]
+    }
+  ]
+}

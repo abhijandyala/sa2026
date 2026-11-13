@@ -8,9 +8,17 @@ from __future__ import annotations
 
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from fieldshift.api.routes import router as core_router
+from fieldshift.field.routes import router as field_router
+from fieldshift.planner.routes import router as planner_router
+from fieldshift.report.http import issue
+from fieldshift.report.meta import response_meta
+from fieldshift.tools.routes import router as tools_router
 from fieldshift.weather.power_client import is_offline
 from fieldshift.weather.snapshot import load_snapshot
 
@@ -39,11 +47,28 @@ def create_app() -> FastAPI:
         allow_headers=["Content-Type"],
     )
 
+    @app.exception_handler(RequestValidationError)
+    async def _invalid_input(_: Request, exc: RequestValidationError) -> JSONResponse:
+        """Typed bodies/queries report ``invalid_input`` (HTTP 400) like the hand-parsed routes."""
+        issues = [
+            issue(".".join(str(p) for p in e["loc"] if p not in ("body", "query", "path"))
+                  or "body", e["type"], e["msg"])
+            for e in exc.errors()
+        ]
+        return JSONResponse(
+            status_code=400,
+            content={"status": "invalid_input", "issues": issues, **response_meta()},
+        )
+
+    for r in (core_router, planner_router, field_router, tools_router):
+        app.include_router(r)
+
     @app.get("/health")
     def health() -> dict:
         snap = load_snapshot()
         cov = snap.manifest["coverage"]
         return {
+            "meta": response_meta(),
             "status": "ok",
             "offline": is_offline(),
             "snapshot_hash": snap.snapshot_hash,

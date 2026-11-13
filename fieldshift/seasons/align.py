@@ -29,7 +29,7 @@ from fieldshift.seasons.validate import ensure_valid
 SPRING_WINDOW_DAYS = 30
 
 
-def _after(anchor: date, md: str) -> date:
+def resolve_after(anchor: date, md: str) -> date:
     """First occurrence of ``md`` on or after ``anchor`` (Feb 29 -> Feb 28 in non-leap years)."""
     candidate = resolve_md(anchor.year, md)
     return candidate if candidate >= anchor else resolve_md(anchor.year + 1, md)
@@ -53,8 +53,8 @@ def build_calendar(plan: Plan, year: int) -> SeasonCalendar:
     w = plan.winter
     if w.kind == "cover":
         assert w.crop_id and w.seed and w.terminate
-        seed = _after(harvest, w.seed)
-        terminate = _after(seed, w.terminate)
+        seed = resolve_after(harvest, w.seed)
+        terminate = resolve_after(seed, w.terminate)
         _require_ordered(year, seed < terminate <= plant, "winter.terminate",
                          f"in {year} seed {seed}, terminate {terminate}, plant {plant} are not in order")
         cover = CoverInterval(crop_id=w.crop_id, seed=seed, terminate=terminate,
@@ -62,8 +62,8 @@ def build_calendar(plan: Plan, year: int) -> SeasonCalendar:
         gap = (plant - terminate).days
     elif w.kind == "winter_grain":
         assert w.crop_id and w.plant and w.harvest
-        g_plant = _after(harvest, w.plant)
-        g_harvest = _after(g_plant, w.harvest)
+        g_plant = resolve_after(harvest, w.plant)
+        g_harvest = resolve_after(g_plant, w.harvest)
         _require_ordered(year, g_plant < g_harvest <= plant, "winter.harvest",
                          f"in {year} grain plant {g_plant}, harvest {g_harvest}, "
                          f"next plant {plant} are not in order")
