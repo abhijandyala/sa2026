@@ -53,7 +53,10 @@ _MOUNTAIN_MARGIN_DEG = 0.5  # between -81.9 and -81.4 the boundary is not decide
 
 class Bounds(BaseModel):
     in_nc: bool
-    basis: str = "bounding_box"
+    basis: str = "coarse_polygon"
+    tolerance_note: str = (
+        "approximate NC outline (about 10 km tolerance at the border); not a legal boundary"
+    )
     south: float = NC_BOUNDS[0]
     north: float = NC_BOUNDS[1]
     west: float = NC_BOUNDS[2]
@@ -93,9 +96,35 @@ class LocationResult(BaseModel):
     notes: list[str] = Field(default_factory=list)
 
 
+#: Coarse NC outline as (latitude, longitude) vertices, clockwise from the northeast corner.
+#: Good to roughly 10 km at the border, which is enough to reject neighbouring-state cities.
+NC_OUTLINE = [
+    (36.55, -75.88), (36.54, -77.00), (36.54, -80.00), (36.59, -81.68),  # Virginia border
+    (36.25, -81.90), (36.00, -82.10), (35.85, -82.55), (35.75, -83.00),  # Tennessee border
+    (35.55, -83.50), (35.45, -84.00), (35.00, -84.32),
+    (35.00, -83.10), (35.20, -82.40), (35.19, -81.04), (34.99, -80.93),  # Georgia / S. Carolina
+    (34.82, -80.80), (34.80, -79.67), (33.85, -78.55),
+    (33.90, -77.95), (34.50, -76.90), (34.70, -76.50), (35.25, -75.52),  # Atlantic coast
+    (36.00, -75.50),
+]  # fmt: skip
+
+
+def _inside(lat: float, lon: float, poly: list[tuple[float, float]]) -> bool:
+    """Ray-casting point-in-polygon (x = longitude, y = latitude)."""
+    inside = False
+    j = len(poly) - 1
+    for i in range(len(poly)):
+        yi, xi = poly[i]
+        yj, xj = poly[j]
+        if (yi > lat) != (yj > lat) and lon < (xj - xi) * (lat - yi) / (yj - yi) + xi:
+            inside = not inside
+        j = i
+    return inside
+
+
 def in_nc_bounds(lat: float, lon: float) -> bool:
     s, n, w, e = NC_BOUNDS
-    return s <= lat <= n and w <= lon <= e
+    return s <= lat <= n and w <= lon <= e and _inside(lat, lon, NC_OUTLINE)
 
 
 def cell_id(cell: dict[str, Any]) -> str:
@@ -252,7 +281,17 @@ def resolve_location(
     # ---- guidance region
     tag = normalize_field_region(region)
     scope = region_scope(region)
-    if scope in ("outside", "unrecognized"):
+    statewide = (region or "").strip().lower() in {
+        "nc",
+        "north carolina",
+        "north carolina statewide",
+    }
+    if scope == "nc" and tag is None and region and region.strip() and not statewide:
+        guidance = GuidanceSupport(
+            supported=False, status=Status.UNKNOWN, region=None, basis="provided",
+            reason=f"region '{region}' is not in the region mapping table; guidance is unknown",
+        )  # fmt: skip
+    elif scope in ("outside", "unrecognized"):
         guidance = GuidanceSupport(
             supported=False, status=Status.UNKNOWN, region=None, basis="provided",
             reason=(

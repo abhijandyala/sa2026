@@ -167,6 +167,33 @@ def test_evidence_requires_a_date_and_finite_numbers():
         GrowerObservation(observed_on="2025-01-01", kind="ponding", surprise=1)
 
 
+# ------------------------------------------------------------------ review fixes (phase-8-B)
+
+
+@pytest.mark.parametrize(
+    "lat,lon,inside",
+    [(35.23, -80.84, True), (35.60, -82.55, True), (35.78, -78.64, True), (34.23, -77.94, True),
+     (36.20, -81.67, True), (34.98, -80.55, True), (35.07, -77.04, True),
+     (34.00, -81.03, False), (32.78, -79.93, False), (34.85, -82.40, False), (35.96, -83.92, False),
+     (36.85, -75.98, False), (37.54, -77.44, False), (33.50, -79.00, False), (34.70, -84.00, False)],
+)  # fmt: skip
+def test_neighbouring_state_cities_are_outside_nc(lat, lon, inside):
+    assert in_nc_bounds(lat, lon) is inside
+    r = resolve_location(lat, lon)
+    assert (r.status != "unsupported") is inside
+    if not inside:
+        assert r.code == "unsupported_location"
+
+
+def test_explicit_unmapped_region_text_is_unknown_guidance(tmp_path):
+    kw = dict(cache_dir=tmp_path, fetch=no_network, offline=True)
+    for text in ("Atlantis NC", "Wake County NC", "somewhere"):
+        g = resolve_location(35.8, -82.6, region=text, **kw).guidance
+        assert (g.supported, g.status, g.region) == (False, "unknown", None), text
+    assert resolve_location(35.8, -82.6, region="NC", **kw).guidance.region == "mountains"
+    assert resolve_location(35.8, -82.6, region="VA Piedmont", **kw).guidance.supported is False
+
+
 # ------------------------------------------------------------------ routes
 
 
@@ -185,8 +212,27 @@ def test_resolve_route(client):
     assert j["location"]["weather"]["source"] == "snapshot"
     out = client.post("/v1/locations/resolve", json={"lat": 40.7, "lon": -74.0})
     assert out.status_code == 200 and out.json()["location"]["code"] == "unsupported_location"
-    bad = client.post("/v1/locations/resolve", json={"lat": "x", "lon": 1})
-    assert bad.status_code == 400 and bad.json()["issues"][0]["field"] == "lat/lon"
+
+
+@pytest.mark.parametrize(
+    "payload,field",
+    [({"lat": "x", "lon": 1}, "lat"), ({"lat": 35, "lon": None}, "lon"), ({"lat": 95, "lon": 0}, "lat"),
+     ({"lat": 35, "lon": -80, "region": 5}, "region"),
+     ({"lat": 35, "lon": -80, "region": {"a": 1}}, "region"),
+     ({"lat": 35, "lon": -80, "fetch_history": "false"}, "fetch_history"),
+     ({"lat": True, "lon": -80}, "lat"), ({"lat": 10**400, "lon": -80}, "lat")],
+)  # fmt: skip
+def test_resolve_route_validates_types(client, payload, field):
+    r = client.post("/v1/locations/resolve", json=payload)
+    assert r.status_code == 400 and r.json()["issues"][0]["field"] == field
+    assert "request_id" in r.json()
+
+
+def test_resolve_route_malformed_json(client):
+    r = client.post(
+        "/v1/locations/resolve", content=b"{oops", headers={"content-type": "application/json"}
+    )
+    assert r.status_code == 400 and r.json()["issues"][0]["code"] == "invalid_json"
 
 
 def test_soil_route_survives_an_sda_failure(client, monkeypatch):
@@ -196,3 +242,24 @@ def test_soil_route_survives_an_sda_failure(client, monkeypatch):
     assert r.json()["soil"]["status"] == "unavailable" and "timed out" in r.json()["soil"]["reason"]
     out = client.get("/v1/soil", params={"lat": 40.7, "lon": -74.0})
     assert out.json()["status"] == "unsupported" and out.json()["code"] == "unsupported_location"
+    bad = client.get("/v1/soil", params={"lat": "abc", "lon": "1"})
+    assert bad.status_code == 400 and bad.json()["issues"][0]["field"] == "lat"
+
+
+def test_soil_route_follows_offline_mode_without_touching_the_network(
+    client, monkeypatch, tmp_path
+):
+    from fieldshift.field import soil as soil_mod
+
+    monkeypatch.setenv("FIELDSHIFT_OFFLINE", "1")
+    monkeypatch.setattr(soil_mod, "DEFAULT_CACHE_DIR", tmp_path)
+    monkeypatch.setattr(
+        soil_mod.httpx, "Client", lambda *a, **k: (_ for _ in ()).throw(AssertionError("network"))
+    )
+    real = soil_mod.get_soil
+    monkeypatch.setattr(
+        field_routes, "get_soil", lambda lat, lon: real(lat, lon, cache_dir=tmp_path)
+    )
+    r = client.get("/v1/soil", params={"lat": UNION[0], "lon": UNION[1]})
+    assert r.status_code == 200 and r.json()["soil"]["status"] == "unavailable"
+    assert "offline" in r.json()["soil"]["reason"]

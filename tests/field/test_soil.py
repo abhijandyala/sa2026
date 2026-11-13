@@ -135,16 +135,6 @@ def test_cache_is_used_for_30_days_then_refreshed(table, tmp_path):
     assert expired.provenance.freshness == "fresh" and len(calls) == 2
 
 
-def test_failed_refresh_falls_back_to_a_stale_cached_copy(table, tmp_path):
-    get_soil(34.98, -80.55, client=client_returning({"Table": table}), cache_dir=tmp_path, now=NOW)
-    r = get_soil(
-        34.98, -80.55, client=failing_client(httpx.ReadTimeout("slow")), cache_dir=tmp_path,
-        now=NOW + timedelta(days=60),
-    )  # fmt: skip
-    assert r.status == "complete" and r.provenance.stale and "stale" in r.provenance.freshness
-    assert any("ReadTimeout" in n for n in r.notes)
-
-
 def test_offline_never_opens_a_connection(tmp_path):
     r = get_soil(
         34.98,
@@ -159,3 +149,94 @@ def test_offline_never_opens_a_connection(tmp_path):
 
 def test_module_constants():
     assert soil_mod.SDA_CACHE_DAYS == 30
+
+
+# ------------------------------------------------------------------ review fixes (phase-8-B)
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "not a table",
+        [["mukey"], [1]],  # missing columns
+        [["a"], "row"],
+        [[], []],
+        {"Table": []},
+    ],
+)
+def test_malformed_tables_are_unavailable_not_exceptions(bad):
+    assert parse_sda_table(bad).status == "unavailable"
+
+
+def test_wrong_row_width_and_bad_values_are_unavailable(table):
+    short = [table[0], table[1][:5]]
+    assert parse_sda_table(short).status == "unavailable"
+    bad_pct = [list(r) for r in table]
+    bad_pct[1][7] = "lots"  # comppct_r is not a number: treated as missing, not a crash
+    assert parse_sda_table(bad_pct).status in ("complete", "partial")
+
+
+def test_malformed_body_from_sda_is_unavailable(tmp_path):
+    for payload in ({"Table": "oops"}, {"Table": [["mukey"], ["1"]]}, {"Table": [["x"]] * 3}):
+        r = get_soil(34.98, -80.55, client=client_returning(payload), cache_dir=tmp_path, now=NOW)
+        assert r.status == "unavailable"
+
+
+def test_corrupt_cache_is_ignored_and_refetched(table, tmp_path):
+    from fieldshift.field.soil import _cache_path, build_query
+
+    p = _cache_path(tmp_path, build_query(34.98, -80.55))
+    for junk in ("{not json", json.dumps({"fetched_at": "2026-11-12T12:00:00Z", "table": "oops"}),
+                 json.dumps({"fetched_at": 5, "table": []}), json.dumps([1, 2])):  # fmt: skip
+        p.write_text(junk)
+        r = get_soil(
+            34.98, -80.55, client=client_returning({"Table": table}), cache_dir=tmp_path, now=NOW
+        )
+        assert r.status == "complete" and r.provenance.freshness == "fresh"
+
+
+def test_expired_cache_is_never_reported_as_current(table, tmp_path):
+    get_soil(34.98, -80.55, client=client_returning({"Table": table}), cache_dir=tmp_path, now=NOW)
+    later = NOW + timedelta(days=60)
+    r = get_soil(
+        34.98,
+        -80.55,
+        client=failing_client(httpx.ReadTimeout("slow")),
+        cache_dir=tmp_path,
+        now=later,
+    )
+    assert r.status == "unavailable" and "30-day limit" in r.reason
+    assert (
+        r.stale_copy is not None
+        and r.stale_copy.status == "complete"
+        and r.stale_copy.provenance.stale
+    )
+    off = get_soil(
+        34.98,
+        -80.55,
+        client=failing_client(AssertionError("net")),
+        cache_dir=tmp_path,
+        now=later,
+        offline=True,
+    )
+    assert off.status == "unavailable" and off.stale_copy is not None
+
+
+def test_offline_follows_the_environment(tmp_path, monkeypatch):
+    monkeypatch.setenv("FIELDSHIFT_OFFLINE", "1")
+    r = get_soil(
+        34.98, -80.55, client=failing_client(AssertionError("net")), cache_dir=tmp_path, now=NOW
+    )
+    assert r.status == "unavailable" and "offline" in r.reason
+
+
+def test_published_zero_percent_outranks_a_missing_percentage(table):
+    rows = [list(r) for r in table]
+    hdr = rows[0]
+    ip = hdr.index("comppct_r")
+    for r in rows[1:]:
+        if r[hdr.index("compname")] == "Tarrus":
+            r[ip] = None  # missing
+        else:
+            r[ip] = "0"  # published zero
+    assert parse_sda_table(rows).dominant_component.name == "Urban land"

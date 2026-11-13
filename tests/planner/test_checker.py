@@ -309,3 +309,21 @@ def test_http_finder_invalid_base_pair_is_400(client):
     b = body(prev_harvest="05-12")  # harvest on the planting day: empty winter window
     r = client.post("/v1/plans/find", json=b)
     assert r.status_code == 400 and r.json()["status"] == "invalid_input"
+
+
+@pytest.mark.parametrize("bad", ["garbage", "NaN", "inf", 10**400, {"x": 1}, [1], True])
+def test_http_non_numeric_inputs_are_400_not_200_or_500(client, bad):
+    r = client.post("/v1/plans/check", json={**body(), "inputs": {"soil_temp_f": bad}})
+    assert r.status_code == 400 and r.json()["issues"][0]["field"] == "inputs.soil_temp_f"
+
+
+def test_http_numeric_strings_and_blanks_are_accepted(client):
+    ok = client.post(
+        "/v1/plans/check", json={**body(), "inputs": {"soil_temp_f": "52", "soil_ph": ""}}
+    )
+    assert ok.status_code == 200
+
+
+def test_state_abbreviations_are_unsupported(index):
+    for region in ("VA Piedmont", "SC Coastal Plain"):
+        assert check_plan(plan(region=region), index, year=YEAR).status == "unsupported", region

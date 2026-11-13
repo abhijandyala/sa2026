@@ -27,6 +27,7 @@ import httpx
 from pydantic import BaseModel, Field
 
 from fieldshift.contracts import Status
+from fieldshift.weather.power_client import is_offline
 
 SDA_URL = "https://SDMDataAccess.sc.egov.usda.gov/Tabular/post.rest"
 SDA_TIMEOUT_S = 15.0
@@ -102,6 +103,9 @@ class SoilResult(BaseModel):
     other_components: list[DominantComponent] = Field(default_factory=list)
     provenance: SoilProvenance | None = None
     notes: list[str] = Field(default_factory=list)
+    # An expired cached copy is never reported as current. When a refresh fails, the old copy is
+    # kept here, clearly separate, so a caller can show it as "last known" if it chooses.
+    stale_copy: SoilResult | None = None
 
 
 def unavailable(reason: str) -> SoilResult:
@@ -179,7 +183,27 @@ def awc_to_depth(
     )
 
 
-def parse_sda_table(table: list[list[Any]]) -> SoilResult:
+REQUIRED_COLUMNS = frozenset(
+    "mukey muname areasymbol areaname saverest cokey compname comppct_r majcompflag drainagecl "
+    "hydgrp hzname hzdept_r hzdepb_r awc_r texdesc texture".split()
+)
+
+
+def parse_sda_table(table: Any) -> SoilResult:
+    """Parse an SDA table; malformed data is ``unavailable`` (never an exception)."""
+    try:
+        if not isinstance(table, list) or not table or not all(isinstance(r, list) for r in table):
+            return unavailable("SDA returned a malformed table")
+        if len(table) > 1 and not REQUIRED_COLUMNS <= set(map(str, table[0])):
+            return unavailable("SDA returned a table without the expected columns")
+        if any(len(r) != len(table[0]) for r in table[1:]):
+            return unavailable("SDA returned rows of the wrong width")
+        return _parse_table(table)
+    except (KeyError, TypeError, ValueError, IndexError, AttributeError) as exc:
+        return unavailable(f"SDA returned data that could not be read ({type(exc).__name__})")
+
+
+def _parse_table(table: list[list[Any]]) -> SoilResult:
     """Turn an SDA ``JSON+COLUMNNAME`` table into a :class:`SoilResult` (no provenance yet)."""
     if not table or len(table) < 2:
         return unavailable("no soil map unit was returned for this point")
@@ -189,7 +213,8 @@ def parse_sda_table(table: list[list[Any]]) -> SoilResult:
         by_component.setdefault(str(r["cokey"]), []).append(r)
 
     def pct(rs: list[dict[str, Any]]) -> float:
-        return _num(rs[0].get("comppct_r")) or -1.0
+        v = _num(rs[0].get("comppct_r"))
+        return -1.0 if v is None else v  # a published 0 % outranks a missing percentage
 
     ordered = sorted(by_component.values(), key=pct, reverse=True)
     top = ordered[0]
@@ -267,6 +292,20 @@ def _finish(
     return result
 
 
+def _cached_copy(path: Path | None, now: datetime) -> tuple[dict[str, Any] | None, bool]:
+    """``(cache entry, is_within_policy)``; a malformed entry is ``(None, False)``."""
+    entry = _read_cache(path) if path is not None else None
+    if not isinstance(entry, dict) or not isinstance(entry.get("fetched_at"), str):
+        return None, False
+    try:
+        at = datetime.strptime(entry["fetched_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+    except ValueError:
+        return None, False
+    if parse_sda_table(entry.get("table")).status == Status.UNAVAILABLE:
+        return None, False  # corrupt cache: not a result
+    return entry, now - at <= timedelta(days=SDA_CACHE_DAYS)
+
+
 def get_soil(
     lat: float,
     lon: float,
@@ -274,36 +313,41 @@ def get_soil(
     client: httpx.Client | None = None,
     cache_dir: Path | str | None = DEFAULT_CACHE_DIR,
     now: datetime | None = None,
-    offline: bool = False,
+    offline: bool | None = None,
     timeout_s: float = SDA_TIMEOUT_S,
 ) -> SoilResult:
-    """Soil for a point. Never raises: failures become ``status="unavailable"``."""
+    """Soil for a point. Never raises: failures become ``status="unavailable"``.
+
+    ``offline=None`` follows ``FIELDSHIFT_OFFLINE``. A cached copy within 30 days is returned as
+    ``cached(<time>)``. If a refresh fails (or offline) and the copy is older than that, the
+    result is ``unavailable``; the old copy is kept apart in ``stale_copy``, never as current.
+    """
     now = now or datetime.now(UTC)
+    offline = is_offline() if offline is None else offline
     query = build_query(lat, lon)
     path = _cache_path(Path(cache_dir), query) if cache_dir is not None else None
-    cached = _read_cache(path) if path is not None else None
+    entry, within_policy = _cached_copy(path, now)
 
-    def from_cache(stale: bool) -> SoilResult:
-        assert cached is not None
-        res = parse_sda_table(cached["table"])
-        label = f"cached({cached['fetched_at']})" + (" stale" if stale else "")
-        return _finish(res, query, cached["fetched_at"], label, stale)
+    def from_entry(stale: bool) -> SoilResult:
+        assert entry is not None
+        res = parse_sda_table(entry["table"])
+        label = f"cached({entry['fetched_at']})" + (" stale" if stale else "")
+        return _finish(res, query, entry["fetched_at"], label, stale)
 
-    if cached is not None:
-        try:
-            age = now - datetime.strptime(cached["fetched_at"], "%Y-%m-%dT%H:%M:%SZ").replace(
-                tzinfo=UTC
+    def failed(reason: str) -> SoilResult:
+        out = unavailable(reason)
+        if entry is not None:
+            out.stale_copy = from_entry(stale=True)
+            out.reason = (
+                f"{reason}; the cached copy from {entry['fetched_at']} is past the "
+                f"{SDA_CACHE_DAYS}-day limit"
             )
-        except (KeyError, ValueError):
-            cached = None
-        else:
-            if age <= timedelta(days=SDA_CACHE_DAYS):
-                return from_cache(stale=False)
+        return out
 
+    if entry is not None and within_policy:
+        return from_entry(stale=False)
     if offline:
-        return (
-            from_cache(stale=True) if cached else unavailable("offline mode: SDA was not queried")
-        )
+        return failed("offline mode: SDA was not queried")
 
     owns = client is None
     http = client or httpx.Client(timeout=timeout_s)
@@ -317,8 +361,10 @@ def get_soil(
         table = body.get("Table") if isinstance(body, dict) else None
         if table is None:
             # SDA returns an empty body when the query matches nothing (point off the survey).
-            result = unavailable("no soil survey data was returned for this point")
-            return _finish(result, query, _iso(now), "fresh", False)
+            return _finish(
+                unavailable("no soil survey data was returned for this point"),
+                query, _iso(now), "fresh", False,
+            )  # fmt: skip
         result = parse_sda_table(table)
         fetched_at = _iso(now)
         if path is not None and result.status != Status.UNAVAILABLE:
@@ -331,12 +377,7 @@ def get_soil(
                 pass  # caching is an optimization only
         return _finish(result, query, fetched_at, "fresh", False)
     except (httpx.HTTPError, RuntimeError, ValueError) as exc:
-        reason = f"SDA request failed: {type(exc).__name__}: {exc}"
-        if cached is not None:
-            res = from_cache(stale=True)
-            res.notes.append(f"{reason}; showing the cached copy from {cached['fetched_at']}")
-            return res
-        return unavailable(reason)
+        return failed(f"SDA request failed: {type(exc).__name__}: {exc}")
     finally:
         if owns:
             http.close()

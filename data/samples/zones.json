@@ -1,0 +1,167 @@
+{
+  "_label": "SAMPLE DATA: synthetic field geometry beside the Union County reference point; terrain and drainage are real public data",
+  "field_id": "sample_field",
+  "reference_point": "union_county_nc",
+  "zones": [
+    {
+      "zone_id": "zone_nw",
+      "name": "Northwest block",
+      "center": {
+        "latitude": 34.980449,
+        "longitude": -80.550548
+      },
+      "size_m": 100.0,
+      "terrain": {
+        "source": "USGS 3DEP (Elevation Point Query Service)",
+        "elevation_m": {
+          "min": 185.0,
+          "mean": 186.65,
+          "max": 188.42
+        },
+        "slope_pct": {
+          "mean": 2.1,
+          "max": 4.53
+        },
+        "points": 9,
+        "point_spacing_m": 40.0,
+        "resolution_m": [
+          1
+        ],
+        "acquisition_dates": [
+          "9/1/2017"
+        ],
+        "retrieved_on": "2026-11-13",
+        "terrain_date": "2017-09-01",
+        "derivation": "usgs"
+      },
+      "drainage": {
+        "class": "Well drained",
+        "source": "USDA Soil Data Access (map unit component at the zone centre)",
+        "component": "Tarrus",
+        "survey_version": "9/3/2026 1:43:46 PM",
+        "status": "complete",
+        "derivation": "usda"
+      }
+    },
+    {
+      "zone_id": "zone_ne",
+      "name": "Northeast block",
+      "center": {
+        "latitude": 34.980449,
+        "longitude": -80.549452
+      },
+      "size_m": 100.0,
+      "terrain": {
+        "source": "USGS 3DEP (Elevation Point Query Service)",
+        "elevation_m": {
+          "min": 186.2,
+          "mean": 186.83,
+          "max": 187.38
+        },
+        "slope_pct": {
+          "mean": 1.2,
+          "max": 2.19
+        },
+        "points": 9,
+        "point_spacing_m": 40.0,
+        "resolution_m": [
+          1
+        ],
+        "acquisition_dates": [
+          "9/1/2017"
+        ],
+        "retrieved_on": "2026-11-13",
+        "terrain_date": "2017-09-01",
+        "derivation": "usgs"
+      },
+      "drainage": {
+        "class": "Well drained",
+        "source": "USDA Soil Data Access (map unit component at the zone centre)",
+        "component": "Tarrus",
+        "survey_version": "9/3/2026 1:43:46 PM",
+        "status": "complete",
+        "derivation": "usda"
+      }
+    },
+    {
+      "zone_id": "zone_sw",
+      "name": "Southwest block",
+      "center": {
+        "latitude": 34.979551,
+        "longitude": -80.550548
+      },
+      "size_m": 100.0,
+      "terrain": {
+        "source": "USGS 3DEP (Elevation Point Query Service)",
+        "elevation_m": {
+          "min": 187.24,
+          "mean": 189.21,
+          "max": 190.3
+        },
+        "slope_pct": {
+          "mean": 1.96,
+          "max": 3.27
+        },
+        "points": 9,
+        "point_spacing_m": 40.0,
+        "resolution_m": [
+          1
+        ],
+        "acquisition_dates": [
+          "9/1/2017"
+        ],
+        "retrieved_on": "2026-11-13",
+        "terrain_date": "2017-09-01",
+        "derivation": "usgs"
+      },
+      "drainage": {
+        "class": "Well drained",
+        "source": "USDA Soil Data Access (map unit component at the zone centre)",
+        "component": "Tarrus",
+        "survey_version": "9/3/2026 1:43:46 PM",
+        "status": "complete",
+        "derivation": "usda"
+      }
+    },
+    {
+      "zone_id": "zone_se",
+      "name": "Southeast block",
+      "center": {
+        "latitude": 34.979551,
+        "longitude": -80.549452
+      },
+      "size_m": 100.0,
+      "terrain": {
+        "source": "USGS 3DEP (Elevation Point Query Service)",
+        "elevation_m": {
+          "min": 187.08,
+          "mean": 189.07,
+          "max": 190.7
+        },
+        "slope_pct": {
+          "mean": 2.55,
+          "max": 5.85
+        },
+        "points": 9,
+        "point_spacing_m": 40.0,
+        "resolution_m": [
+          1
+        ],
+        "acquisition_dates": [
+          "9/1/2017"
+        ],
+        "retrieved_on": "2026-11-13",
+        "terrain_date": "2017-09-01",
+        "derivation": "usgs"
+      },
+      "drainage": {
+        "class": "Well drained",
+        "source": "USDA Soil Data Access (map unit component at the zone centre)",
+        "component": "Tarrus",
+        "survey_version": "9/3/2026 1:43:46 PM",
+        "status": "complete",
+        "derivation": "usda"
+      }
+    }
+  ]
+}

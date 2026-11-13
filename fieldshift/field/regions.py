@@ -96,9 +96,21 @@ OTHER_STATES = frozenset(
 _NC_MARKER_RE = re.compile(r"\bnc\b|north carolina")
 
 
-def _mentions_other_state(t: str) -> bool:
+# Two-letter codes of other states. Upper case always counts ("VA Piedmont"); lower case counts only
+# for codes that are not ordinary words ("in", "or", "me" are not treated as states).
+_OTHER_CODES = frozenset(
+    "AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY "
+    "ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY DC".split()
+)
+_UNAMBIGUOUS_LOWER = frozenset({"va", "sc", "ga", "tn", "wv", "md", "fl", "ky", "pa"})
+
+
+def _mentions_other_state(t: str, original: str | None = None) -> bool:
     if _NC_MARKER_RE.search(t):  # "Washington County, NC" is North Carolina
         return False
+    for tok in re.split(r"[^A-Za-z]+", original if original is not None else t):
+        if (tok in _OTHER_CODES) or (tok in _UNAMBIGUOUS_LOWER):
+            return True
     words = set(re.split(r"[^a-z]+", t))
     if any(state in words for state in OTHER_STATES if " " not in state):
         return True
@@ -110,7 +122,7 @@ def region_scope(text: str | None) -> Literal["unspecified", "nc", "outside", "u
     if not text or not text.strip():
         return "unspecified"
     t = text.strip().lower().replace("_", " ")
-    if _mentions_other_state(t):
+    if _mentions_other_state(t, text):
         return "outside"
     if normalize_field_region(t) is not None or _NC_MARKER_RE.search(t):
         return "nc"
@@ -125,7 +137,7 @@ def normalize_field_region(text: str | None) -> str | None:
     if not text:
         return None
     t = text.strip().lower().replace("_", " ")
-    if _mentions_other_state(t):
+    if _mentions_other_state(t, text):
         return None
     if "hertford" in t or "northeast" in t:
         return "northeast"

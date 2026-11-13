@@ -51,7 +51,8 @@ def test_region_match(rule_region, field, expected):
     ("text", "scope"),
     [(None, "unspecified"), ("", "unspecified"), ("NC Piedmont", "nc"), ("North Carolina", "nc"),
      ("Washington County, NC", "nc"), ("Virginia Piedmont", "outside"), ("West Virginia", "outside"),
-     ("South Carolina coastal", "outside"), ("Pennsylvania mountains", "outside"),
+     ("South Carolina coastal", "outside"), ("Pennsylvania mountains", "outside"), ("VA Piedmont", "outside"),
+     ("SC Coastal Plain", "outside"), ("va piedmont", "outside"), ("NC Piedmont", "nc"), ("in the Piedmont", "nc"),
      ("the moon", "unrecognized")],
 )  # fmt: skip
 def test_region_scope(text, scope):
