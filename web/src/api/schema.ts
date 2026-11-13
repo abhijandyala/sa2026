@@ -97,49 +97,66 @@ const Winter = z.union([
   z.object({ type: z.literal("winter_grain"), crop_id: z.string(), plant: md, harvest: md }).passthrough(),
 ]);
 
+export const Sequence = z
+  .object({
+    previous_crop_id: z.string(),
+    prev_harvest: md,
+    winter: Winter,
+    next_crop_id: z.string(),
+    next_plant: md,
+  })
+  .passthrough();
+
+const Calendar = z
+  .object({
+    living_cover_days_planned: z.number().int(),
+    days_without_planned_cover: z.number().int(),
+    termination_gap_days: z.number().int().nullable(),
+    harvest_to_plant_days: z.number().int().nullable().optional(),
+    establishment: z.string(),
+  })
+  .passthrough();
+
+const WinterResult = z
+  .object({
+    status: Status,
+    per_season_median: z
+      .object({
+        rain_mm_without_cover: z.number().nullable(),
+        heavy_rain_days_without_cover: z.number().nullable(),
+      })
+      .passthrough(),
+    eligible_seasons: z.number().int().optional(),
+    segments: z.array(z.string()),
+    per_season: z // REQUESTED
+      .array(z.object({ year: z.number().int(), rain_mm_without_cover: z.number().nullable(), status: Status }).passthrough())
+      .optional(),
+  })
+  .passthrough();
+
+/**
+ * One winter transition (backend docs/api/presets.md). A plan the backend cannot
+ * evaluate yet (wheat until its catalog rows land) comes back with
+ * status "unavailable" and a reason, and may omit everything else.
+ */
 export const Plan = z
   .object({
     plan_id: z.string(),
     label: z.string(),
+    rotation_id: z.string().optional(),
+    leg: z.union([z.literal(1), z.literal(2)]).optional(),
     status: Status.optional(),
-    sequence: z
-      .object({
-        previous_crop_id: z.string(),
-        prev_harvest: md,
-        winter: Winter,
-        next_crop_id: z.string(),
-        next_plant: md,
-      })
-      .passthrough(),
+    reason: z.string().optional(),
+    editable: z.array(z.string()).optional(),
+    dates_assumed: z.boolean().optional(),
+    sequence: Sequence.optional(),
+    spring_window: z.object({ start: md, end: md }).passthrough().optional(),
     spring_window_id: z.string().optional(), // REQUESTED
-    calendar: z
-      .object({
-        living_cover_days_planned: z.number().int(),
-        days_without_planned_cover: z.number().int(),
-        termination_gap_days: z.number().int().nullable(),
-        harvest_to_plant_days: z.number().int().nullable().optional(),
-        establishment: z.string(),
-      })
-      .passthrough(),
-    winter: z
-      .object({
-        status: Status,
-        per_season_median: z
-          .object({
-            rain_mm_without_cover: z.number().nullable(),
-            heavy_rain_days_without_cover: z.number().nullable(),
-          })
-          .passthrough(),
-        eligible_seasons: z.number().int().optional(),
-        segments: z.array(z.string()),
-        per_season: z // REQUESTED
-          .array(z.object({ year: z.number().int(), rain_mm_without_cover: z.number().nullable(), status: Status }).passthrough())
-          .optional(),
-      })
-      .passthrough(),
-    spring_checks: z.array(SpringCheck),
-    other_checks: z.array(OtherCheck),
-    eras: z.record(Era),
+    calendar: Calendar.optional(),
+    winter: WinterResult.optional(),
+    spring_checks: z.array(SpringCheck).default([]),
+    other_checks: z.array(OtherCheck).default([]),
+    eras: z.record(Era).default({}),
     residue_context: z.object({ status: Status, note: z.string() }).passthrough().optional(),
   })
   .passthrough();
@@ -181,14 +198,26 @@ export const SpringWindow = z
   .passthrough();
 export type SpringWindow = z.infer<typeof SpringWindow>;
 
+export const Rotation = z
+  .object({
+    rotation_id: z.string(),
+    label: z.string(),
+    legs: z.array(z.object({ leg: z.union([z.literal(1), z.literal(2)]), plan_id: z.string() }).passthrough()).min(1),
+  })
+  .passthrough();
+export type Rotation = z.infer<typeof Rotation>;
+
 export const CompareResponse = z
   .object({
     meta: Meta,
-    request_echo: z.object({ location_id: z.string(), plan_ids: z.array(z.string()) }).passthrough(),
+    request_echo: z
+      .object({ location_id: z.string(), rotation_ids: z.array(z.string()).optional(), plan_ids: z.array(z.string()).optional() })
+      .passthrough(),
     thresholds: z.object({ heavy_rain: Threshold, dry_spring: Threshold }).passthrough(),
     shared_eligible_years: z.object({ spring: z.number().int(), winter: z.number().int() }).passthrough(),
     plans: z.array(Plan).min(1),
-    spring_window: z.object({ start: md, end: md, note: z.string().optional() }).passthrough(),
+    rotations: z.array(Rotation).default([]),
+    spring_window: z.object({ start: md.optional(), end: md.optional(), note: z.string().optional() }).passthrough().optional(),
     spring_windows: z.record(SpringWindow).optional(), // REQUESTED
   })
   .passthrough();

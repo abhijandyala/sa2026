@@ -1497,3 +1497,360 @@
     height: clamp(120px, calc(100vh - 690px), 460px);
   }
 }
+
+/* ===================================================================== Two winters per rotation */
+.sc-legs {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+}
+.sc-legs th,
+.sc-legs td {
+  text-align: left;
+  padding: 4px 6px;
+  vertical-align: baseline;
+  border-bottom: 1px solid var(--line);
+}
+.sc-legs thead th {
+  font-weight: 600;
+  color: var(--ink-muted);
+  font-size: 12px;
+  border-bottom-color: var(--line-strong);
+}
+.sc-legs tbody th {
+  font-weight: 600;
+}
+.sc-legs tbody tr.is-current {
+  background: var(--surface-2);
+}
+.sc-legs tbody tr.is-current th {
+  box-shadow: inset 3px 0 0 var(--action);
+}
+.sc-legs .sc-count {
+  font-size: 22px;
+}
+.sc-leg-plant {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.sc-legs .sc-na,
+.sc-leg-na {
+  font-size: var(--fs-small);
+  color: var(--ink-muted);
+  line-height: 1.3;
+}
+.sc-legs-note {
+  font-size: 12px;
+  color: var(--ink-muted);
+  margin-top: 4px;
+}
+.sc-headline {
+  display: block;
+}
+.sc-leg-label {
+  font-weight: 600;
+  color: var(--ink);
+}
+.form-section {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  padding-top: var(--sp-2);
+  border-top: var(--border);
+}
+
+.sc-legs th,
+.sc-legs td {
+  padding: 3px 6px;
+}
+.sc-legs thead th {
+  font-size: 11.5px;
+  padding-bottom: 2px;
+}
+.sc-legs th:first-child {
+  width: 30%;
+  white-space: nowrap;
+}
+.sc-legs .sc-count {
+  font-size: 21px;
+}
+
+/* ===================================================================== Hero: 3D farm + almanac (directions C and B, Nov 13) */
+/* Desktop and projector only. The 3D world and the 45 springs sit side by side; the cards follow. */
+.app-header {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "brand title status"
+    "actions actions actions";
+  row-gap: var(--sp-2);
+}
+.header-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 var(--sp-3);
+  min-width: 0;
+}
+.header-actions {
+  justify-content: flex-start;
+}
+.header-actions-gap {
+  flex: 1 1 var(--sp-2);
+}
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 430px);
+  gap: var(--sp-3);
+  align-items: stretch;
+}
+.hero:has(.world-band.is-expanded) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.hero .world-band {
+  min-width: 0;
+  align-content: start;
+}
+.hero .world-stage {
+  height: clamp(220px, calc(100vh - 470px), 520px);
+}
+.hero .world-band.is-expanded .world-stage {
+  height: min(70vh, 640px);
+}
+.almanac {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+}
+.alm-title {
+  font-size: 17px;
+}
+.alm-context,
+.alm-facts {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.alm-callout {
+  display: grid;
+  gap: 2px;
+  min-height: 74px;
+  align-content: start;
+}
+.alm-year {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-2);
+}
+.alm-year-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-marker);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.alm-mm {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--rain-strong);
+}
+.alm-dry {
+  justify-self: start;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rain-strong);
+  background: var(--rain-soft);
+  padding: 1px 10px;
+  border-radius: 999px;
+}
+.alm-chart {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 130px;
+}
+.alm-bars {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  gap: 2px;
+  min-height: 112px;
+}
+.alm-bar {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 3px;
+}
+.alm-bar:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.alm-track {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+}
+.alm-fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 2px;
+  background: var(--rain);
+  border-radius: 2px 2px 0 0;
+}
+.alm-bar:hover .alm-fill {
+  background: var(--rain-strong);
+}
+.alm-bar.is-selected .alm-fill {
+  background: var(--action);
+}
+.alm-bar.is-missing .alm-fill {
+  background: repeating-linear-gradient(45deg, var(--surface-2) 0 3px, var(--line) 3px 6px);
+}
+/* Dot (2 + 6 + 2) and label (14) = 24px, the BELOW constant in Almanac.tsx. */
+.alm-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin: 2px 0;
+  border-radius: 50%;
+}
+.alm-bar.is-dry .alm-dot {
+  background: var(--ink);
+}
+.alm-label {
+  flex: none;
+  height: 14px;
+  line-height: 14px;
+  font-size: 11px;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.alm-bar.is-selected .alm-label {
+  color: var(--ink);
+  font-weight: 700;
+}
+.alm-cutoff {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px dashed var(--ink-muted);
+  pointer-events: none;
+  z-index: 1;
+}
+.alm-cutoff span {
+  position: absolute;
+  right: 0;
+  bottom: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  background: var(--surface);
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+}
+.alm-eras {
+  display: flex;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.alm-eras > span {
+  flex-basis: 0;
+  min-width: 0;
+  padding-top: 3px;
+  border-top: 3px solid var(--line-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.alm-eras strong {
+  color: var(--ink);
+}
+.alm-eras > .alm-era-gap {
+  border-top: 3px dotted var(--line);
+}
+.alm-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px var(--sp-3);
+}
+.alm-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.btn.is-current {
+  border-color: var(--action);
+  box-shadow: inset 0 0 0 1px var(--action);
+}
+.alm-key {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.alm-key-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* Short projector screens: keep the title, drop the one-line explainer so the cards' numbers stay above the fold. */
+@media (max-height: 800px) {
+  .header-tagline {
+    display: none;
+  }
+}
+.alm-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.alm-shortcuts {
+  flex-wrap: nowrap;
+}
+.hero .world-band {
+  display: flex;
+  flex-direction: column;
+}
+.hero .world-stage {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: clamp(220px, calc(100vh - 470px), 520px);
+}
+.hero .world-band.is-expanded .world-stage {
+  flex: none;
+}
+.alm-key {
+  white-space: nowrap;
+}
+.alm-key-line {
+  width: 14px;
+  margin-left: var(--sp-2);
+  border-top: 2px dashed var(--ink-muted);
+}

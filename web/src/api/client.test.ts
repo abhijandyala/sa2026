@@ -107,13 +107,34 @@ describe("sample contract invariants", () => {
 
   it("the 12-day and 19-day plans match the sample dates (cases A–C)", () => {
     const byId = new Map(compare.plans.map((p) => [p.plan_id, p]));
-    expect(byId.get("rye_12d")!.calendar.termination_gap_days).toBe(12);
-    expect(byId.get("rye_19d")!.calendar.termination_gap_days).toBe(19);
-    expect(byId.get("rye_12d")!.calendar.living_cover_days_planned - byId.get("rye_19d")!.calendar.living_cover_days_planned).toBe(7);
+    expect(byId.get("corn_soy__rye")!.calendar!.termination_gap_days).toBe(12);
+    const p19 = sens.points.find((p) => p.terminate === "04-23")!;
+    const p12 = sens.points.find((p) => p.terminate === "04-30")!;
+    expect(p19.gap_days).toBe(19);
+    expect(p12.living_cover_days_planned - p19.living_cover_days_planned).toBe(7);
+  });
+
+  it("rotations follow presets.md: two legs each, wheat leg 1 unavailable", () => {
+    expect(compare.rotations.map((r) => [r.rotation_id, r.legs.map((l) => l.plan_id)])).toEqual([
+      ["current_practice", ["corn_soy__no_cover", "soy_corn__no_cover"]],
+      ["winter_cover", ["corn_soy__rye", "soy_corn__rye"]],
+      ["add_grain_crop", ["corn_soy__wheat_dc", "soy_corn__no_cover"]],
+    ]);
+    const wheat = compare.plans.find((p) => p.plan_id === "corn_soy__wheat_dc")!;
+    expect(wheat.status).toBe("unavailable");
+    expect(wheat.reason).toMatch(/^catalog_missing/);
+    for (const p of compare.plans) expect(p.leg === 1 || p.leg === 2).toBe(true);
+  });
+
+  it("each leg has its own spring window and denominators", () => {
+    const rye2 = compare.plans.find((p) => p.plan_id === "soy_corn__rye")!;
+    expect(rye2.spring_window).toEqual({ start: "03-16", end: "04-14" });
+    expect(rye2.calendar).toMatchObject({ termination_gap_days: 10, living_cover_days_planned: 167 });
+    expect(compare.spring_windows!.corn_planting!.denominator).toBe(45);
   });
 
   it("the rye check never applies to the no-cover plan", () => {
-    const nc = compare.plans.find((p) => p.plan_id === "no_cover")!;
+    const nc = compare.plans.find((p) => p.plan_id === "corn_soy__no_cover")!;
     expect(nc.spring_checks.every((c) => c.status === "inapplicable" && c.count === null)).toBe(true);
   });
 

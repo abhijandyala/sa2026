@@ -1,19 +1,19 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { APP_NAME, TAGLINE, TASK_TITLE } from "../config";
-import { cardByKey } from "../content/strategies";
+import { cardByKey, type Leg } from "../content/strategies";
 import type { Client } from "../api/client";
 import { sameForm, sampleForm } from "../state/form";
 import { hasPendingEdits, initialState, reducer } from "../state/model";
 import { applyUrlView, fromHash, toHash } from "../state/url";
 import { useReplay, type ApplyOutcome, type Loaded } from "../state/useData";
 import { buildView, validYears } from "../view/build";
-import { Banner, Button, StatusPill } from "../ui/components";
+import { Banner, Button, Segmented, StatusPill } from "../ui/components";
 import { G } from "../ui/Glossary";
 import { EvidenceDrawer } from "./planner/EvidenceDrawer";
 import { FarmFormDrawer } from "./planner/FarmFormDrawer";
 import { StrategyCard } from "./planner/StrategyCard";
 import { Timeline } from "./planner/Timeline";
-import { YearStrip } from "./planner/YearStrip";
+import { Almanac } from "./planner/Almanac";
 import { WeatherDetail } from "./planner/WeatherDetail";
 import { FarmView } from "./planner/FarmView";
 import { RyeDeepDive } from "./planner/RyeDeepDive";
@@ -71,14 +71,21 @@ export function Planner({
   }, [state.ryeOpen]);
 
   const view = useMemo(
-    () => buildView(data, { card: state.card, year: state.year, ryeEnd: state.ryeEnd }),
-    [data, state.card, state.year, state.ryeEnd],
+    () =>
+      buildView(data, {
+        card: state.card,
+        year: state.year,
+        leg: state.leg,
+        ryeEnd: state.ryeEnd,
+        earlierRyeEnd: state.applied.ryeEndEarlier.slice(5),
+      }),
+    [data, state.card, state.year, state.leg, state.ryeEnd, state.applied.ryeEndEarlier],
   );
   const selectedCard = view.cards.find((c) => c.key === state.card) ?? view.cards[0]!;
-  const rye19 = data.compare.plans.find((p) => p.plan_id === "rye_19d") ?? null;
-  const rye19Check = rye19?.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture");
+  // The grower's earlier rye date, read from the backend's sweep (same plan, edited date).
+  const earlierPoint = view.rye && view.rye.earlierIndex !== null ? view.rye.points[view.rye.earlierIndex]! : null;
   const pending = hasPendingEdits(state);
-  const replay = useReplay(client, view.selectedYear?.year ?? null, cardByKey(state.card).planId, data.origin);
+  const replay = useReplay(client, view.selectedYear?.year ?? null, cardByKey(state.card).legs[state.leg], data.origin);
 
   const onApply = async () => {
     const draft = state.draft ?? state.applied;
@@ -124,7 +131,16 @@ export function Planner({
           </a>
         </div>
         <nav className="header-actions" aria-label="Plan actions">
-          <span className="control-label">Change the plan:</span>
+          <Segmented
+            label="Which winter"
+            value={String(view.leg) as "1" | "2"}
+            onChange={(v) => dispatch({ type: "selectLeg", leg: Number(v) as Leg })}
+            options={[
+              { value: "1", label: `Winter 1: ${view.legTitles[1]}` },
+              { value: "2", label: `Winter 2: ${view.legTitles[2]}` },
+            ]}
+          />
+          <span className="header-actions-gap" aria-hidden="true" />
           <Button ref={formBtn} variant="primary" onClick={() => dispatch({ type: "openForm" })}>
             Edit farm dates
           </Button>
@@ -162,9 +178,10 @@ export function Planner({
         </Banner>
       ) : null}
 
-      <YearStrip view={view} onSelect={(year) => dispatch({ type: "selectYear", year })} />
-
-      <FarmView strips={view.strips} onSelectCard={(card) => dispatch({ type: "selectCard", card })} />
+      <div className="hero">
+        <FarmView strips={view.strips} onSelectCard={(card) => dispatch({ type: "selectCard", card })} />
+        <Almanac view={view} onSelect={(year) => dispatch({ type: "selectYear", year })} />
+      </div>
 
       {state.ryeOpen && view.rye ? (
         <RyeDeepDive
@@ -185,8 +202,8 @@ export function Planner({
             index={i + 1}
             selected={c.key === state.card}
             earlier={
-              c.key === "cover" && rye19 && rye19Check
-                ? { plan: rye19, count: rye19Check.count, denominator: rye19Check.denominator }
+              c.key === "cover" && state.leg === 1 && earlierPoint && view.rye
+                ? { terminate: earlierPoint.terminate, gap: earlierPoint.gap_days, count: earlierPoint.checks_count, denominator: view.rye.denominator }
                 : null
             }
             onSelect={() => dispatch({ type: "selectCard", card: c.key })}

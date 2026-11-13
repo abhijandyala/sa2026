@@ -35,9 +35,9 @@ and each plan carries `"spring_window_id": "soy_full_season"`.
 
 The no-cover and wheat plans have no rye check, so their cards show dry planting windows by period instead. That is `spring_windows.<id>.eras.dry_spring` above, using the same era rules as the checks (1981–2000 vs 2006–2025, at least 15 of 20).
 
-## 3. Wheat double-crop plan
+## 3. Unavailable plans (wheat)
 
-Cards show three plans: `no_cover`, `rye_12d` (with `rye_19d` as the earlier end date), and `wheat_double_crop`. Until the wheat catalog rows land, the sample marks the wheat plan `"status": "partial"`, keeps its June weather replay, and lists the timing check as `"verdict": "unknown"` with `"reason": "catalog_missing: …"`. The UI shows the reason without the code prefix.
+Cards follow the three rotations in `docs/api/presets.md`. Until the wheat catalog rows land, the sample returns `corn_soy__wheat_dc` with `"status": "unavailable"`, a `"reason": "catalog_missing: …"`, and no sequence, calendar or winter. The UI shows "Not evaluated yet" with the reason (code prefix removed). Please confirm the real response looks like that.
 
 ## 4. Per-season winter rain (for the replay line, later phases)
 
@@ -56,9 +56,9 @@ As the grower drags the rye end date, the card, the 3D field and the year strip 
 
 Without them, the slider still shows counts, gaps and rain, and the per-year mark and the period split say "not available for this date".
 
-## 6. Two-year presets
+## 6. Two-winter presets (resolved Nov 12)
 
-Still open: the cards describe two-year rotations, but the API evaluates one winter (corn → winter → soybean). The UI currently shows the first winter and lists the second winter as a gap. Tell us how the second winter (soybean → rye or clover → corn) will be represented.
+Rotations with two legs, per `docs/api/presets.md`. The UI shows both legs' rain-without-cover and check counts side by side on each card (never summed), and a "Which winter" switch picks the leg for the strip, charts, 3D and card details. Each leg needs its own `spring_window_id` and entry in `spring_windows` (the sample uses `soy_full_season` and `corn_planting`).
 
 ## What the frontend relies on and will not recompute
 

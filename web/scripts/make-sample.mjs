@@ -1,22 +1,29 @@
-// Writes web/public/data/sample/{years,compare,sensitivity}.json in the SHAPE of Rahul's
-// draft API examples (backend branch, docs/api/examples/). The weather is SYNTHETIC and
-// every file says "draft": true, so the UI shows a draft-data banner. When the backend
-// generates real output (its Phase 10), those files replace these with the same names.
+// Writes web/public/data/sample/ in the SHAPE of Rahul's draft API examples
+// (backend branch: docs/api/examples/ and docs/api/presets.md, Nov 12 2026).
+// The weather is SYNTHETIC and every file says "draft": true, so the UI shows a
+// draft-data banner. The backend's generated output (its Phase 10) replaces these
+// files with the same names.
 //
-// Field names follow the draft examples exactly. Additions the frontend needs are kept
-// in clearly named blocks and listed for Rahul in web/docs/api-requests.md:
-//   - compare.spring_windows: per-year spring results for each planting window
-//   - plans[].spring_window_id: which window a plan's planting falls in
-//   - spring_windows[].eras.dry_spring: earlier vs recent for dry windows (no rule needed)
-//   - plans[].winter.per_season: per-year winter rain without cover (for the replay line)
+// Presets are rotations with two legs; each leg is its own plan, tested against every
+// spring on its own, and the legs are never summed:
+//   current_practice: corn_soy__no_cover + soy_corn__no_cover
+//   winter_cover:     corn_soy__rye      + soy_corn__rye
+//   add_grain_crop:   corn_soy__wheat_dc + soy_corn__no_cover
+// corn_soy__wheat_dc is "unavailable: catalog_missing" until the wheat rows land.
+// Sample dates follow presets.md and are flagged dates_assumed.
 //
-// Rules mirrored from the backend phase cards (Phases 2–5):
-//   spring window = [plant − 30d, plant − 1d]; winter window = [prev_harvest, next_plant)
-//   living cover = [seed, terminate); dry = bottom 20% of complete windows, ties count as dry
-//   rank 1 = driest; cr_tt_03 fires when gap < 14 AND (dry OR grower concern)
-//   eras 1981–2000 vs 2006–2025, ≥ 15 of 20 evaluable, "similar" when |Δ| < 10 pp
+// Frontend additions the drafts do not carry yet (see web/docs/api-requests.md):
+//   compare.spring_windows (per-year results per window), plans[].spring_window_id,
+//   spring_windows[].eras.dry_spring, plans[].winter.per_season,
+//   sensitivity.points[].qualifying_years and .eras.
+//
+// Rules mirrored from the backend phase cards: spring window = [plant − 30d, plant − 1d];
+// winter window = [prev_harvest, next_plant); living cover = [seed, terminate);
+// dry = bottom 20% of complete windows, ties count as dry; rank 1 = driest;
+// cr_tt_03 fires when gap < 14 AND (dry OR grower concern);
+// eras 1981–2000 vs 2006–2025, ≥ 15 of 20 evaluable, "similar" when |Δ| < 10 pp.
 
-import { writeFileSync, mkdirSync } from "node:fs";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -48,12 +55,10 @@ const r2 = (x) => Math.round(x * 100) / 100;
 
 // ---------------------------------------------------------------- synthetic daily weather
 // Starts 1981-01-01 like the real snapshot, so the 1981 winter is unavailable.
-const FIRST = "1981-01-01";
-const LAST = "2025-06-30";
 const daily = new Map();
 let soil = 0.6;
 let wetness = 1;
-for (let t = ms(FIRST); t <= ms(LAST); t += DAY) {
+for (let t = ms("1981-01-01"); t <= ms("2025-06-30"); t += DAY) {
   const d = iso(t);
   if (d.endsWith("-01-01")) wetness = 0.45 + rand() * 1.0;
   const doy = (t - ms(d.slice(0, 4) + "-01-01")) / DAY;
@@ -65,65 +70,9 @@ for (let t = ms(FIRST); t <= ms(LAST); t += DAY) {
 }
 const rain = (d) => daily.get(d)?.mm ?? null;
 
-// ---------------------------------------------------------------- plans (draft sample dates)
 const YEARS = Array.from({ length: 2025 - 1981 + 1 }, (_, i) => 1981 + i);
 const ERA = { earlier: [1981, 2000], recent: [2006, 2025] };
 const MIN_ERA = 15;
-
-const PLANS = [
-  { plan_id: "no_cover", label: "No planted winter cover", prev: "09-20", winter: { type: "none" }, plant: "05-12", window: "soy_full_season" },
-  { plan_id: "rye_12d", label: "Cereal rye, terminated 12 days before soybean", prev: "09-20", winter: { type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-30" }, plant: "05-12", window: "soy_full_season" },
-  { plan_id: "rye_19d", label: "Cereal rye, terminated 19 days before soybean", prev: "09-20", winter: { type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-23" }, plant: "05-12", window: "soy_full_season" },
-  { plan_id: "wheat_double_crop", label: "Winter wheat for grain, then double-crop soybean", prev: "09-20", winter: { type: "winter_grain", crop_id: "winter_wheat", plant: "10-25", harvest: "06-10" }, plant: "06-15", window: "soy_double_crop" },
-];
-
-// ---------------------------------------------------------------- spring windows
-function springWindow(id, plantMD, label) {
-  const years = YEARS.map((y) => {
-    const plant = `${y}-${plantMD}`;
-    const start = add(plant, -30);
-    let total = 0, valid = 0, top = 0, root = 0;
-    for (let i = 0; i < 30; i++) {
-      const rec = daily.get(add(start, i));
-      if (rec) { total += rec.mm; valid++; top += rec.top; root += rec.root; }
-    }
-    const complete = valid === 30;
-    return {
-      year: y,
-      start, end: add(plant, -1),
-      total_mm: complete ? r1(total) : null,
-      status: complete ? "complete" : valid ? "partial" : "unavailable",
-      rank: null, of: null, percentile: null, is_dry: null,
-      gwettop_window_mean: complete ? r2(top / 30) : null,
-      gwetroot_window_mean: complete ? r2(root / 30) : null,
-    };
-  });
-  const ok = years.filter((y) => y.status === "complete");
-  const sorted = [...ok].sort((a, b) => a.total_mm - b.total_mm || a.year - b.year);
-  const cutoffIdx = Math.max(0, Math.ceil(0.2 * sorted.length) - 1);
-  const cutoff = sorted[cutoffIdx].total_mm;
-  sorted.forEach((y, i) => {
-    y.rank = i + 1;
-    y.of = sorted.length;
-    y.percentile = r1(((i + 1) / sorted.length) * 100);
-    y.is_dry = y.total_mm <= cutoff;
-  });
-  const med = median(ok.map((y) => y.total_mm));
-  const typical = [...ok].sort((a, b) => Math.abs(a.total_mm - med) - Math.abs(b.total_mm - med) || a.year - b.year)[0].year;
-  const dryReplay = ok.filter((y) => y.is_dry).sort((a, b) => b.total_mm - a.total_mm || a.year - b.year)[0].year;
-  const wettest = [...ok].sort((a, b) => b.total_mm - a.total_mm || a.year - b.year)[0].year;
-  return {
-    id, label, plant: plantMD,
-    start: add(`2001-${plantMD}`, -30).slice(5), end: add(`2001-${plantMD}`, -1).slice(5),
-    threshold: { value: cutoff, unit: "mm", method: "bottom 20% of eligible 30-day windows; ties at cutoff count as dry", reference_span: "1981-2025", status: "complete" },
-    median_mm: r1(med),
-    dry_count: ok.filter((y) => y.is_dry).length,
-    denominator: ok.length,
-    shortcuts: { typical, dry: dryReplay, wet: wettest },
-    years,
-    eras: { dry_spring: eraCompare(years, (y) => y.status === "complete", (y) => y.is_dry) },
-  };
-}
 
 function eraCompare(rows, eligible, counts) {
   const part = ([a, b]) => {
@@ -139,27 +88,109 @@ function eraCompare(rows, eligible, counts) {
   return { earlier, recent, diff_pp, result, caveat: "Descriptive comparison of two periods; not a trend, cause, or forecast." };
 }
 
+// ---------------------------------------------------------------- spring windows (one per planting date)
+function springWindow(id, plantMD, label) {
+  const years = YEARS.map((y) => {
+    const plant = `${y}-${plantMD}`;
+    const start = add(plant, -30);
+    let total = 0, valid = 0, top = 0, root = 0;
+    for (let i = 0; i < 30; i++) {
+      const rec = daily.get(add(start, i));
+      if (rec) { total += rec.mm; valid++; top += rec.top; root += rec.root; }
+    }
+    const complete = valid === 30;
+    return {
+      year: y, start, end: add(plant, -1),
+      total_mm: complete ? r1(total) : null,
+      status: complete ? "complete" : valid ? "partial" : "unavailable",
+      rank: null, of: null, percentile: null, is_dry: null,
+      gwettop_window_mean: complete ? r2(top / 30) : null,
+      gwetroot_window_mean: complete ? r2(root / 30) : null,
+    };
+  });
+  const ok = years.filter((y) => y.status === "complete");
+  const sorted = [...ok].sort((a, b) => a.total_mm - b.total_mm || a.year - b.year);
+  const cutoff = sorted[Math.max(0, Math.ceil(0.2 * sorted.length) - 1)].total_mm;
+  sorted.forEach((y, i) => {
+    y.rank = i + 1;
+    y.of = sorted.length;
+    y.percentile = r1(((i + 1) / sorted.length) * 100);
+    y.is_dry = y.total_mm <= cutoff;
+  });
+  const med = median(ok.map((y) => y.total_mm));
+  const typical = [...ok].sort((a, b) => Math.abs(a.total_mm - med) - Math.abs(b.total_mm - med) || a.year - b.year)[0].year;
+  const dry = ok.filter((y) => y.is_dry).sort((a, b) => b.total_mm - a.total_mm || a.year - b.year)[0].year;
+  const wet = [...ok].sort((a, b) => b.total_mm - a.total_mm || a.year - b.year)[0].year;
+  const s = add(`2001-${plantMD}`, -30).slice(5);
+  const e = add(`2001-${plantMD}`, -1).slice(5);
+  return {
+    id, label, plant: plantMD, start: s, end: e,
+    threshold: { value: cutoff, unit: "mm", method: "bottom 20% of eligible 30-day windows; ties at cutoff count as dry", window: `${s}..${e}`, reference_span: "1981-2025", status: "complete" },
+    median_mm: r1(med),
+    dry_count: ok.filter((y) => y.is_dry).length,
+    denominator: ok.length,
+    shortcuts: { typical, dry, wet },
+    years,
+    eras: { dry_spring: eraCompare(years, (y) => y.status === "complete", (y) => y.is_dry) },
+  };
+}
+
 const WINDOWS = {
-  soy_full_season: springWindow("soy_full_season", "05-12", "30 days before full-season soybean planting"),
-  soy_double_crop: springWindow("soy_double_crop", "06-15", "30 days before double-crop soybean planting"),
+  soy_full_season: springWindow("soy_full_season", "05-12", "30 days before soybean planting"),
+  corn_planting: springWindow("corn_planting", "04-15", "30 days before corn planting"),
 };
 
-// ---------------------------------------------------------------- per plan
+// ---------------------------------------------------------------- plans (presets.md, dates assumed)
+const SOURCE_SOY4 = { title: "NC State Soybean Production Guide: Rotational Considerations", url: "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations" };
+
+const PLANS = [
+  { plan_id: "corn_soy__no_cover", rotation_id: "current_practice", leg: 1, label: "No planted winter cover before soybean", prev_crop: "field_corn", prev: "09-20", winter: { type: "none" }, next_crop: "soybean", plant: "05-12", window: "soy_full_season" },
+  { plan_id: "corn_soy__rye", rotation_id: "winter_cover", leg: 1, label: "Cereal rye before soybean", prev_crop: "field_corn", prev: "09-20", winter: { type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-30" }, next_crop: "soybean", plant: "05-12", window: "soy_full_season", moistureRule: true },
+  { plan_id: "soy_corn__no_cover", rotation_id: "current_practice", leg: 2, label: "No planted winter cover before corn", prev_crop: "soybean", prev: "10-15", winter: { type: "none" }, next_crop: "field_corn", plant: "04-15", window: "corn_planting" },
+  { plan_id: "soy_corn__rye", rotation_id: "winter_cover", leg: 2, label: "Cereal rye before corn", prev_crop: "soybean", prev: "10-15", winter: { type: "cover", crop_id: "cereal_rye", seed: "10-20", terminate: "04-05" }, next_crop: "field_corn", plant: "04-15", window: "corn_planting" },
+];
+
+const ROTATIONS = [
+  { rotation_id: "current_practice", label: "Current practice", legs: [{ leg: 1, plan_id: "corn_soy__no_cover" }, { leg: 2, plan_id: "soy_corn__no_cover" }] },
+  { rotation_id: "winter_cover", label: "Winter cover", legs: [{ leg: 1, plan_id: "corn_soy__rye" }, { leg: 2, plan_id: "soy_corn__rye" }] },
+  { rotation_id: "add_grain_crop", label: "Add a grain crop", legs: [{ leg: 1, plan_id: "corn_soy__wheat_dc" }, { leg: 2, plan_id: "soy_corn__no_cover" }] },
+];
+
 function coverInterval(p, y) {
-  if (p.winter.type === "cover") return [`${y - 1}-${p.winter.seed}`, `${y}-${p.winter.terminate}`];
-  if (p.winter.type === "winter_grain") return [`${y - 1}-${p.winter.plant}`, `${y}-${p.winter.harvest}`];
-  return null;
+  if (p.winter.type !== "cover") return null;
+  const seedYear = Number(p.winter.seed.slice(0, 2)) >= 7 ? y - 1 : y;
+  return [`${seedYear}-${p.winter.seed}`, `${y}-${p.winter.terminate}`];
 }
+
+const OTHER_CHECKS = {
+  corn_soy__no_cover: [{ rule_id: "sb_pw_01", verdict: "preferred", reason: "May 12 is inside the Apr 20–May 20 full-season soybean window" }],
+  corn_soy__rye: [
+    { rule_id: "sb_pw_01", verdict: "preferred", reason: "May 12 is inside the Apr 20–May 20 full-season soybean window" },
+    { rule_id: "cr_tt_04", verdict: "manual_check", reason: "Applies only if insect pest spillover is a concern; grower input not provided" },
+  ],
+  soy_corn__no_cover: [
+    { rule_id: "fc_pw_01", verdict: "manual_check", reason: "Plant corn once soil is at or above 55 F; no soil temperature input. Conflicts with fc_pw_02 (50 F)" },
+    { rule_id: "fc_pw_02", verdict: "manual_check", reason: "Below 50 F soil temperature is a germination concern; no soil temperature input. Conflicts with fc_pw_01 (55 F)" },
+    { rule_id: "fc_wt_03", verdict: "manual_check", reason: "Choose hybrid and date so silking avoids July 1–20" },
+  ],
+  soy_corn__rye: [
+    { rule_id: "cr_tt_01", verdict: "preferred", reason: "Gap 10 days is within 7–14 days before corn" },
+    { rule_id: "cr_nut_01", verdict: "manual_check", reason: "Corn after rye: plan the nitrogen rate, rye can tie up nitrogen" },
+    { rule_id: "fc_nut_02", verdict: "acceptable", reason: "Starter fertilizer can speed early growth in no-till corn after a small grain cover" },
+    { rule_id: "fc_pw_01", verdict: "manual_check", reason: "Plant corn once soil is at or above 55 F; no soil temperature input. Conflicts with fc_pw_02 (50 F)" },
+    { rule_id: "fc_pw_02", verdict: "manual_check", reason: "Below 50 F soil temperature is a germination concern; no soil temperature input. Conflicts with fc_pw_01 (55 F)" },
+    { rule_id: "fc_wt_03", verdict: "manual_check", reason: "Choose hybrid and date so silking avoids July 1–20" },
+  ],
+};
 
 function buildPlan(p, { concern = false } = {}) {
   const w = WINDOWS[p.window];
-  const exampleYear = 2007;
-  const winterStart = `${exampleYear - 1}-${p.prev}`;
-  const plant = `${exampleYear}-${p.plant}`;
-  const cov = coverInterval(p, exampleYear);
-  const windowDays = diff(winterStart, plant);
+  const ex = 2007;
+  const winterStart = `${ex - 1}-${p.prev}`;
+  const plant = `${ex}-${p.plant}`;
+  const cov = coverInterval(p, ex);
   const living = cov ? diff(cov[0], cov[1]) : 0;
-  const gap = p.winter.type === "cover" ? diff(cov[1], plant) : p.winter.type === "winter_grain" ? diff(cov[1], plant) : null;
+  const gap = cov ? diff(cov[1], plant) : null;
 
   const perSeason = YEARS.map((y) => {
     const s = `${y - 1}-${p.prev}`;
@@ -171,8 +202,7 @@ function buildPlan(p, { concern = false } = {}) {
       const mm = rain(d);
       if (mm === null) continue;
       valid++;
-      const covered = c && d >= c[0] && d < c[1];
-      if (!covered) total += mm;
+      if (!(c && d >= c[0] && d < c[1])) total += mm;
     }
     return { year: y, rain_mm_without_cover: valid === n ? r1(total) : null, status: valid === n ? "complete" : valid ? "partial" : "unavailable" };
   });
@@ -180,14 +210,18 @@ function buildPlan(p, { concern = false } = {}) {
 
   const plan = {
     plan_id: p.plan_id,
+    rotation_id: p.rotation_id,
+    leg: p.leg,
     label: p.label,
-    sequence: { previous_crop_id: "field_corn", prev_harvest: p.prev, winter: p.winter, next_crop_id: "soybean", next_plant: p.plant },
+    editable: ["prev_harvest", ...(p.winter.type === "cover" ? ["winter.seed", "winter.terminate"] : []), "next_plant"],
+    dates_assumed: true,
+    sequence: { previous_crop_id: p.prev_crop, prev_harvest: p.prev, winter: p.winter, next_crop_id: p.next_crop, next_plant: p.plant },
+    spring_window: { start: w.start, end: w.end },
     spring_window_id: p.window,
     calendar: {
       living_cover_days_planned: living,
-      days_without_planned_cover: windowDays - living,
-      termination_gap_days: p.winter.type === "cover" ? gap : null,
-      harvest_to_plant_days: p.winter.type === "winter_grain" ? gap : null,
+      days_without_planned_cover: diff(winterStart, plant) - living,
+      termination_gap_days: gap,
       establishment: p.winter.type === "none" ? "inapplicable" : "uncertain",
     },
     winter: {
@@ -198,64 +232,61 @@ function buildPlan(p, { concern = false } = {}) {
       per_season: perSeason,
     },
     spring_checks: [],
-    other_checks: [],
+    other_checks: OTHER_CHECKS[p.plan_id] ?? [],
     eras: {},
   };
 
-  if (p.winter.type === "cover") {
+  if (p.moistureRule) {
     const qualifying = w.years.filter((y) => y.status === "complete" && gap < 14 && (y.is_dry || concern)).map((y) => y.year);
-    const count = qualifying.length;
     plan.spring_checks.push({
       check_id: "rye_soy_short_gap_moisture",
       rule_ids: ["cr_tt_03"],
       label: gap < 14 ? "Would have prompted a field-moisture check" : "Gap is 14 days or more; short-gap check clears",
       fires_when: "gap < 14 days AND (dry replay OR grower low-moisture concern)",
-      count, denominator: w.denominator, pct: r1((count / w.denominator) * 100),
+      count: qualifying.length,
+      denominator: w.denominator,
+      pct: r1((qualifying.length / w.denominator) * 100),
       qualifying_years: qualifying,
       skipped_years: [],
-      source: { title: "NC State Soybean Production Guide: Rotational Considerations", url: "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations" },
+      source: SOURCE_SOY4,
     });
-    plan.other_checks.push({ rule_id: "cr_tt_04", verdict: "manual_check", reason: "Applies only if insect pest spillover is a concern; grower input not provided" });
     plan.eras.rye_soy_short_gap_moisture = eraCompare(w.years, (y) => y.status === "complete", (y) => qualifying.includes(y.year));
-  } else {
-    plan.spring_checks.push({
-      check_id: "rye_soy_short_gap_moisture", rule_ids: ["cr_tt_03"], status: "inapplicable",
-      label: "Rye timing check does not apply to this plan", count: null, denominator: null, pct: null, qualifying_years: [], skipped_years: [],
-    });
   }
-
   if (p.winter.type === "none") {
-    plan.residue_context = { status: "unknown", note: "Corn residue may remain; not measured" };
-    plan.other_checks.push({ rule_id: "sb_pw_01", verdict: "preferred", reason: "May 12 is inside the Apr 20–May 20 full-season window" });
-  }
-  if (p.winter.type === "cover") {
-    plan.other_checks.push({ rule_id: "sb_pw_01", verdict: "preferred", reason: "May 12 is inside the Apr 20–May 20 full-season window" });
-  }
-  if (p.winter.type === "winter_grain") {
-    plan.status = "partial";
-    plan.other_checks.push(
-      { rule_id: "ww_timing", verdict: "unknown", status: "unavailable", reason: "catalog_missing: wheat planting and harvest windows are not yet sourced" },
-      { rule_id: "sb_pw_03", verdict: "caution", reason: "Planting past the third week of May; NC State reports yield declines" },
-      { rule_id: "ww_rc_01", verdict: "caution", reason: "Wheat after corn: check head scab risk" },
-    );
-    plan._frontend_note = "Frontend-only draft plan. Backend wheat path is unavailable until the wheat catalog rows land (backend Phase 12).";
+    plan.residue_context = { status: "unknown", note: `${p.prev_crop === "soybean" ? "Soybean" : "Corn"} residue may remain; not measured` };
   }
   return plan;
 }
 
 const plans = PLANS.map((p) => buildPlan(p));
+plans.splice(2, 0, {
+  plan_id: "corn_soy__wheat_dc",
+  rotation_id: "add_grain_crop",
+  leg: 1,
+  label: "Winter wheat for grain, then double-crop soybean",
+  status: "unavailable",
+  reason: "catalog_missing: wheat planting and harvest windows and the double-crop soybean window are not yet sourced",
+  spring_checks: [],
+  other_checks: [
+    { rule_id: "ww_rc_01", verdict: "caution", reason: "Wheat after corn: check head scab risk" },
+    { rule_id: "sb_rc_03", verdict: "caution", reason: "Double-crop soybeans: maturity groups under 4 need a caution" },
+  ],
+  eras: {},
+});
+
 const meta = (id) => ({ plan_version: "pv_sample", catalog_version: "v1", snapshot_hash: "sha256:SYNTHETIC", request_id: id, draft: true });
 
 const compare = {
   meta: meta("req_cmp_sample"),
-  request_echo: { location_id: "union_county_sample", plan_ids: plans.map((p) => p.plan_id) },
+  request_echo: { location_id: "union_county_sample", rotation_ids: ROTATIONS.map((r) => r.rotation_id) },
   thresholds: {
     heavy_rain: { value: null, unit: "mm", method: "PENDING handbook definition", reference_span: "1981-2025", status: "unknown" },
-    dry_spring: { ...WINDOWS.soy_full_season.threshold, window: `${WINDOWS.soy_full_season.start}..${WINDOWS.soy_full_season.end}` },
+    dry_spring: WINDOWS.soy_full_season.threshold,
   },
   shared_eligible_years: { spring: WINDOWS.soy_full_season.denominator, winter: plans[0].winter.eligible_seasons },
   plans,
-  spring_window: { start: WINDOWS.soy_full_season.start, end: WINDOWS.soy_full_season.end, note: "Same for no_cover and the rye plans because the planting date matches; rye date edits do not change it" },
+  spring_window: { note: "Per plan. Leg 1 plans share 04-12..05-11; leg 2 plans share 03-16..04-14. Termination edits never change it; planting-date edits do." },
+  rotations: ROTATIONS,
   spring_windows: WINDOWS,
 };
 
@@ -273,7 +304,8 @@ const years = {
   eras: { earlier: { start: 1981, end: 2000 }, recent: { start: 2006, end: 2025 }, excluded_from_eras: [2001, 2002, 2003, 2004, 2005] },
 };
 
-const rye = PLANS.find((p) => p.plan_id === "rye_12d");
+// ---------------------------------------------------------------- sensitivity sweep for corn_soy__rye
+const rye = PLANS.find((p) => p.plan_id === "corn_soy__rye");
 const sw = WINDOWS.soy_full_season;
 const points = [];
 for (let t = "2007-03-01"; t <= "2007-05-11"; t = add(t, 1)) {
@@ -285,14 +317,13 @@ for (let t = "2007-03-01"; t <= "2007-05-11"; t = add(t, 1)) {
     living_cover_days_planned: plan.calendar.living_cover_days_planned,
     rain_mm_without_cover_median: plan.winter.per_season_median.rain_mm_without_cover,
     checks_count: plan.spring_checks[0].count,
-    // REQUESTED: lets the UI mark this spring and show earlier vs recent for any date.
-    qualifying_years: plan.spring_checks[0].qualifying_years,
-    eras: plan.eras.rye_soy_short_gap_moisture,
+    qualifying_years: plan.spring_checks[0].qualifying_years, // REQUESTED
+    eras: plan.eras.rye_soy_short_gap_moisture, // REQUESTED
   });
 }
 const sensitivity = {
   meta: meta("req_sens_sample"),
-  base_plan_id: "rye_12d",
+  base_plan_id: "corn_soy__rye",
   varied: "terminate",
   fixed: { next_plant: rye.plant, seed: rye.winter.seed },
   check_id: "rye_soy_short_gap_moisture",
@@ -300,24 +331,22 @@ const sensitivity = {
   points,
 };
 
+// ---------------------------------------------------------------- write
+rmSync(join(OUT, "replay"), { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 for (const [name, body] of Object.entries({ years, compare, sensitivity })) {
   writeFileSync(join(OUT, `${name}.json`), JSON.stringify(body, null, 1) + "\n");
 }
-// ---------------------------------------------------------------- replay (GET /v1/seasons/{year}/replay?plan=)
-// Same shape as the draft replay.json. To keep the static sample small, `daily` is
-// trimmed to the 30-day spring window (the real endpoint returns every day from the
-// previous harvest to the day before planting); `daily_scope` says so.
-const REPLAY_PLANS = ["no_cover", "rye_12d", "wheat_double_crop"];
+
+// Replay (GET /v1/seasons/{year}/replay?plan=). `daily` is trimmed to the 30-day spring
+// window to keep the static sample small; `daily_scope` says so.
 let replayFiles = 0;
-for (const planId of REPLAY_PLANS) {
-  const p = PLANS.find((x) => x.plan_id === planId);
-  const built = plans.find((x) => x.plan_id === planId);
+for (const p of PLANS) {
+  const built = plans.find((x) => x.plan_id === p.plan_id);
   const w = WINDOWS[p.window];
   const check = built.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture");
-  mkdirSync(join(OUT, "replay", planId), { recursive: true });
+  mkdirSync(join(OUT, "replay", p.plan_id), { recursive: true });
   for (const y of w.years) {
-    const plant = `${y.year}-${p.plant}`;
     const cov = coverInterval(p, y.year);
     const days = [];
     for (let d = y.start; d <= y.end; d = add(d, 1)) {
@@ -337,40 +366,33 @@ for (const planId of REPLAY_PLANS) {
       ? [{ check_id: check.check_id, rule_ids: check.rule_ids, reason: `Gap ${built.calendar.termination_gap_days} days < 14 and spring window ranked dry (${y.total_mm} mm <= ${w.threshold.value} mm cutoff)` }]
       : [];
     const body = {
-      meta: { ...meta(`req_rep_${planId}_${y.year}`) },
+      meta: meta(`req_rep_${p.plan_id}_${y.year}`),
       year: y.year,
-      plan_id: planId,
+      plan_id: p.plan_id,
       dates: {
         prev_harvest: `${y.year - 1}-${p.prev}`,
-        ...(p.winter.type === "cover" ? { seed: `${y.year - 1}-${p.winter.seed}`, terminate: `${y.year}-${p.winter.terminate}` } : {}),
-        ...(p.winter.type === "winter_grain" ? { wheat_plant: `${y.year - 1}-${p.winter.plant}`, wheat_harvest: `${y.year}-${p.winter.harvest}` } : {}),
-        next_plant: plant,
+        ...(cov ? { seed: cov[0], terminate: cov[1] } : {}),
+        next_plant: `${y.year}-${p.plant}`,
         spring_window: { start: y.start, end: y.end },
       },
       coverage: { winter: y.year === 1981 ? "unavailable" : "complete", spring: y.status },
       spring: { total_mm: y.total_mm, rank: y.rank, of: y.of, percentile: y.percentile, is_dry: y.is_dry, status: y.status },
-      wetness: {
-        gwettop_window_mean: y.gwettop_window_mean,
-        gwetroot_window_mean: y.gwetroot_window_mean,
-        unit: "fraction (0-1)",
-        label: "modeled",
-        status: y.gwetroot_window_mean === null ? "unavailable" : "complete",
-      },
+      wetness: { gwettop_window_mean: y.gwettop_window_mean, gwetroot_window_mean: y.gwetroot_window_mean, unit: "fraction (0-1)", label: "modeled", status: y.gwetroot_window_mean === null ? "unavailable" : "complete" },
       checks_triggered: triggered,
       key_rain_days: days.filter((d) => (d.precip_mm ?? 0) >= 20).map((d) => ({ date: d.date, precip_mm: d.precip_mm, segment: d.segment, heavy: null })),
       daily_scope: "spring_window",
       daily: days,
     };
-    writeFileSync(join(OUT, "replay", planId, `${y.year}.json`), JSON.stringify(body) + "\n");
+    writeFileSync(join(OUT, "replay", p.plan_id, `${y.year}.json`), JSON.stringify(body) + "\n");
     replayFiles++;
   }
 }
 
-const p12 = plans.find((p) => p.plan_id === "rye_12d");
-console.log(`replay files: ${replayFiles}`);
+const p12 = plans.find((p) => p.plan_id === "corn_soy__rye");
 console.log(
-  `sample written to ${OUT}\n` +
-    `soy window: ${sw.denominator} years, cutoff ${sw.threshold.value} mm, dry ${sw.dry_count}, typical ${sw.shortcuts.typical}, dry replay ${sw.shortcuts.dry}\n` +
-    `rye_12d check ${p12.spring_checks[0].count}/${p12.spring_checks[0].denominator}; winter rain without cover: ` +
-    plans.map((p) => `${p.plan_id} ${p.winter.per_season_median.rain_mm_without_cover} mm`).join(", "),
+  `sample written to ${OUT} (${replayFiles} replay files)\n` +
+    `soy window: cutoff ${sw.threshold.value} mm, dry ${sw.dry_count}/${sw.denominator}, typical ${sw.shortcuts.typical}, dry replay ${sw.shortcuts.dry}\n` +
+    `corn window: cutoff ${WINDOWS.corn_planting.threshold.value} mm, typical ${WINDOWS.corn_planting.shortcuts.typical}, dry replay ${WINDOWS.corn_planting.shortcuts.dry}\n` +
+    `corn_soy__rye check ${p12.spring_checks[0].count}/${p12.spring_checks[0].denominator}; winter rain without cover: ` +
+    plans.filter((p) => p.winter).map((p) => `${p.plan_id} ${p.winter.per_season_median.rain_mm_without_cover} mm (gap ${p.calendar.termination_gap_days})`).join(", "),
 );

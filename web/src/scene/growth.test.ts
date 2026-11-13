@@ -2,12 +2,13 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { CompareResponse } from "../api/schema";
-import { fieldStateAt, SEASON_DAYS, seasonDay, seasonLabel } from "./growth";
+import { fieldStateAt, SEASON_DAYS, seasonDay, seasonLabel, type FieldState } from "./growth";
 
 const compare = CompareResponse.parse(
   JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/data/sample/compare.json"), "utf8")),
 );
 const plan = (id: string) => compare.plans.find((p) => p.plan_id === id)!;
+const at = (id: string, md: string): FieldState => fieldStateAt(plan(id), seasonDay(md))!;
 
 describe("season axis", () => {
   it("maps dates onto Sep 1 … Jun 30", () => {
@@ -22,41 +23,62 @@ describe("season axis", () => {
   });
 });
 
-describe("what each field shows", () => {
-  const jan = seasonDay("01-15");
-
-  it("in winter: residue only without cover, living rye, living wheat", () => {
-    expect(fieldStateAt(plan("no_cover"), jan)).toMatchObject({ cover: { show: false }, wheat: { show: false }, residue: 1 });
-    expect(fieldStateAt(plan("rye_12d"), jan)).toMatchObject({ cover: { show: true, ended: false } });
-    expect(fieldStateAt(plan("wheat_double_crop"), jan)).toMatchObject({ wheat: { show: true } });
+describe("winter 1: corn → soybeans", () => {
+  it("in winter: residue only without cover, living rye with cover", () => {
+    expect(at("corn_soy__no_cover", "01-15")).toMatchObject({ cover: { show: false }, residue: 1 });
+    expect(at("corn_soy__rye", "01-15")).toMatchObject({ cover: { show: true, ended: false } });
   });
 
-  it("ends rye on its date and keeps soybeans until after planting", () => {
-    const rye = plan("rye_12d");
-    expect(fieldStateAt(rye, seasonDay("04-29")).cover.ended).toBe(false);
-    expect(fieldStateAt(rye, seasonDay("04-30")).cover.ended).toBe(true);
-    expect(fieldStateAt(rye, seasonDay("05-12")).soy.show).toBe(false);
-    expect(fieldStateAt(rye, seasonDay("05-25")).soy.show).toBe(true);
+  it("ends rye on its date and shows soybeans only after planting", () => {
+    expect(at("corn_soy__rye", "04-29").cover.ended).toBe(false);
+    expect(at("corn_soy__rye", "04-30").cover.ended).toBe(true);
+    expect(at("corn_soy__rye", "05-12").soy.show).toBe(false);
+    expect(at("corn_soy__rye", "05-25")).toMatchObject({ soy: { show: true, mature: false } });
   });
 
-  it("marks the 30-day window before each field's own planting", () => {
-    expect(fieldStateAt(plan("rye_12d"), seasonDay("04-12")).inSpringWindow).toBe(true);
-    expect(fieldStateAt(plan("rye_12d"), seasonDay("05-12")).inSpringWindow).toBe(false);
-    expect(fieldStateAt(plan("wheat_double_crop"), seasonDay("05-20")).inSpringWindow).toBe(true);
-    expect(fieldStateAt(plan("wheat_double_crop"), seasonDay("04-20")).inSpringWindow).toBe(false);
+  it("shows mature corn only before its harvest", () => {
+    expect(at("corn_soy__no_cover", "09-10").corn).toMatchObject({ show: true, mature: true });
+    expect(at("corn_soy__no_cover", "09-25").corn.show).toBe(false);
   });
 
-  it("shows corn only before its harvest", () => {
-    expect(fieldStateAt(plan("no_cover"), seasonDay("09-10")).corn.show).toBe(true);
-    expect(fieldStateAt(plan("no_cover"), seasonDay("09-25")).corn.show).toBe(false);
+  it("marks the 30 days before planting", () => {
+    expect(at("corn_soy__rye", "04-12").inSpringWindow).toBe(true);
+    expect(at("corn_soy__rye", "05-12").inSpringWindow).toBe(false);
+  });
+});
+
+describe("winter 2: soybeans → corn", () => {
+  it("shows mature soybeans before their Oct 15 harvest, then residue", () => {
+    expect(at("soy_corn__no_cover", "10-01").soy).toMatchObject({ show: true, mature: true });
+    expect(at("soy_corn__no_cover", "11-01")).toMatchObject({ soy: { show: false }, residue: 1 });
+    expect(at("soy_corn__no_cover", "11-01").label).toBe("Soybean residue, no living cover");
   });
 
-  it("never draws a stage taller than 1", () => {
-    for (const id of ["no_cover", "rye_12d", "wheat_double_crop"]) {
-      for (let d = 0; d < SEASON_DAYS; d += 3) {
-        const s = fieldStateAt(plan(id), d);
-        for (const v of [s.cover.h, s.wheat.h, s.soy.h]) expect(v).toBeLessThanOrEqual(1);
-      }
+  it("ends rye Apr 5 and brings corn up after the Apr 15 planting", () => {
+    expect(at("soy_corn__rye", "04-04").cover.ended).toBe(false);
+    expect(at("soy_corn__rye", "04-05").cover.ended).toBe(true);
+    expect(at("soy_corn__rye", "04-20").corn.show).toBe(false);
+    expect(at("soy_corn__rye", "05-10").corn).toMatchObject({ show: true, mature: false });
+    expect(at("soy_corn__rye", "05-10").label).toMatch(/corn up$/);
+  });
+
+  it("marks its own window before corn planting", () => {
+    expect(at("soy_corn__rye", "03-20").inSpringWindow).toBe(true);
+    expect(at("soy_corn__rye", "04-20").inSpringWindow).toBe(false);
+  });
+});
+
+describe("plans the backend cannot evaluate yet", () => {
+  it("draws nothing for a plan without dates (wheat until sourced)", () => {
+    expect(fieldStateAt(plan("corn_soy__wheat_dc"), seasonDay("01-15"))).toBeNull();
+  });
+});
+
+it("never draws a stage taller than 1", () => {
+  for (const p of compare.plans) {
+    for (let d = 0; d < SEASON_DAYS; d += 3) {
+      const s = fieldStateAt(p, d);
+      if (s) for (const v of [s.cover.h, s.wheat.h, s.soy.h, s.corn.h]) expect(v).toBeLessThanOrEqual(1);
     }
-  });
+  }
 });

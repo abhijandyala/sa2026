@@ -20,7 +20,9 @@ export interface ScenePalette {
   wheat: string;
   wheatGreen: string;
   corn: string;
+  cornGreen: string;
   soy: string;
+  soyMature: string;
   residue: string;
   rain: string;
   action: string;
@@ -177,6 +179,8 @@ function Flag({ color }: { color: string }) {
   );
 }
 
+const GHOST = ["#E2E6DD", "#D3D8CE", "#C4CABF"] as const;
+
 function Field({
   strip,
   state,
@@ -221,7 +225,9 @@ function Field({
     const t = hi > lo ? (wet - lo) / (hi - lo) : 0.5;
     return SOIL_DRY.clone().lerp(SOIL_WET, 0.15 + 0.85 * t);
   }, [wet, w.wetnessRange]);
-  const waterTop = wet === null ? null : -SOIL_H + SOIL_H * Math.min(0.95, Math.max(0.05, wet));
+  // A plan the backend cannot evaluate yet is drawn as a pale, empty block, never as bare soil.
+  const ghost = state === null;
+  const waterTop = wet === null || ghost ? null : -SOIL_H + SOIL_H * Math.min(0.95, Math.max(0.05, wet));
   const rainIntensity =
     state?.inSpringWindow && w.complete && w.totalMm !== null && w.medianMm
       ? Math.min(2, Math.max(0.08, w.totalMm / w.medianMm))
@@ -244,15 +250,15 @@ function Field({
         onPointerOut={() => (document.body.style.cursor = "")}
       >
         <boxGeometry args={[FIELD_W, 0.35, FIELD_D]} />
-        <meshStandardMaterial color={soilColor} flatShading roughness={1} />
+        <meshStandardMaterial color={ghost ? GHOST[0] : soilColor} flatShading roughness={1} />
       </mesh>
       <mesh position={[0, -0.625, 0]}>
         <boxGeometry args={[FIELD_W, 0.55, FIELD_D]} />
-        <meshStandardMaterial color={SUBSOIL} roughness={1} />
+        <meshStandardMaterial color={ghost ? GHOST[1] : SUBSOIL} roughness={1} />
       </mesh>
       <mesh position={[0, -1.25, 0]}>
         <boxGeometry args={[FIELD_W, 0.7, FIELD_D]} />
-        <meshStandardMaterial color={DEEP} roughness={1} />
+        <meshStandardMaterial color={ghost ? GHOST[2] : DEEP} roughness={1} />
       </mesh>
       {waterTop !== null ? (
         <group position={[0, 0, FIELD_D / 2 + 0.012]}>
@@ -272,7 +278,14 @@ function Field({
       {state ? (
         <>
           <Residue amount={state.residue} color={palette.residue} seed={51 + index} />
-          <Crop geometry={geos.corn} points={pts.corn} show={state.corn.show} height={state.corn.h} baseH={2.1} color={palette.corn} />
+          <Crop
+            geometry={geos.corn}
+            points={pts.corn}
+            show={state.corn.show}
+            height={state.corn.h}
+            baseH={2.1}
+            color={state.corn.mature ? palette.corn : palette.cornGreen}
+          />
           <Crop
             geometry={geos.tuft}
             points={pts.tuft}
@@ -283,7 +296,14 @@ function Field({
             tilt={state.cover.ended ? 1.6 : 0.15}
           />
           <Crop geometry={geos.wheat} points={pts.wheat} show={state.wheat.show} height={state.wheat.h} baseH={1.15} color={wheatColor} tilt={0.12} />
-          <Crop geometry={geos.soy} points={pts.soy} show={state.soy.show} height={state.soy.h} baseH={0.9} color={palette.soy} />
+          <Crop
+            geometry={geos.soy}
+            points={pts.soy}
+            show={state.soy.show}
+            height={state.soy.h}
+            baseH={0.9}
+            color={state.soy.mature ? palette.soyMature : palette.soy}
+          />
           {rainIntensity > 0 ? <Rain intensity={rainIntensity} color={palette.rain} animate={animate} seed={61 + index} /> : null}
         </>
       ) : null}

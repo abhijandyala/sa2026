@@ -11,7 +11,8 @@ const compare = CompareResponse.parse(read("compare"));
 const sensitivity = SensitivityResponse.parse(read("sensitivity"));
 const data = { years, compare, sensitivity, origin: "saved" as const };
 const soy = compare.spring_windows!.soy_full_season!;
-const rye12 = compare.plans.find((p) => p.plan_id === "rye_12d")!;
+const rye12 = compare.plans.find((p) => p.plan_id === "corn_soy__rye")!;
+const cornWin = compare.spring_windows!.corn_planting!;
 
 describe("view model", () => {
   const v = buildView(data, { card: "cover", year: null });
@@ -33,24 +34,33 @@ describe("view model", () => {
     expect(card("cover").era?.measure).toBe("Springs with a field-moisture check");
   });
 
-  it("leads every card with the backend's winter rain without cover, unchanged", () => {
+  it("shows both winters' rain without cover on every card, from the backend, never added", () => {
     for (const k of ["current", "cover", "grain"]) {
-      const p = compare.plans.find((pl) => pl.plan_id === card(k).content.planId)!;
-      expect(card(k).soil.mm).toBe(p.winter.per_season_median.rain_mm_without_cover);
+      for (const l of card(k).legs) {
+        const p = compare.plans.find((pl) => pl.plan_id === l.planId)!;
+        expect(l.soilMm).toBe(p.winter ? p.winter.per_season_median.rain_mm_without_cover : null);
+      }
     }
-    expect(card("current").soil.mm!).toBeGreaterThan(card("cover").soil.mm!);
+    expect(card("current").legs[0]!.soilMm!).toBeGreaterThan(card("cover").legs[0]!.soilMm!);
+    expect(card("current").legs[1]!.soilMm!).toBeGreaterThan(card("cover").legs[1]!.soilMm!);
   });
 
-  it("says the moisture check does not apply where there is no cover crop to end", () => {
+  it("says the moisture check does not apply where there is no cover crop to end before soybeans", () => {
     expect(card("current").check).toEqual({ applies: false, count: null, denominator: null });
-    expect(card("grain").check.applies).toBe(false);
+    expect(card("cover").legs[1]!.check.applies).toBe(false);
+  });
+
+  it("shows the wheat winter as not evaluated, with the backend's reason and no numbers", () => {
+    const g = card("grain");
+    expect(g.legs[0]).toMatchObject({ available: false, soilMm: null, check: { count: null } });
+    expect(g.legs[0]!.reason).toMatch(/^Wheat planting and harvest windows/);
+    expect(g.missing).toBe(true);
+    expect(g.legs[1]).toMatchObject({ available: true, planId: "soy_corn__no_cover" });
   });
 
   it("shows dry planting windows as weather context, per planting window", () => {
     expect(v.windowEra).toMatchObject({ earlier: { count: soy.eras.dry_spring.earlier.count }, recent: { count: soy.eras.dry_spring.recent.count } });
     expect(card("current").era?.measure).toBe("Dry planting windows");
-    const june = compare.spring_windows!.soy_double_crop!;
-    expect(card("grain").era?.earlier.count).toBe(june.eras.dry_spring.earlier.count);
   });
 
   it("shows the check only in a year the backend listed", () => {
@@ -69,14 +79,25 @@ describe("view model", () => {
     expect(s?.kind).toBe("dry");
   });
 
-  it("follows the grain card to its own June window", () => {
-    const g = buildView(data, { card: "grain", year: null });
-    expect(g.window?.id).toBe("soy_double_crop");
-    expect(g.windowLabel).toMatch(/double-crop/);
+  it("winter 2 follows its own corn planting window and plans", () => {
+    const w2 = buildView(data, { card: "cover", year: null, leg: 2 });
+    expect(w2.window?.id).toBe("corn_planting");
+    expect(w2.selectedYear?.year).toBe(cornWin.shortcuts.typical);
+    const cover = w2.cards.find((c) => c.key === "cover")!;
+    expect(cover.plan?.plan_id).toBe("soy_corn__rye");
+    expect(cover.metrics[0]).toBe("10 days before corn planting");
+    expect(cover.checks.map((c) => c.rule_id)).toContain("cr_tt_01");
+    expect(w2.strips.map((s) => s.plan?.plan_id)).toEqual(["soy_corn__no_cover", "soy_corn__rye", "soy_corn__no_cover"]);
   });
 
-  it("shows a missing plan as not available instead of inventing numbers", () => {
-    const without = { ...data, compare: { ...compare, plans: compare.plans.filter((p) => p.plan_id !== "wheat_double_crop") } };
+  it("the grain card on winter 1 has no weather window to show", () => {
+    const g = buildView(data, { card: "grain", year: null, leg: 1 });
+    expect(g.window).toBeNull();
+    expect(g.tiles).toEqual([]);
+  });
+
+  it("shows a plan the service did not send as not available instead of inventing numbers", () => {
+    const without = { ...data, compare: { ...compare, plans: compare.plans.filter((p) => p.plan_id !== "corn_soy__wheat_dc") } };
     const g = buildView(without, { card: "cover", year: null }).cards.find((c) => c.key === "grain")!;
     expect(g.missing).toBe(true);
     expect(g.soil.mm).toBeNull();
@@ -124,7 +145,7 @@ describe("weather states", () => {
     }));
     const v = buildView(d, { card: "cover", year: 2020 });
     expect(v.labelsWithheld).toBe(true);
-    expect(v.shortcuts).toEqual({ typical: null, dry: null });
+    expect(v.shortcuts).toEqual({ typical: null, dry: null, wet: null });
     expect(v.tiles.every((t) => t.marker === undefined && t.isDry === null && t.percentile === null)).toBe(true);
     expect(v.chart.medianMm).toBeNull();
     expect(v.chart.cutoffMm).toBeNull();
@@ -162,8 +183,9 @@ describe("3D field strips", () => {
   it("gives every field its own planting window's selected spring", () => {
     const v = buildView(data, { card: "cover", year: 2014 });
     expect(v.strips.map((s) => s.key)).toEqual(["current", "cover", "grain"]);
-    const june = compare.spring_windows!.soy_double_crop!.years.find((y) => y.year === 2014)!;
-    expect(v.strips[2]!.weather.totalMm).toBe(june.total_mm);
+    expect(v.strips[2]!.weather.totalMm).toBeNull(); // wheat winter not evaluated yet
+    const w2 = buildView(data, { card: "cover", year: 2014, leg: 2 });
+    expect(w2.strips[1]!.weather.totalMm).toBe(cornWin.years.find((y) => y.year === 2014)!.total_mm);
     expect(v.strips[1]!.weather.totalMm).toBe(soy.years.find((y) => y.year === 2014)!.total_mm);
     expect(v.strips[1]!.selected).toBe(true);
   });
@@ -178,7 +200,7 @@ describe("rye slider", () => {
   const point = (md: string) => sensitivity.points.find((p) => p.terminate === md)!;
 
   it("starts on the proposed date and finds the earlier date and the 14-day boundary", () => {
-    const r = buildView(data, { card: "cover", year: 2014 }).rye!;
+    const r = buildView(data, { card: "cover", year: 2014, earlierRyeEnd: "04-23" }).rye!;
     expect(r.chosen.terminate).toBe("04-30");
     expect(r.changed).toBe(false);
     expect(r.points[r.earlierIndex!]!.terminate).toBe("04-23");
@@ -194,7 +216,8 @@ describe("rye slider", () => {
     expect(cover.check).toEqual({ applies: true, count: p.checks_count, denominator: sensitivity.denominator });
     expect(cover.soil.mm).toBe(p.rain_mm_without_cover_median);
     expect(cover.metrics).toEqual([`${p.gap_days} days before soybean planting`, `${p.living_cover_days_planned} planned days with living rye`]);
-    expect(cover.plan!.sequence.winter).toMatchObject({ terminate: "04-23" });
+    expect(cover.plan!.sequence!.winter).toMatchObject({ terminate: "04-23" });
+    expect(cover.legs[0]).toMatchObject({ soilMm: p.rain_mm_without_cover_median, check: { count: p.checks_count } });
   });
 
   it("clears the check in a dry spring once the gap reaches 14 days (case C)", () => {
@@ -215,7 +238,7 @@ describe("rye slider", () => {
 
   it("the 3D field and its plan follow the chosen date", () => {
     const v = buildView(data, { card: "cover", year: 2014, ryeEnd: "04-10" });
-    expect(v.strips[1]!.plan!.sequence.winter).toMatchObject({ terminate: "04-10" });
+    expect(v.strips[1]!.plan!.sequence!.winter).toMatchObject({ terminate: "04-10" });
   });
 
   it("says the per-year mark is not available when the sweep lacks qualifying years", () => {

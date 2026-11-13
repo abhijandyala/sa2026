@@ -48,7 +48,9 @@ function readPalette(): ScenePalette {
     wheat: "#D2AE4E",
     wheatGreen: "#6E9E52",
     corn: "#C4A15C",
+    cornGreen: "#5C9A44",
     soy: "#5E8C3A",
+    soyMature: "#A88B4A",
     residue: "#D8C69A",
     rain: v("--rain", "#285A76"),
     action: v("--action", "#164B38"),
@@ -108,7 +110,7 @@ export function FarmView({
 
   const states = strips.map((s) => (s.plan ? fieldStateAt(s.plan, day) : null));
   const description = strips
-    .map((s, i) => `${s.name}: ${states[i]?.label ?? "not available"}${s.status?.kind === "check" ? ", check field moisture" : ""}`)
+    .map((s, i) => `${s.name}: ${states[i]?.label ?? "not evaluated yet"}${s.status?.kind === "check" ? ", check field moisture" : ""}`)
     .join(". ");
   const show3d = webgl && mounted && (!narrow || tapped);
 
@@ -173,7 +175,7 @@ export function FarmView({
                 hidden={preset !== "overview" && i !== selectedIndex}
               >
                 <strong>{s.name}</strong>
-                <span>{states[i]?.label ?? "Not available"}</span>
+                <span>{states[i]?.label ?? "Not evaluated yet"}</span>
                 {s.status?.kind === "check" ? <StatusPill kind="check">Check field moisture</StatusPill> : null}
               </li>
             ))}
@@ -222,26 +224,18 @@ export function FarmView({
             ))}
           </div>
         </div>
-        <div className="world-jumps">
-          <Button className="btn btn-quiet btn-small" onClick={() => (setPlaying(false), setDay(DEFAULT_DAY))}>
-            Winter
-          </Button>
-          <Button className="btn btn-quiet btn-small" onClick={() => (setPlaying(false), setDay(seasonDay("05-01")))}>
-            Before planting
-          </Button>
-        </div>
         <Segmented
           label="Camera"
           value={preset}
           onChange={setPreset}
           options={[
             { value: "overview", label: "All fields" },
-            { value: "field", label: "Selected field" },
-            { value: "cutaway", label: "Soil cutaway" },
+            { value: "field", label: "One field" },
+            { value: "cutaway", label: "Soil" },
           ]}
         />
         <Button className="btn btn-quiet btn-small" onClick={() => setExpanded((e) => !e)} aria-pressed={expanded}>
-          {expanded ? "Smaller view" : "Larger view"}
+          {expanded ? "Smaller" : "Enlarge"}
         </Button>
       </div>
       <p className="world-legend">

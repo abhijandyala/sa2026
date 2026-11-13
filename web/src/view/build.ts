@@ -1,6 +1,6 @@
 import type { CompareResponse, Era, OtherCheck, Plan, SensitivityResponse, SpringWindow, SpringYear, YearsResponse } from "../api/schema";
 import type { Origin } from "../api/client";
-import { CARDS, type CardContent, type CardKey } from "../content/strategies";
+import { CARDS, type CardContent, type CardKey, type Leg } from "../content/strategies";
 
 /*
   Turns backend responses into exactly what the screen shows. Selection only: it never
@@ -13,6 +13,10 @@ export type DataKind = "draft" | "saved" | "live";
 export interface Selection {
   card: CardKey;
   year: number | null;
+  /** Which winter the strip, charts, 3D and card details show. Default 1 (corn → soybeans). */
+  leg?: Leg;
+  /** The grower's earlier rye end date to compare on the slider, MM-DD. */
+  earlierRyeEnd?: string | null;
   /** Rye end date from the slider, MM-DD; null = the plan's proposed date. */
   ryeEnd?: string | null;
 }
@@ -72,11 +76,30 @@ export type CardStatus =
   | { kind: "unavailable"; text: string }
   | null;
 
+/** Headline numbers for one leg, shown side by side on the card and never added together. */
+export interface LegSummaryVM {
+  leg: Leg;
+  title: string;
+  short: string;
+  plant: string | null;
+  planId: string;
+  available: boolean;
+  reason: string | null;
+  soilMm: number | null;
+  check: { applies: boolean; count: number | null; denominator: number | null };
+  selected: boolean;
+}
+
 export interface CardVM {
   key: CardKey;
   content: CardContent;
+  /** The selected leg's plan; everything below describes that leg. */
   plan: Plan | null;
+  leg: Leg;
+  legs: LegSummaryVM[];
   missing: boolean;
+  /** Why the selected leg is not evaluated (backend reason, code prefix removed). */
+  unavailableReason: string | null;
   /** Soil-protection side: median winter rain on ground with no planned living cover. */
   soil: { mm: number | null; seasons: number | null };
   /** Risk side: springs that would have prompted the NC State field-moisture check. */
@@ -147,7 +170,9 @@ export interface ViewModel {
   windowEra: EraVM | null;
   tiles: TileVM[];
   selectedYear: YearVM | null;
-  shortcuts: { typical: number | null; dry: number | null };
+  shortcuts: { typical: number | null; dry: number | null; wet: number | null };
+  leg: Leg;
+  legTitles: Record<Leg, string>;
   /** Too few complete years, or the backend did not rank this window: no dry labels anywhere. */
   labelsWithheld: boolean;
   /** No meaningful dry contrast (the backend sent no dry replay year). */
@@ -185,8 +210,13 @@ function withheld(w: SpringWindow | null): boolean {
   return w.years.filter((y) => y.status === "complete").length < MIN_COMPLETE_YEARS;
 }
 
+const CROP: Record<string, string> = { soybean: "soybean", field_corn: "corn" };
+export const LEG_TITLE: Record<Leg, string> = { 1: "Corn → soybeans", 2: "Soybeans → corn" };
+const cleanReason = (r: string | undefined) => (r ? r.replace(/^[a-z_]+:\s*/, "").replace(/^./, (c) => c.toUpperCase()) : null);
+
 function plantedLabel(plan: Plan): string {
-  const w = plan.sequence.winter;
+  const w = plan.sequence?.winter;
+  if (!w) return "cover";
   if (w.type === "cover") return "rye";
   if (w.type === "winter_grain") return "wheat";
   return "cover";
@@ -200,8 +230,9 @@ export function buildView(
   const spans = { earlier: span(years.eras.earlier), recent: span(years.eras.recent) };
   const planById = new Map(compare.plans.map((p) => [p.plan_id, p]));
 
+  const leg: Leg = sel.leg ?? 1;
   const selectedContent = CARDS.find((c) => c.key === sel.card) ?? CARDS[0]!;
-  const selectedPlan = planById.get(selectedContent.planId) ?? null;
+  const selectedPlan = planById.get(selectedContent.legs[leg]) ?? null;
   const window = windowFor(compare, selectedPlan);
   const year =
     sel.year ??
@@ -218,6 +249,7 @@ export function buildView(
   const contrastWithheld = labelsWithheld || !window?.shortcuts.dry;
   const typicalYear = labelsWithheld ? null : (window?.shortcuts.typical ?? null);
   const dryYear = contrastWithheld ? null : (window?.shortcuts.dry ?? null);
+  const wetYear = labelsWithheld ? null : (window?.shortcuts.wet ?? null);
 
   const tiles: TileVM[] = (window?.years ?? []).map((y) => ({
     year: y.year,
@@ -274,14 +306,15 @@ export function buildView(
       }
     : null;
 
-  const cards: CardVM[] = CARDS.map((content) => {
-    const plan = planById.get(content.planId) ?? null;
+  // ---------------------------------------------------------------- one leg's details
+  type LegDetail = Omit<CardVM, "key" | "content" | "leg" | "legs">;
+
+  function legDetail(plan: Plan | null): LegDetail {
     if (!plan) {
       return {
-        key: content.key,
-        content,
         plan: null,
         missing: true,
+        unavailableReason: "Not available from the service yet",
         soil: { mm: null, seasons: null },
         check: { applies: false, count: null, denominator: null },
         era: null,
@@ -290,104 +323,136 @@ export function buildView(
         checks: [],
       };
     }
+    if (plan.status === "unavailable" || !plan.sequence || !plan.calendar || !plan.winter) {
+      const reason = cleanReason(plan.reason) ?? "Not evaluated yet";
+      return {
+        plan,
+        missing: true,
+        unavailableReason: reason,
+        soil: { mm: null, seasons: null },
+        check: { applies: false, count: null, denominator: null },
+        era: null,
+        metrics: [],
+        status: { kind: "unavailable", text: "Not evaluated yet" },
+        checks: plan.other_checks,
+      };
+    }
     const w = windowFor(compare, plan);
     const check = plan.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture");
     const ruleApplies = Boolean(check && check.status !== "inapplicable" && check.count !== null);
-
     const eraSource = ruleApplies ? plan.eras["rye_soy_short_gap_moisture"] : withheld(w) ? undefined : w?.eras.dry_spring;
     const eraBase = eraVM(eraSource, spans);
-    const era = eraBase
-      ? { ...eraBase, measure: ruleApplies ? "Springs with a field-moisture check" : "Dry planting windows" }
-      : null;
-
+    const next = CROP[plan.sequence.next_crop_id] ?? plan.sequence.next_crop_id;
     const cal = plan.calendar;
     const metrics: string[] = [];
     if (cal.termination_gap_days !== null) {
-      metrics.push(`${cal.termination_gap_days} days before soybean planting`);
+      metrics.push(`${cal.termination_gap_days} days before ${next} planting`);
       metrics.push(`${cal.living_cover_days_planned} planned days with living ${plantedLabel(plan)}`);
     } else if (cal.harvest_to_plant_days != null) {
-      metrics.push(`${cal.harvest_to_plant_days} days between wheat harvest and soybean planting`);
+      metrics.push(`${cal.harvest_to_plant_days} days between wheat harvest and ${next} planting`);
       metrics.push(`${cal.living_cover_days_planned} planned days with living ${plantedLabel(plan)}`);
     } else {
       metrics.push(`${cal.days_without_planned_cover} days without planned living cover`);
     }
-
     const yr = w?.years.find((y) => y.year === year);
     let status: CardStatus = null;
-    if (!yr || yr.status !== "complete") {
-      status = { kind: "unavailable", text: "Weather unavailable for this year" };
-    } else if (ruleApplies && check!.qualifying_years.includes(year ?? -1)) {
-      status = { kind: "check", text: "Check field moisture" };
-    } else if (!ruleApplies && yr.is_dry && !withheld(w)) {
-      status = { kind: "dry", text: "A dry planting window this year" };
-    }
-
+    if (!yr || yr.status !== "complete") status = { kind: "unavailable", text: "Weather unavailable for this year" };
+    else if (ruleApplies && check!.qualifying_years.includes(year ?? -1)) status = { kind: "check", text: "Check field moisture" };
+    else if (!ruleApplies && yr.is_dry && !withheld(w)) status = { kind: "dry", text: "A dry planting window this year" };
     return {
-      key: content.key,
-      content,
       plan,
       missing: false,
+      unavailableReason: null,
       soil: { mm: plan.winter.per_season_median.rain_mm_without_cover, seasons: plan.winter.eligible_seasons ?? null },
       check: { applies: ruleApplies, count: ruleApplies ? check!.count : null, denominator: ruleApplies ? check!.denominator : null },
-      era,
+      era: eraBase ? { ...eraBase, measure: ruleApplies ? "Springs with a field-moisture check" : "Dry planting windows" } : null,
       metrics,
       status,
       checks: plan.other_checks,
     };
+  }
+
+  function summary(l: Leg, planId: string, d: LegDetail): LegSummaryVM {
+    return {
+      leg: l,
+      title: LEG_TITLE[l],
+      short: l === 1 ? "Corn → soy" : "Soy → corn",
+      plant: d.plan?.sequence?.next_plant ?? null,
+      planId,
+      available: !d.missing,
+      reason: d.unavailableReason,
+      soilMm: d.soil.mm,
+      check: d.check,
+      selected: l === leg,
+    };
+  }
+
+  const cards: CardVM[] = CARDS.map((content) => {
+    const details: Record<Leg, LegDetail> = {
+      1: legDetail(planById.get(content.legs[1]) ?? null),
+      2: legDetail(planById.get(content.legs[2]) ?? null),
+    };
+    return {
+      key: content.key,
+      content,
+      leg,
+      legs: ([1, 2] as Leg[]).map((l) => summary(l, content.legs[l], details[l])),
+      ...details[leg],
+    };
   });
 
-  // ---------------------------------------------------------------- rye slider (Phase 5)
+  // ---------------------------------------------------------------- rye slider (Phase 5), leg 1 of winter cover
   const sens = data.sensitivity;
-  const rye12 = planById.get("rye_12d") ?? null;
-  const rye19 = planById.get("rye_19d") ?? null;
+  const ryeContent = CARDS.find((c) => c.key === "cover")!;
+  const ryePlan = planById.get(sens?.base_plan_id ?? ryeContent.legs[1]) ?? null;
   let rye: RyeVM | null = null;
-  if (sens && rye12 && rye12.sequence.winter.type === "cover" && sens.points.length) {
+  if (sens && ryePlan?.sequence?.winter.type === "cover" && sens.points.length) {
     const pts = sens.points;
-    const proposedMd = rye12.sequence.winter.terminate;
+    const proposedMd = ryePlan.sequence.winter.terminate;
     const proposedIndex = Math.max(0, pts.findIndex((p) => p.terminate === proposedMd));
     const chosenIndex = sel.ryeEnd ? pts.findIndex((p) => p.terminate === sel.ryeEnd) : -1;
     const index = chosenIndex >= 0 ? chosenIndex : proposedIndex;
     const chosen = pts[index]!;
-    const earlierMd = rye19?.sequence.winter.type === "cover" ? rye19.sequence.winter.terminate : null;
-    const earlierIndex = earlierMd ? pts.findIndex((p) => p.terminate === earlierMd) : -1;
+    const earlierIndex = sel.earlierRyeEnd ? pts.findIndex((p) => p.terminate === sel.earlierRyeEnd) : -1;
     let boundaryIndex: number | null = null;
     pts.forEach((p, i) => {
       if (p.gap_days >= 14) boundaryIndex = i;
     });
-    const check12 = rye12.spring_checks.find((c) => c.check_id === sens.check_id);
+    const baseCheck = ryePlan.spring_checks.find((c) => c.check_id === sens.check_id);
     rye = {
       points: pts,
       denominator: sens.denominator,
       index,
       proposedIndex,
-      earlierIndex: earlierIndex >= 0 ? earlierIndex : null,
+      earlierIndex: earlierIndex >= 0 && earlierIndex !== proposedIndex ? earlierIndex : null,
       boundaryIndex,
       chosen,
       proposed: pts[proposedIndex]!,
       plant: sens.fixed.next_plant,
       seed: sens.fixed.seed,
       changed: index !== proposedIndex,
-      thisYear:
-        year === null ? null : { year, flagged: chosen.qualifying_years ? chosen.qualifying_years.includes(year) : null },
+      thisYear: year === null || leg !== 1 ? null : { year, flagged: chosen.qualifying_years ? chosen.qualifying_years.includes(year) : null },
       era: eraVM(chosen.eras, spans),
-      rule: { label: check12?.fires_when ?? "gap < 14 days AND (dry replay OR grower low-moisture concern)", source: check12?.source ?? null },
+      rule: { label: baseCheck?.fires_when ?? "gap < 14 days AND (dry replay OR grower low-moisture concern)", source: baseCheck?.source ?? null },
     };
 
-    // The cover card, its 3D field and its calendar row follow the chosen date.
+    // The winter-cover card's leg 1, its 3D field and its calendar row follow the chosen date.
     if (rye.changed) {
-      const ci = cards.findIndex((c) => c.key === "cover" && c.plan?.plan_id === "rye_12d");
-      const card = cards[ci];
-      if (card && card.plan && card.plan.sequence.winter.type === "cover") {
-        const plan: Plan = {
-          ...card.plan,
-          sequence: { ...card.plan.sequence, winter: { ...card.plan.sequence.winter, terminate: chosen.terminate } },
-          calendar: {
-            ...card.plan.calendar,
-            termination_gap_days: chosen.gap_days,
-            living_cover_days_planned: chosen.living_cover_days_planned,
-          },
-        };
-        const w = windowFor(compare, plan);
+      const ci = cards.findIndex((c) => c.key === "cover");
+      const card = cards[ci]!;
+      const seq = ryePlan.sequence;
+      const moved: Plan = {
+        ...ryePlan,
+        sequence: { ...seq, winter: { ...seq.winter, terminate: chosen.terminate } },
+        calendar: { ...ryePlan.calendar!, termination_gap_days: chosen.gap_days, living_cover_days_planned: chosen.living_cover_days_planned },
+      };
+      const legs = card.legs.map((l) =>
+        l.leg === 1
+          ? { ...l, soilMm: chosen.rain_mm_without_cover_median, check: { applies: true, count: chosen.checks_count, denominator: sens.denominator } }
+          : l,
+      );
+      if (leg === 1) {
+        const w = windowFor(compare, moved);
         const yr = w?.years.find((y) => y.year === year);
         let status: CardStatus = null;
         if (!yr || yr.status !== "complete") status = { kind: "unavailable", text: "Weather unavailable for this year" };
@@ -396,13 +461,16 @@ export function buildView(
         const eraBase = eraVM(chosen.eras, spans);
         cards[ci] = {
           ...card,
-          plan,
+          legs,
+          plan: moved,
           soil: { ...card.soil, mm: chosen.rain_mm_without_cover_median },
           check: { applies: true, count: chosen.checks_count, denominator: sens.denominator },
           era: eraBase ? { ...eraBase, measure: "Springs with a field-moisture check" } : null,
           metrics: [`${chosen.gap_days} days before soybean planting`, `${chosen.living_cover_days_planned} planned days with living rye`],
           status,
         };
+      } else {
+        cards[ci] = { ...card, legs };
       }
     }
   }
@@ -441,7 +509,9 @@ export function buildView(
         },
       };
     }),
-    shortcuts: { typical: typicalYear, dry: dryYear },
+    shortcuts: { typical: typicalYear, dry: dryYear, wet: wetYear },
+    leg,
+    legTitles: LEG_TITLE,
     labelsWithheld,
     contrastWithheld,
     chart,

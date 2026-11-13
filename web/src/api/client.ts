@@ -1,4 +1,4 @@
-import type { ZodType } from "zod";
+import type { ZodType, ZodTypeDef } from "zod";
 import { CompareResponse, ReplayResponse, SensitivityResponse, YearsResponse, type PlanInput } from "./schema";
 
 /*
@@ -39,7 +39,7 @@ function looksLikeHtml(contentType: string | null | undefined, body: string): bo
 
 async function getJson<T>(
   url: string,
-  schema: ZodType<T>,
+  schema: ZodType<T, ZodTypeDef, unknown>,
   opts: { timeoutMs: number; fetchImpl: FetchLike; init?: { method?: string; headers?: Record<string, string>; body?: string } },
 ): Promise<{ ok: true; data: T } | Failure> {
   const controller = new AbortController();
@@ -84,7 +84,7 @@ export function createClient(opts: ClientOptions) {
   const sample = (name: string) => `${opts.sampleBase.replace(/\/$/, "")}/${name}.json`;
   const api = (path: string) => (opts.apiBase ? `${opts.apiBase.replace(/\/$/, "")}${path}` : null);
 
-  async function saved<T>(name: string, schema: ZodType<T>): Promise<Result<T>> {
+  async function saved<T>(name: string, schema: ZodType<T, ZodTypeDef, unknown>): Promise<Result<T>> {
     const r = await getJson(sample(name), schema, base);
     return r.ok ? { ok: true, data: r.data, origin: "saved" } : r;
   }

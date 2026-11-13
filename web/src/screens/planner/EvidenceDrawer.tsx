@@ -66,7 +66,7 @@ export function EvidenceDrawer({
   const dry = view.thresholds.dry_spring;
   const heavy = view.thresholds.heavy_rain;
   const plan = card.plan;
-  const w = plan?.sequence.winter;
+  const w = plan?.sequence?.winter;
   const sources = [...new Set(Object.values(card.content.headings).flat().map((c) => c.source).filter(Boolean))] as Array<keyof typeof SOURCES>;
   const daily = replay.status === "ready" && replay.data.year === y?.year ? replay.data : null;
   const backendReasons =
@@ -74,7 +74,7 @@ export function EvidenceDrawer({
   const valid = daily ? daily.daily.filter((d) => d.precip_mm !== null).length : null;
   const complete = view.window?.years.filter((r) => r.status === "complete").length ?? 0;
   const excluded = view.window?.years.filter((r) => r.status !== "complete").map((r) => r.year) ?? [];
-  const gap = plan?.calendar.termination_gap_days ?? plan?.calendar.harvest_to_plant_days ?? null;
+  const gap = plan?.calendar?.termination_gap_days ?? plan?.calendar?.harvest_to_plant_days ?? null;
   const ryeCheck = plan?.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture");
 
   return (
@@ -205,15 +205,17 @@ export function EvidenceDrawer({
         <h3>
           4. Your plan <SourceChip kind={form.soilSource === "sample" ? "sample" : "farmer"} />
         </h3>
-        {plan ? (
+        {plan?.sequence ? (
           <p>
-            Corn harvest {monthDay(plan.sequence.prev_harvest)}
+            {plan.sequence.previous_crop_id === "soybean" ? "Soybean" : "Corn"} harvest {monthDay(plan.sequence.prev_harvest)}
             {w?.type === "cover" ? `, rye ${monthDay(w.seed)} to ${monthDay(w.terminate)}` : ""}
-            {w?.type === "winter_grain" ? `, wheat ${monthDay(w.plant)} to ${monthDay(w.harvest)}` : ""}, soybeans {monthDay(plan.sequence.next_plant)}.
+            {w?.type === "winter_grain" ? `, wheat ${monthDay(w.plant)} to ${monthDay(w.harvest)}` : ""},{" "}
+            {plan.sequence.next_crop_id === "field_corn" ? "corn" : "soybeans"} {monthDay(plan.sequence.next_plant)}.
+            {plan.dates_assumed ? " Sample dates, assumed until the handbook arrives." : ""}
             {card.key === "cover" && view.rye?.changed ? ` Rye end date moved on the slider from ${monthDay(view.rye.proposed.terminate)}.` : ""}
           </p>
         ) : (
-          <p>Not available.</p>
+          <p>{card.unavailableReason ?? "Not available."}</p>
         )}
         <p className="ev-note">
           Priorities: {priorities.length ? priorities.map((p) => PRIORITY_LABEL[p]).join(", ") : "none chosen"}. Emphasis:{" "}

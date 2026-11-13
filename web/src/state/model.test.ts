@@ -74,8 +74,12 @@ describe("state model", () => {
 });
 
 describe("farm form", () => {
-  it("reads the sample dates from the backend plans", () => {
+  it("reads the sample dates for both winters from the backend plans", () => {
     expect(sample).toMatchObject({
+      soyHarvest: "2027-10-15",
+      rye2Seed: "2027-10-20",
+      rye2End: "2028-04-05",
+      cornPlant: "2028-04-15",
       cornHarvest: "2026-09-20",
       ryeSeed: "2026-10-01",
       ryeEnd: "2027-04-30",
@@ -105,7 +109,14 @@ describe("farm form", () => {
 
   it("sends MM-DD and the grower's concern to the backend, never a guessed value", () => {
     const inputs = toPlanInputs({ ...sample, moistureConcern: "unknown" });
-    const rye = inputs.find((p) => p.plan_id === "rye_12d")!;
+    expect(inputs.map((p) => p.plan_id)).toEqual([
+      "corn_soy__no_cover",
+      "corn_soy__rye",
+      "corn_soy__wheat_dc",
+      "soy_corn__no_cover",
+      "soy_corn__rye",
+    ]);
+    const rye = inputs.find((p) => p.plan_id === "corn_soy__rye")!;
     expect(rye).toMatchObject({ prev_harvest: "09-20", next_plant: "05-12", low_moisture_concern: "unknown" });
     expect(rye.winter).toEqual({ type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-30" });
   });
@@ -131,6 +142,30 @@ describe("shareable links", () => {
 
   it("never puts farm details in the link", () => {
     expect(toHash(base)).not.toMatch(/union|harvest|moisture|irrigation|soil=/i);
+  });
+});
+
+describe("winters", () => {
+  it("choosing winter 2 keeps the plan and resets the year to that window's typical year", () => {
+    const s = reducer(reducer(base, { type: "selectYear", year: 2014 }), { type: "selectLeg", leg: 2 });
+    expect(s).toMatchObject({ leg: 2, year: null });
+    expect(s.applied).toEqual(base.applied);
+  });
+
+  it("checks the order of winter 2's dates", () => {
+    expect(validateForm({ ...sample, rye2End: "2028-04-20" }).rye2End).toBe("Choose a rye end date after seeding and before corn planting.");
+    expect(validateForm({ ...sample, cornPlant: "2027-10-01" }).cornPlant).toBe("Corn planting must come after the soybean harvest.");
+  });
+
+  it("the rye slider opens on winter 1", () => {
+    const s = reducer(reducer(base, { type: "selectLeg", leg: 2 }), { type: "openRye" });
+    expect(s.leg).toBe(1);
+  });
+
+  it("keeps the winter in a shared link", () => {
+    const s = reducer(base, { type: "selectLeg", leg: 2 });
+    expect(toHash(s)).toMatch(/l=2/);
+    expect(fromHash(toHash(s), validYears(compare)).leg).toBe(2);
   });
 });
 

@@ -17,6 +17,10 @@ const LABELS: Record<keyof FarmForm, string> = {
   wheatPlant: "Wheat planting date",
   wheatHarvest: "Wheat harvest date",
   soyDoubleCropPlant: "Soybean planting date after wheat",
+  soyHarvest: "Soybean harvest date",
+  rye2Seed: "Rye seeding date",
+  rye2End: "When would you end the rye before corn?",
+  cornPlant: "Planned corn planting date",
   moistureConcern: "Field moisture concern",
   irrigation: "Irrigation available",
   soilSource: "Where the soil information comes from",
@@ -102,8 +106,7 @@ export function FarmFormDrawer({
         }}
       >
         <p className="form-intro">
-          Dates are for one planned season (fall 2026 to summer 2027). The past springs are replayed for these same calendar
-          dates.
+          A rotation has two winters. Each is replayed against every past spring for the same calendar dates and shown on its own.
         </p>
 
         {errorCount > 1 ? (
@@ -112,6 +115,7 @@ export function FarmFormDrawer({
           </Banner>
         ) : null}
 
+        <p className="form-section">Winter 1: corn → soybeans (2026–27)</p>
         <fieldset className="form-group">
           <legend>What is already planned</legend>
           {date("cornHarvest")}
@@ -127,9 +131,22 @@ export function FarmFormDrawer({
 
         <fieldset className="form-group">
           <legend>Grain crop: winter wheat</legend>
+          <p className="form-note">Not evaluated yet: wheat windows are still being sourced. Your dates are kept for when they are.</p>
           {date("wheatPlant")}
           {date("wheatHarvest")}
           {date("soyDoubleCropPlant")}
+        </fieldset>
+
+        <p className="form-section">Winter 2: soybeans → corn (2027–28)</p>
+        <fieldset className="form-group">
+          <legend>What is already planned</legend>
+          {date("soyHarvest")}
+          {date("cornPlant")}
+        </fieldset>
+        <fieldset className="form-group">
+          <legend>Winter cover: cereal rye</legend>
+          {date("rye2Seed")}
+          {date("rye2End", "NC State catalog rule cr_tt_01 prefers ending rye 7–14 days before corn.")}
         </fieldset>
 
         <fieldset className="form-group">

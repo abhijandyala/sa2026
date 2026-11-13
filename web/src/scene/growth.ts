@@ -38,10 +38,12 @@ export function seasonLabel(day: number): string {
 export const MONTH_TICKS = NAMES.map((name, k) => ({ name, day: LEN.slice(0, k).reduce((a, b) => a + b, 0) }));
 
 export interface FieldState {
-  corn: { show: boolean; h: number };
+  /** Corn: mature and drying before harvest (leg 1), or young corn after planting (leg 2). */
+  corn: { show: boolean; h: number; mature: boolean };
   cover: { show: boolean; h: number; ended: boolean };
   wheat: { show: boolean; h: number; ripe: number };
-  soy: { show: boolean; h: number };
+  /** Soybeans: mature before harvest (leg 2), or seedlings after planting (leg 1). */
+  soy: { show: boolean; h: number; mature: boolean };
   /** 0..1 how much crop residue is drawn on the surface. */
   residue: number;
   /** True while the day is inside the 30-day window before this field's planting. */
@@ -51,20 +53,37 @@ export interface FieldState {
 }
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
+const NAME: Record<string, string> = { field_corn: "Corn", soybean: "Soybean" };
 
-export function fieldStateAt(plan: Plan, day: number): FieldState {
+/** Null when the backend has not given this plan's dates (for example wheat until it is sourced). */
+export function fieldStateAt(plan: Plan, day: number): FieldState | null {
   const seq = plan.sequence;
+  if (!seq) return null;
   const harvest = seasonDay(seq.prev_harvest);
   const plant = seasonDay(seq.next_plant);
   const w = seq.winter;
-  const emergence = plant + 7;
+  const prev = seq.previous_crop_id;
+  const next = seq.next_crop_id;
+  const prevName = NAME[prev] ?? "Crop";
+  const nextName = (NAME[next] ?? "crop").toLowerCase();
+  const emergence = plant + (next === "field_corn" ? 10 : 7);
+  const before = day < harvest;
+  const up = day >= emergence;
 
-  const corn = { show: day < harvest, h: 1 };
-  const soy = { show: day >= emergence, h: 0.12 + 0.68 * clamp01((day - emergence) / 50) };
+  const corn = {
+    show: (prev === "field_corn" && before) || (next === "field_corn" && up),
+    h: prev === "field_corn" && before ? 1 : 0.1 + 0.45 * clamp01((day - emergence) / 60),
+    mature: prev === "field_corn" && before,
+  };
+  const soy = {
+    show: (prev === "soybean" && before) || (next === "soybean" && up),
+    h: prev === "soybean" && before ? 0.9 : 0.12 + 0.68 * clamp01((day - emergence) / 50),
+    mature: prev === "soybean" && before,
+  };
   const cover = { show: false, h: 0, ended: false };
   const wheat = { show: false, h: 0, ripe: 0 };
-  let residue = day >= harvest ? 1 : 0;
-  let label = day < harvest ? "Corn before harvest" : "Corn residue, no living cover";
+  let residue = before ? 0 : 1;
+  let label = before ? `${prevName} before harvest` : `${prevName} residue, no living cover`;
 
   if (w.type === "cover") {
     const seed = seasonDay(w.seed);
@@ -97,16 +116,8 @@ export function fieldStateAt(plan: Plan, day: number): FieldState {
     }
   }
 
-  if (soy.show) label = `${label.split(";")[0]}; soybeans up`;
-  else if (day >= plant) label = `${label.split(";")[0]}; soybeans planted`;
+  if (up) label = `${label.split(";")[0]}; ${nextName} up`;
+  else if (day >= plant) label = `${label.split(";")[0]}; ${nextName} planted`;
 
-  return {
-    corn,
-    cover,
-    wheat,
-    soy,
-    residue,
-    inSpringWindow: day >= plant - 30 && day < plant,
-    label,
-  };
+  return { corn, cover, wheat, soy, residue, inSpringWindow: day >= plant - 30 && day < plant, label };
 }

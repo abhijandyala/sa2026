@@ -28,14 +28,19 @@ const VERDICT: Record<OtherCheck["verdict"], { kind: "ok" | "check" | "unavailab
   inapplicable: { kind: "inapplicable", label: "Does not apply" },
 };
 
+const CROP: Record<string, string> = { field_corn: "Corn", soybean: "Soybeans" };
+
 function sequenceText(plan: Plan | null): string {
-  if (!plan) return "";
-  const w = plan.sequence.winter;
-  const harvest = monthDay(plan.sequence.prev_harvest);
-  const plant = monthDay(plan.sequence.next_plant);
-  if (w.type === "cover") return `Corn (harvest ${harvest}) → rye ${monthDay(w.seed)}–${monthDay(w.terminate)} → soybeans ${plant}`;
-  if (w.type === "winter_grain") return `Corn (harvest ${harvest}) → wheat ${monthDay(w.plant)}–${monthDay(w.harvest)} → soybeans ${plant}`;
-  return `Corn (harvest ${harvest}) → no planted cover → soybeans ${plant}`;
+  const seq = plan?.sequence;
+  if (!seq) return "";
+  const w = seq.winter;
+  const prev = CROP[seq.previous_crop_id] ?? seq.previous_crop_id;
+  const next = (CROP[seq.next_crop_id] ?? seq.next_crop_id).toLowerCase();
+  const harvest = monthDay(seq.prev_harvest);
+  const plant = monthDay(seq.next_plant);
+  if (w.type === "cover") return `${prev} (harvest ${harvest}) → rye ${monthDay(w.seed)}–${monthDay(w.terminate)} → ${next} ${plant}`;
+  if (w.type === "winter_grain") return `${prev} (harvest ${harvest}) → wheat ${monthDay(w.plant)}–${monthDay(w.harvest)} → ${next} ${plant}`;
+  return `${prev} (harvest ${harvest}) → no planted cover → ${next} ${plant}`;
 }
 
 function ClaimList({ claims }: { claims: Claim[] }) {
@@ -70,13 +75,13 @@ export function StrategyCard({
   card: CardVM;
   index: number;
   selected: boolean;
-  earlier?: { plan: Plan; count: number | null; denominator: number | null } | null;
+  earlier?: { terminate: string; gap: number; count: number | null; denominator: number } | null;
   onSelect: () => void;
   onEvidence: () => void;
   onAdjust?: () => void;
   planSource?: "sample" | "farmer";
 }) {
-  const { content, soil, check, era, status } = card;
+  const { content, era, status } = card;
   const h = content.headings;
   return (
     <article
@@ -96,30 +101,57 @@ export function StrategyCard({
       </header>
 
       <div className="sc-headline">
-        <div className="sc-metric-block">
-          <span className={`sc-count${soil.mm === null ? " sc-count-muted" : ""}`}>
-            {soil.mm === null ? "—" : soil.mm.toFixed(0)}
-            {soil.mm === null ? null : <span className="sc-of"> mm</span>}
-            <Src k={["nasa", "calculated"]} />
-          </span>
-          <span className="sc-meaning">
-            median winter rain on ground with no <G id="living-cover">living cover</G>
-            {soil.seasons ? <span className="sc-basis"> · {soil.seasons} winters</span> : null}
-          </span>
-        </div>
-        <div className="sc-metric-block">
-          {check.applies ? (
-            <span className="sc-count">
-              {check.count} <span className="sc-of">of {check.denominator}</span>
-              <Src k={["nasa", "ncstate", "calculated"]} />
-            </span>
-          ) : (
-            <span className="sc-count sc-count-muted sc-na">Does not apply</span>
-          )}
-          <span className="sc-meaning">
-            {check.applies ? "springs would have needed a field-moisture check" : "no cover crop to end before planting"}
-          </span>
-        </div>
+        <table className="sc-legs">
+          <caption className="visually-hidden">Each winter of the rotation, tested on its own against every past spring</caption>
+          <thead>
+            <tr>
+              <th scope="col">Winter</th>
+              <th scope="col">
+                Rain, no <G id="living-cover">cover</G>
+              </th>
+              <th scope="col">Moisture check</th>
+            </tr>
+          </thead>
+          <tbody>
+            {card.legs.map((l) => (
+              <tr key={l.leg} className={l.selected ? "is-current" : undefined} aria-current={l.selected ? "true" : undefined}>
+                <th scope="row">
+                  <span aria-hidden="true">{l.short}</span>
+                  <span className="visually-hidden">{l.title}</span>
+                  <span className="sc-leg-plant">{l.plant ? `plant ${monthDay(l.plant)}` : "dates not set"}</span>
+                </th>
+                {l.available ? (
+                  <>
+                    <td>
+                      <span className="sc-count tabular">{l.soilMm === null ? "—" : l.soilMm.toFixed(0)}</span>
+                      {l.soilMm === null ? null : <span className="sc-of"> mm</span>}
+                      <Src k={["nasa", "calculated"]} />
+                    </td>
+                    <td>
+                      {l.check.applies ? (
+                        <>
+                          <span className="sc-count tabular">{l.check.count}</span>
+                          <span className="sc-of"> of {l.check.denominator}</span>
+                          <Src k={["nasa", "ncstate", "calculated"]} />
+                        </>
+                      ) : (
+                        <span className="sc-na">Does not apply</span>
+                      )}
+                    </td>
+                  </>
+                ) : (
+                  <td colSpan={2} className="sc-leg-na">
+                    Not evaluated yet
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="sc-legs-note">
+          Median winter rain per winter; checks are springs out of all on record. Each winter is tested on its own; rows are never
+          added.
+        </p>
       </div>
 
       {era ? (
@@ -141,7 +173,8 @@ export function StrategyCard({
       )}
 
       <p className="sc-sequence">
-        {sequenceText(card.plan)}
+        <span className="sc-leg-label">{card.legs.find((l) => l.selected)?.title} winter: </span>
+        {card.unavailableReason ? card.unavailableReason : sequenceText(card.plan)}
         <Src k={planSource} />
       </p>
 
@@ -152,10 +185,9 @@ export function StrategyCard({
       </ul>
 
       <div className="sc-earlier">
-        {earlier && earlier.plan.sequence.winter.type === "cover" ? (
+        {earlier ? (
           <p>
-            Ending rye {monthDay(earlier.plan.sequence.winter.terminate)} instead ({earlier.plan.calendar.termination_gap_days} days
-            before planting):{" "}
+            Ending rye {monthDay(earlier.terminate)} instead ({earlier.gap} days before planting):{" "}
             <strong className="tabular">
               {earlier.count ?? "—"} of {earlier.denominator ?? "—"}
             </strong>{" "}

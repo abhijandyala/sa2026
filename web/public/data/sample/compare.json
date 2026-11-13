@@ -8,11 +8,10 @@
  },
  "request_echo": {
   "location_id": "union_county_sample",
-  "plan_ids": [
-   "no_cover",
-   "rye_12d",
-   "rye_19d",
-   "wheat_double_crop"
+  "rotation_ids": [
+   "current_practice",
+   "winter_cover",
+   "add_grain_crop"
   ]
  },
  "thresholds": {
@@ -27,9 +26,9 @@
    "value": 26.9,
    "unit": "mm",
    "method": "bottom 20% of eligible 30-day windows; ties at cutoff count as dry",
+   "window": "04-12..05-11",
    "reference_span": "1981-2025",
-   "status": "complete",
-   "window": "04-12..05-11"
+   "status": "complete"
   }
  },
  "shared_eligible_years": {
@@ -38,8 +37,15 @@
  },
  "plans": [
   {
-   "plan_id": "no_cover",
-   "label": "No planted winter cover",
+   "plan_id": "corn_soy__no_cover",
+   "rotation_id": "current_practice",
+   "leg": 1,
+   "label": "No planted winter cover before soybean",
+   "editable": [
+    "prev_harvest",
+    "next_plant"
+   ],
+   "dates_assumed": true,
    "sequence": {
     "previous_crop_id": "field_corn",
     "prev_harvest": "09-20",
@@ -49,12 +55,15 @@
     "next_crop_id": "soybean",
     "next_plant": "05-12"
    },
+   "spring_window": {
+    "start": "04-12",
+    "end": "05-11"
+   },
    "spring_window_id": "soy_full_season",
    "calendar": {
     "living_cover_days_planned": 0,
     "days_without_planned_cover": 234,
     "termination_gap_days": null,
-    "harvest_to_plant_days": null,
     "establishment": "inapplicable"
    },
    "winter": {
@@ -295,26 +304,12 @@
      }
     ]
    },
-   "spring_checks": [
-    {
-     "check_id": "rye_soy_short_gap_moisture",
-     "rule_ids": [
-      "cr_tt_03"
-     ],
-     "status": "inapplicable",
-     "label": "Rye timing check does not apply to this plan",
-     "count": null,
-     "denominator": null,
-     "pct": null,
-     "qualifying_years": [],
-     "skipped_years": []
-    }
-   ],
+   "spring_checks": [],
    "other_checks": [
     {
      "rule_id": "sb_pw_01",
      "verdict": "preferred",
-     "reason": "May 12 is inside the Apr 20–May 20 full-season window"
+     "reason": "May 12 is inside the Apr 20–May 20 full-season soybean window"
     }
    ],
    "eras": {},
@@ -324,8 +319,17 @@
    }
   },
   {
-   "plan_id": "rye_12d",
-   "label": "Cereal rye, terminated 12 days before soybean",
+   "plan_id": "corn_soy__rye",
+   "rotation_id": "winter_cover",
+   "leg": 1,
+   "label": "Cereal rye before soybean",
+   "editable": [
+    "prev_harvest",
+    "winter.seed",
+    "winter.terminate",
+    "next_plant"
+   ],
+   "dates_assumed": true,
    "sequence": {
     "previous_crop_id": "field_corn",
     "prev_harvest": "09-20",
@@ -338,12 +342,15 @@
     "next_crop_id": "soybean",
     "next_plant": "05-12"
    },
+   "spring_window": {
+    "start": "04-12",
+    "end": "05-11"
+   },
    "spring_window_id": "soy_full_season",
    "calendar": {
     "living_cover_days_planned": 211,
     "days_without_planned_cover": 23,
     "termination_gap_days": 12,
-    "harvest_to_plant_days": null,
     "establishment": "uncertain"
    },
    "winter": {
@@ -617,14 +624,14 @@
    ],
    "other_checks": [
     {
+     "rule_id": "sb_pw_01",
+     "verdict": "preferred",
+     "reason": "May 12 is inside the Apr 20–May 20 full-season soybean window"
+    },
+    {
      "rule_id": "cr_tt_04",
      "verdict": "manual_check",
      "reason": "Applies only if insect pest spillover is a concern; grower input not provided"
-    },
-    {
-     "rule_id": "sb_pw_01",
-     "verdict": "preferred",
-     "reason": "May 12 is inside the Apr 20–May 20 full-season window"
     }
    ],
    "eras": {
@@ -646,627 +653,681 @@
    }
   },
   {
-   "plan_id": "rye_19d",
-   "label": "Cereal rye, terminated 19 days before soybean",
-   "sequence": {
-    "previous_crop_id": "field_corn",
-    "prev_harvest": "09-20",
-    "winter": {
-     "type": "cover",
-     "crop_id": "cereal_rye",
-     "seed": "10-01",
-     "terminate": "04-23"
-    },
-    "next_crop_id": "soybean",
-    "next_plant": "05-12"
-   },
-   "spring_window_id": "soy_full_season",
-   "calendar": {
-    "living_cover_days_planned": 204,
-    "days_without_planned_cover": 30,
-    "termination_gap_days": 19,
-    "harvest_to_plant_days": null,
-    "establishment": "uncertain"
-   },
-   "winter": {
-    "status": "complete",
-    "per_season_median": {
-     "rain_mm_without_cover": 68.6,
-     "heavy_rain_days_without_cover": null
-    },
-    "eligible_seasons": 44,
-    "segments": [
-     "before_establishment",
-     "living_cover",
-     "after_termination"
-    ],
-    "per_season": [
-     {
-      "year": 1981,
-      "rain_mm_without_cover": null,
-      "status": "partial"
-     },
-     {
-      "year": 1982,
-      "rain_mm_without_cover": 27.6,
-      "status": "complete"
-     },
-     {
-      "year": 1983,
-      "rain_mm_without_cover": 90.7,
-      "status": "complete"
-     },
-     {
-      "year": 1984,
-      "rain_mm_without_cover": 72.8,
-      "status": "complete"
-     },
-     {
-      "year": 1985,
-      "rain_mm_without_cover": 92.4,
-      "status": "complete"
-     },
-     {
-      "year": 1986,
-      "rain_mm_without_cover": 105.6,
-      "status": "complete"
-     },
-     {
-      "year": 1987,
-      "rain_mm_without_cover": 48.1,
-      "status": "complete"
-     },
-     {
-      "year": 1988,
-      "rain_mm_without_cover": 117.6,
-      "status": "complete"
-     },
-     {
-      "year": 1989,
-      "rain_mm_without_cover": 93.9,
-      "status": "complete"
-     },
-     {
-      "year": 1990,
-      "rain_mm_without_cover": 154.7,
-      "status": "complete"
-     },
-     {
-      "year": 1991,
-      "rain_mm_without_cover": 76.6,
-      "status": "complete"
-     },
-     {
-      "year": 1992,
-      "rain_mm_without_cover": 49.8,
-      "status": "complete"
-     },
-     {
-      "year": 1993,
-      "rain_mm_without_cover": 46.5,
-      "status": "complete"
-     },
-     {
-      "year": 1994,
-      "rain_mm_without_cover": 66.2,
-      "status": "complete"
-     },
-     {
-      "year": 1995,
-      "rain_mm_without_cover": 28.4,
-      "status": "complete"
-     },
-     {
-      "year": 1996,
-      "rain_mm_without_cover": 3.9,
-      "status": "complete"
-     },
-     {
-      "year": 1997,
-      "rain_mm_without_cover": 20,
-      "status": "complete"
-     },
-     {
-      "year": 1998,
-      "rain_mm_without_cover": 9.3,
-      "status": "complete"
-     },
-     {
-      "year": 1999,
-      "rain_mm_without_cover": 99.9,
-      "status": "complete"
-     },
-     {
-      "year": 2000,
-      "rain_mm_without_cover": 66.8,
-      "status": "complete"
-     },
-     {
-      "year": 2001,
-      "rain_mm_without_cover": 83.2,
-      "status": "complete"
-     },
-     {
-      "year": 2002,
-      "rain_mm_without_cover": 95.8,
-      "status": "complete"
-     },
-     {
-      "year": 2003,
-      "rain_mm_without_cover": 52.9,
-      "status": "complete"
-     },
-     {
-      "year": 2004,
-      "rain_mm_without_cover": 100.9,
-      "status": "complete"
-     },
-     {
-      "year": 2005,
-      "rain_mm_without_cover": 39.8,
-      "status": "complete"
-     },
-     {
-      "year": 2006,
-      "rain_mm_without_cover": 16.5,
-      "status": "complete"
-     },
-     {
-      "year": 2007,
-      "rain_mm_without_cover": 138.3,
-      "status": "complete"
-     },
-     {
-      "year": 2008,
-      "rain_mm_without_cover": 171.5,
-      "status": "complete"
-     },
-     {
-      "year": 2009,
-      "rain_mm_without_cover": 70.4,
-      "status": "complete"
-     },
-     {
-      "year": 2010,
-      "rain_mm_without_cover": 34.9,
-      "status": "complete"
-     },
-     {
-      "year": 2011,
-      "rain_mm_without_cover": 28.9,
-      "status": "complete"
-     },
-     {
-      "year": 2012,
-      "rain_mm_without_cover": 35,
-      "status": "complete"
-     },
-     {
-      "year": 2013,
-      "rain_mm_without_cover": 75.7,
-      "status": "complete"
-     },
-     {
-      "year": 2014,
-      "rain_mm_without_cover": 107,
-      "status": "complete"
-     },
-     {
-      "year": 2015,
-      "rain_mm_without_cover": 19.4,
-      "status": "complete"
-     },
-     {
-      "year": 2016,
-      "rain_mm_without_cover": 55.3,
-      "status": "complete"
-     },
-     {
-      "year": 2017,
-      "rain_mm_without_cover": 35.7,
-      "status": "complete"
-     },
-     {
-      "year": 2018,
-      "rain_mm_without_cover": 88.8,
-      "status": "complete"
-     },
-     {
-      "year": 2019,
-      "rain_mm_without_cover": 27.4,
-      "status": "complete"
-     },
-     {
-      "year": 2020,
-      "rain_mm_without_cover": 29.3,
-      "status": "complete"
-     },
-     {
-      "year": 2021,
-      "rain_mm_without_cover": 33.1,
-      "status": "complete"
-     },
-     {
-      "year": 2022,
-      "rain_mm_without_cover": 123.1,
-      "status": "complete"
-     },
-     {
-      "year": 2023,
-      "rain_mm_without_cover": 178.5,
-      "status": "complete"
-     },
-     {
-      "year": 2024,
-      "rain_mm_without_cover": 119.7,
-      "status": "complete"
-     },
-     {
-      "year": 2025,
-      "rain_mm_without_cover": 91.3,
-      "status": "complete"
-     }
-    ]
-   },
-   "spring_checks": [
-    {
-     "check_id": "rye_soy_short_gap_moisture",
-     "rule_ids": [
-      "cr_tt_03"
-     ],
-     "label": "Gap is 14 days or more; short-gap check clears",
-     "fires_when": "gap < 14 days AND (dry replay OR grower low-moisture concern)",
-     "count": 0,
-     "denominator": 45,
-     "pct": 0,
-     "qualifying_years": [],
-     "skipped_years": [],
-     "source": {
-      "title": "NC State Soybean Production Guide: Rotational Considerations",
-      "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations"
-     }
-    }
-   ],
-   "other_checks": [
-    {
-     "rule_id": "cr_tt_04",
-     "verdict": "manual_check",
-     "reason": "Applies only if insect pest spillover is a concern; grower input not provided"
-    },
-    {
-     "rule_id": "sb_pw_01",
-     "verdict": "preferred",
-     "reason": "May 12 is inside the Apr 20–May 20 full-season window"
-    }
-   ],
-   "eras": {
-    "rye_soy_short_gap_moisture": {
-     "earlier": {
-      "count": 0,
-      "denominator": 20,
-      "pct": 0
-     },
-     "recent": {
-      "count": 0,
-      "denominator": 20,
-      "pct": 0
-     },
-     "diff_pp": 0,
-     "result": "similar",
-     "caveat": "Descriptive comparison of two periods; not a trend, cause, or forecast."
-    }
-   }
-  },
-  {
-   "plan_id": "wheat_double_crop",
+   "plan_id": "corn_soy__wheat_dc",
+   "rotation_id": "add_grain_crop",
+   "leg": 1,
    "label": "Winter wheat for grain, then double-crop soybean",
-   "sequence": {
-    "previous_crop_id": "field_corn",
-    "prev_harvest": "09-20",
-    "winter": {
-     "type": "winter_grain",
-     "crop_id": "winter_wheat",
-     "plant": "10-25",
-     "harvest": "06-10"
-    },
-    "next_crop_id": "soybean",
-    "next_plant": "06-15"
-   },
-   "spring_window_id": "soy_double_crop",
-   "calendar": {
-    "living_cover_days_planned": 228,
-    "days_without_planned_cover": 40,
-    "termination_gap_days": null,
-    "harvest_to_plant_days": 5,
-    "establishment": "uncertain"
-   },
-   "winter": {
-    "status": "complete",
-    "per_season_median": {
-     "rain_mm_without_cover": 71.6,
-     "heavy_rain_days_without_cover": null
-    },
-    "eligible_seasons": 44,
-    "segments": [
-     "before_establishment",
-     "living_cover",
-     "after_termination"
-    ],
-    "per_season": [
-     {
-      "year": 1981,
-      "rain_mm_without_cover": null,
-      "status": "partial"
-     },
-     {
-      "year": 1982,
-      "rain_mm_without_cover": 50.4,
-      "status": "complete"
-     },
-     {
-      "year": 1983,
-      "rain_mm_without_cover": 17.9,
-      "status": "complete"
-     },
-     {
-      "year": 1984,
-      "rain_mm_without_cover": 180.3,
-      "status": "complete"
-     },
-     {
-      "year": 1985,
-      "rain_mm_without_cover": 53.9,
-      "status": "complete"
-     },
-     {
-      "year": 1986,
-      "rain_mm_without_cover": 197.6,
-      "status": "complete"
-     },
-     {
-      "year": 1987,
-      "rain_mm_without_cover": 146.1,
-      "status": "complete"
-     },
-     {
-      "year": 1988,
-      "rain_mm_without_cover": 126.3,
-      "status": "complete"
-     },
-     {
-      "year": 1989,
-      "rain_mm_without_cover": 120.9,
-      "status": "complete"
-     },
-     {
-      "year": 1990,
-      "rain_mm_without_cover": 69.6,
-      "status": "complete"
-     },
-     {
-      "year": 1991,
-      "rain_mm_without_cover": 138.5,
-      "status": "complete"
-     },
-     {
-      "year": 1992,
-      "rain_mm_without_cover": 16.9,
-      "status": "complete"
-     },
-     {
-      "year": 1993,
-      "rain_mm_without_cover": 53.1,
-      "status": "complete"
-     },
-     {
-      "year": 1994,
-      "rain_mm_without_cover": 81.7,
-      "status": "complete"
-     },
-     {
-      "year": 1995,
-      "rain_mm_without_cover": 30.2,
-      "status": "complete"
-     },
-     {
-      "year": 1996,
-      "rain_mm_without_cover": 6.7,
-      "status": "complete"
-     },
-     {
-      "year": 1997,
-      "rain_mm_without_cover": 3.3,
-      "status": "complete"
-     },
-     {
-      "year": 1998,
-      "rain_mm_without_cover": 43.5,
-      "status": "complete"
-     },
-     {
-      "year": 1999,
-      "rain_mm_without_cover": 13.8,
-      "status": "complete"
-     },
-     {
-      "year": 2000,
-      "rain_mm_without_cover": 73.6,
-      "status": "complete"
-     },
-     {
-      "year": 2001,
-      "rain_mm_without_cover": 99.5,
-      "status": "complete"
-     },
-     {
-      "year": 2002,
-      "rain_mm_without_cover": 78.8,
-      "status": "complete"
-     },
-     {
-      "year": 2003,
-      "rain_mm_without_cover": 66.3,
-      "status": "complete"
-     },
-     {
-      "year": 2004,
-      "rain_mm_without_cover": 124.5,
-      "status": "complete"
-     },
-     {
-      "year": 2005,
-      "rain_mm_without_cover": 129.3,
-      "status": "complete"
-     },
-     {
-      "year": 2006,
-      "rain_mm_without_cover": 27.8,
-      "status": "complete"
-     },
-     {
-      "year": 2007,
-      "rain_mm_without_cover": 114.5,
-      "status": "complete"
-     },
-     {
-      "year": 2008,
-      "rain_mm_without_cover": 67.4,
-      "status": "complete"
-     },
-     {
-      "year": 2009,
-      "rain_mm_without_cover": 138,
-      "status": "complete"
-     },
-     {
-      "year": 2010,
-      "rain_mm_without_cover": 76.4,
-      "status": "complete"
-     },
-     {
-      "year": 2011,
-      "rain_mm_without_cover": 36.4,
-      "status": "complete"
-     },
-     {
-      "year": 2012,
-      "rain_mm_without_cover": 107.7,
-      "status": "complete"
-     },
-     {
-      "year": 2013,
-      "rain_mm_without_cover": 147,
-      "status": "complete"
-     },
-     {
-      "year": 2014,
-      "rain_mm_without_cover": 164.3,
-      "status": "complete"
-     },
-     {
-      "year": 2015,
-      "rain_mm_without_cover": 45.6,
-      "status": "complete"
-     },
-     {
-      "year": 2016,
-      "rain_mm_without_cover": 51.1,
-      "status": "complete"
-     },
-     {
-      "year": 2017,
-      "rain_mm_without_cover": 49.7,
-      "status": "complete"
-     },
-     {
-      "year": 2018,
-      "rain_mm_without_cover": 141.9,
-      "status": "complete"
-     },
-     {
-      "year": 2019,
-      "rain_mm_without_cover": 44,
-      "status": "complete"
-     },
-     {
-      "year": 2020,
-      "rain_mm_without_cover": 30.3,
-      "status": "complete"
-     },
-     {
-      "year": 2021,
-      "rain_mm_without_cover": 24.1,
-      "status": "complete"
-     },
-     {
-      "year": 2022,
-      "rain_mm_without_cover": 45.4,
-      "status": "complete"
-     },
-     {
-      "year": 2023,
-      "rain_mm_without_cover": 225.4,
-      "status": "complete"
-     },
-     {
-      "year": 2024,
-      "rain_mm_without_cover": 113,
-      "status": "complete"
-     },
-     {
-      "year": 2025,
-      "rain_mm_without_cover": 89,
-      "status": "complete"
-     }
-    ]
-   },
-   "spring_checks": [
-    {
-     "check_id": "rye_soy_short_gap_moisture",
-     "rule_ids": [
-      "cr_tt_03"
-     ],
-     "status": "inapplicable",
-     "label": "Rye timing check does not apply to this plan",
-     "count": null,
-     "denominator": null,
-     "pct": null,
-     "qualifying_years": [],
-     "skipped_years": []
-    }
-   ],
+   "status": "unavailable",
+   "reason": "catalog_missing: wheat planting and harvest windows and the double-crop soybean window are not yet sourced",
+   "spring_checks": [],
    "other_checks": [
-    {
-     "rule_id": "ww_timing",
-     "verdict": "unknown",
-     "status": "unavailable",
-     "reason": "catalog_missing: wheat planting and harvest windows are not yet sourced"
-    },
-    {
-     "rule_id": "sb_pw_03",
-     "verdict": "caution",
-     "reason": "Planting past the third week of May; NC State reports yield declines"
-    },
     {
      "rule_id": "ww_rc_01",
      "verdict": "caution",
      "reason": "Wheat after corn: check head scab risk"
+    },
+    {
+     "rule_id": "sb_rc_03",
+     "verdict": "caution",
+     "reason": "Double-crop soybeans: maturity groups under 4 need a caution"
+    }
+   ],
+   "eras": {}
+  },
+  {
+   "plan_id": "soy_corn__no_cover",
+   "rotation_id": "current_practice",
+   "leg": 2,
+   "label": "No planted winter cover before corn",
+   "editable": [
+    "prev_harvest",
+    "next_plant"
+   ],
+   "dates_assumed": true,
+   "sequence": {
+    "previous_crop_id": "soybean",
+    "prev_harvest": "10-15",
+    "winter": {
+     "type": "none"
+    },
+    "next_crop_id": "field_corn",
+    "next_plant": "04-15"
+   },
+   "spring_window": {
+    "start": "03-16",
+    "end": "04-14"
+   },
+   "spring_window_id": "corn_planting",
+   "calendar": {
+    "living_cover_days_planned": 0,
+    "days_without_planned_cover": 182,
+    "termination_gap_days": null,
+    "establishment": "inapplicable"
+   },
+   "winter": {
+    "status": "complete",
+    "per_season_median": {
+     "rain_mm_without_cover": 306.4,
+     "heavy_rain_days_without_cover": null
+    },
+    "eligible_seasons": 44,
+    "segments": [
+     "no_planned_cover"
+    ],
+    "per_season": [
+     {
+      "year": 1981,
+      "rain_mm_without_cover": null,
+      "status": "partial"
+     },
+     {
+      "year": 1982,
+      "rain_mm_without_cover": 78.3,
+      "status": "complete"
+     },
+     {
+      "year": 1983,
+      "rain_mm_without_cover": 371.5,
+      "status": "complete"
+     },
+     {
+      "year": 1984,
+      "rain_mm_without_cover": 443.5,
+      "status": "complete"
+     },
+     {
+      "year": 1985,
+      "rain_mm_without_cover": 472.6,
+      "status": "complete"
+     },
+     {
+      "year": 1986,
+      "rain_mm_without_cover": 859.8,
+      "status": "complete"
+     },
+     {
+      "year": 1987,
+      "rain_mm_without_cover": 556,
+      "status": "complete"
+     },
+     {
+      "year": 1988,
+      "rain_mm_without_cover": 541,
+      "status": "complete"
+     },
+     {
+      "year": 1989,
+      "rain_mm_without_cover": 305.9,
+      "status": "complete"
+     },
+     {
+      "year": 1990,
+      "rain_mm_without_cover": 305.2,
+      "status": "complete"
+     },
+     {
+      "year": 1991,
+      "rain_mm_without_cover": 306.8,
+      "status": "complete"
+     },
+     {
+      "year": 1992,
+      "rain_mm_without_cover": 195.8,
+      "status": "complete"
+     },
+     {
+      "year": 1993,
+      "rain_mm_without_cover": 293.7,
+      "status": "complete"
+     },
+     {
+      "year": 1994,
+      "rain_mm_without_cover": 181.9,
+      "status": "complete"
+     },
+     {
+      "year": 1995,
+      "rain_mm_without_cover": 144.1,
+      "status": "complete"
+     },
+     {
+      "year": 1996,
+      "rain_mm_without_cover": 66.2,
+      "status": "complete"
+     },
+     {
+      "year": 1997,
+      "rain_mm_without_cover": 76.1,
+      "status": "complete"
+     },
+     {
+      "year": 1998,
+      "rain_mm_without_cover": 106.8,
+      "status": "complete"
+     },
+     {
+      "year": 1999,
+      "rain_mm_without_cover": 258.5,
+      "status": "complete"
+     },
+     {
+      "year": 2000,
+      "rain_mm_without_cover": 380.4,
+      "status": "complete"
+     },
+     {
+      "year": 2001,
+      "rain_mm_without_cover": 634.6,
+      "status": "complete"
+     },
+     {
+      "year": 2002,
+      "rain_mm_without_cover": 375.4,
+      "status": "complete"
+     },
+     {
+      "year": 2003,
+      "rain_mm_without_cover": 345.4,
+      "status": "complete"
+     },
+     {
+      "year": 2004,
+      "rain_mm_without_cover": 372.9,
+      "status": "complete"
+     },
+     {
+      "year": 2005,
+      "rain_mm_without_cover": 320.5,
+      "status": "complete"
+     },
+     {
+      "year": 2006,
+      "rain_mm_without_cover": 316.9,
+      "status": "complete"
+     },
+     {
+      "year": 2007,
+      "rain_mm_without_cover": 214.3,
+      "status": "complete"
+     },
+     {
+      "year": 2008,
+      "rain_mm_without_cover": 318.4,
+      "status": "complete"
+     },
+     {
+      "year": 2009,
+      "rain_mm_without_cover": 397.6,
+      "status": "complete"
+     },
+     {
+      "year": 2010,
+      "rain_mm_without_cover": 212.4,
+      "status": "complete"
+     },
+     {
+      "year": 2011,
+      "rain_mm_without_cover": 186.8,
+      "status": "complete"
+     },
+     {
+      "year": 2012,
+      "rain_mm_without_cover": 488.5,
+      "status": "complete"
+     },
+     {
+      "year": 2013,
+      "rain_mm_without_cover": 486.5,
+      "status": "complete"
+     },
+     {
+      "year": 2014,
+      "rain_mm_without_cover": 260.7,
+      "status": "complete"
+     },
+     {
+      "year": 2015,
+      "rain_mm_without_cover": 296.5,
+      "status": "complete"
+     },
+     {
+      "year": 2016,
+      "rain_mm_without_cover": 94.2,
+      "status": "complete"
+     },
+     {
+      "year": 2017,
+      "rain_mm_without_cover": 242.9,
+      "status": "complete"
+     },
+     {
+      "year": 2018,
+      "rain_mm_without_cover": 420.3,
+      "status": "complete"
+     },
+     {
+      "year": 2019,
+      "rain_mm_without_cover": 256.5,
+      "status": "complete"
+     },
+     {
+      "year": 2020,
+      "rain_mm_without_cover": 152.5,
+      "status": "complete"
+     },
+     {
+      "year": 2021,
+      "rain_mm_without_cover": 260.8,
+      "status": "complete"
+     },
+     {
+      "year": 2022,
+      "rain_mm_without_cover": 291.1,
+      "status": "complete"
+     },
+     {
+      "year": 2023,
+      "rain_mm_without_cover": 657.4,
+      "status": "complete"
+     },
+     {
+      "year": 2024,
+      "rain_mm_without_cover": 357.2,
+      "status": "complete"
+     },
+     {
+      "year": 2025,
+      "rain_mm_without_cover": 310.9,
+      "status": "complete"
+     }
+    ]
+   },
+   "spring_checks": [],
+   "other_checks": [
+    {
+     "rule_id": "fc_pw_01",
+     "verdict": "manual_check",
+     "reason": "Plant corn once soil is at or above 55 F; no soil temperature input. Conflicts with fc_pw_02 (50 F)"
+    },
+    {
+     "rule_id": "fc_pw_02",
+     "verdict": "manual_check",
+     "reason": "Below 50 F soil temperature is a germination concern; no soil temperature input. Conflicts with fc_pw_01 (55 F)"
+    },
+    {
+     "rule_id": "fc_wt_03",
+     "verdict": "manual_check",
+     "reason": "Choose hybrid and date so silking avoids July 1–20"
     }
    ],
    "eras": {},
-   "status": "partial",
-   "_frontend_note": "Frontend-only draft plan. Backend wheat path is unavailable until the wheat catalog rows land (backend Phase 12)."
+   "residue_context": {
+    "status": "unknown",
+    "note": "Soybean residue may remain; not measured"
+   }
+  },
+  {
+   "plan_id": "soy_corn__rye",
+   "rotation_id": "winter_cover",
+   "leg": 2,
+   "label": "Cereal rye before corn",
+   "editable": [
+    "prev_harvest",
+    "winter.seed",
+    "winter.terminate",
+    "next_plant"
+   ],
+   "dates_assumed": true,
+   "sequence": {
+    "previous_crop_id": "soybean",
+    "prev_harvest": "10-15",
+    "winter": {
+     "type": "cover",
+     "crop_id": "cereal_rye",
+     "seed": "10-20",
+     "terminate": "04-05"
+    },
+    "next_crop_id": "field_corn",
+    "next_plant": "04-15"
+   },
+   "spring_window": {
+    "start": "03-16",
+    "end": "04-14"
+   },
+   "spring_window_id": "corn_planting",
+   "calendar": {
+    "living_cover_days_planned": 167,
+    "days_without_planned_cover": 15,
+    "termination_gap_days": 10,
+    "establishment": "uncertain"
+   },
+   "winter": {
+    "status": "complete",
+    "per_season_median": {
+     "rain_mm_without_cover": 28.3,
+     "heavy_rain_days_without_cover": null
+    },
+    "eligible_seasons": 44,
+    "segments": [
+     "before_establishment",
+     "living_cover",
+     "after_termination"
+    ],
+    "per_season": [
+     {
+      "year": 1981,
+      "rain_mm_without_cover": null,
+      "status": "partial"
+     },
+     {
+      "year": 1982,
+      "rain_mm_without_cover": 0,
+      "status": "complete"
+     },
+     {
+      "year": 1983,
+      "rain_mm_without_cover": 50.2,
+      "status": "complete"
+     },
+     {
+      "year": 1984,
+      "rain_mm_without_cover": 73.1,
+      "status": "complete"
+     },
+     {
+      "year": 1985,
+      "rain_mm_without_cover": 19.3,
+      "status": "complete"
+     },
+     {
+      "year": 1986,
+      "rain_mm_without_cover": 0,
+      "status": "complete"
+     },
+     {
+      "year": 1987,
+      "rain_mm_without_cover": 82.1,
+      "status": "complete"
+     },
+     {
+      "year": 1988,
+      "rain_mm_without_cover": 40.4,
+      "status": "complete"
+     },
+     {
+      "year": 1989,
+      "rain_mm_without_cover": 24.3,
+      "status": "complete"
+     },
+     {
+      "year": 1990,
+      "rain_mm_without_cover": 42.1,
+      "status": "complete"
+     },
+     {
+      "year": 1991,
+      "rain_mm_without_cover": 27.3,
+      "status": "complete"
+     },
+     {
+      "year": 1992,
+      "rain_mm_without_cover": 22.3,
+      "status": "complete"
+     },
+     {
+      "year": 1993,
+      "rain_mm_without_cover": 40.8,
+      "status": "complete"
+     },
+     {
+      "year": 1994,
+      "rain_mm_without_cover": 3.4,
+      "status": "complete"
+     },
+     {
+      "year": 1995,
+      "rain_mm_without_cover": 14.7,
+      "status": "complete"
+     },
+     {
+      "year": 1996,
+      "rain_mm_without_cover": 10.6,
+      "status": "complete"
+     },
+     {
+      "year": 1997,
+      "rain_mm_without_cover": 0.1,
+      "status": "complete"
+     },
+     {
+      "year": 1998,
+      "rain_mm_without_cover": 8.4,
+      "status": "complete"
+     },
+     {
+      "year": 1999,
+      "rain_mm_without_cover": 21.8,
+      "status": "complete"
+     },
+     {
+      "year": 2000,
+      "rain_mm_without_cover": 35.8,
+      "status": "complete"
+     },
+     {
+      "year": 2001,
+      "rain_mm_without_cover": 53.5,
+      "status": "complete"
+     },
+     {
+      "year": 2002,
+      "rain_mm_without_cover": 48.4,
+      "status": "complete"
+     },
+     {
+      "year": 2003,
+      "rain_mm_without_cover": 3,
+      "status": "complete"
+     },
+     {
+      "year": 2004,
+      "rain_mm_without_cover": 61.3,
+      "status": "complete"
+     },
+     {
+      "year": 2005,
+      "rain_mm_without_cover": 27,
+      "status": "complete"
+     },
+     {
+      "year": 2006,
+      "rain_mm_without_cover": 80.7,
+      "status": "complete"
+     },
+     {
+      "year": 2007,
+      "rain_mm_without_cover": 26.4,
+      "status": "complete"
+     },
+     {
+      "year": 2008,
+      "rain_mm_without_cover": 29.9,
+      "status": "complete"
+     },
+     {
+      "year": 2009,
+      "rain_mm_without_cover": 34.5,
+      "status": "complete"
+     },
+     {
+      "year": 2010,
+      "rain_mm_without_cover": 2.3,
+      "status": "complete"
+     },
+     {
+      "year": 2011,
+      "rain_mm_without_cover": 29.3,
+      "status": "complete"
+     },
+     {
+      "year": 2012,
+      "rain_mm_without_cover": 84.3,
+      "status": "complete"
+     },
+     {
+      "year": 2013,
+      "rain_mm_without_cover": 68.5,
+      "status": "complete"
+     },
+     {
+      "year": 2014,
+      "rain_mm_without_cover": 0.7,
+      "status": "complete"
+     },
+     {
+      "year": 2015,
+      "rain_mm_without_cover": 48.7,
+      "status": "complete"
+     },
+     {
+      "year": 2016,
+      "rain_mm_without_cover": 2.2,
+      "status": "complete"
+     },
+     {
+      "year": 2017,
+      "rain_mm_without_cover": 25,
+      "status": "complete"
+     },
+     {
+      "year": 2018,
+      "rain_mm_without_cover": 45,
+      "status": "complete"
+     },
+     {
+      "year": 2019,
+      "rain_mm_without_cover": 12.3,
+      "status": "complete"
+     },
+     {
+      "year": 2020,
+      "rain_mm_without_cover": 18.1,
+      "status": "complete"
+     },
+     {
+      "year": 2021,
+      "rain_mm_without_cover": 8.2,
+      "status": "complete"
+     },
+     {
+      "year": 2022,
+      "rain_mm_without_cover": 30.3,
+      "status": "complete"
+     },
+     {
+      "year": 2023,
+      "rain_mm_without_cover": 57.2,
+      "status": "complete"
+     },
+     {
+      "year": 2024,
+      "rain_mm_without_cover": 73.1,
+      "status": "complete"
+     },
+     {
+      "year": 2025,
+      "rain_mm_without_cover": 49.1,
+      "status": "complete"
+     }
+    ]
+   },
+   "spring_checks": [],
+   "other_checks": [
+    {
+     "rule_id": "cr_tt_01",
+     "verdict": "preferred",
+     "reason": "Gap 10 days is within 7–14 days before corn"
+    },
+    {
+     "rule_id": "cr_nut_01",
+     "verdict": "manual_check",
+     "reason": "Corn after rye: plan the nitrogen rate, rye can tie up nitrogen"
+    },
+    {
+     "rule_id": "fc_nut_02",
+     "verdict": "acceptable",
+     "reason": "Starter fertilizer can speed early growth in no-till corn after a small grain cover"
+    },
+    {
+     "rule_id": "fc_pw_01",
+     "verdict": "manual_check",
+     "reason": "Plant corn once soil is at or above 55 F; no soil temperature input. Conflicts with fc_pw_02 (50 F)"
+    },
+    {
+     "rule_id": "fc_pw_02",
+     "verdict": "manual_check",
+     "reason": "Below 50 F soil temperature is a germination concern; no soil temperature input. Conflicts with fc_pw_01 (55 F)"
+    },
+    {
+     "rule_id": "fc_wt_03",
+     "verdict": "manual_check",
+     "reason": "Choose hybrid and date so silking avoids July 1–20"
+    }
+   ],
+   "eras": {}
   }
  ],
  "spring_window": {
-  "start": "04-12",
-  "end": "05-11",
-  "note": "Same for no_cover and the rye plans because the planting date matches; rye date edits do not change it"
+  "note": "Per plan. Leg 1 plans share 04-12..05-11; leg 2 plans share 03-16..04-14. Termination edits never change it; planting-date edits do."
  },
+ "rotations": [
+  {
+   "rotation_id": "current_practice",
+   "label": "Current practice",
+   "legs": [
+    {
+     "leg": 1,
+     "plan_id": "corn_soy__no_cover"
+    },
+    {
+     "leg": 2,
+     "plan_id": "soy_corn__no_cover"
+    }
+   ]
+  },
+  {
+   "rotation_id": "winter_cover",
+   "label": "Winter cover",
+   "legs": [
+    {
+     "leg": 1,
+     "plan_id": "corn_soy__rye"
+    },
+    {
+     "leg": 2,
+     "plan_id": "soy_corn__rye"
+    }
+   ]
+  },
+  {
+   "rotation_id": "add_grain_crop",
+   "label": "Add a grain crop",
+   "legs": [
+    {
+     "leg": 1,
+     "plan_id": "corn_soy__wheat_dc"
+    },
+    {
+     "leg": 2,
+     "plan_id": "soy_corn__no_cover"
+    }
+   ]
+  }
+ ],
  "spring_windows": {
   "soy_full_season": {
    "id": "soy_full_season",
-   "label": "30 days before full-season soybean planting",
+   "label": "30 days before soybean planting",
    "plant": "05-12",
    "start": "04-12",
    "end": "05-11",
@@ -1274,6 +1335,7 @@
     "value": 26.9,
     "unit": "mm",
     "method": "bottom 20% of eligible 30-day windows; ties at cutoff count as dry",
+    "window": "04-12..05-11",
     "reference_span": "1981-2025",
     "status": "complete"
    },
@@ -1890,628 +1952,629 @@
     }
    }
   },
-  "soy_double_crop": {
-   "id": "soy_double_crop",
-   "label": "30 days before double-crop soybean planting",
-   "plant": "06-15",
-   "start": "05-16",
-   "end": "06-14",
+  "corn_planting": {
+   "id": "corn_planting",
+   "label": "30 days before corn planting",
+   "plant": "04-15",
+   "start": "03-16",
+   "end": "04-14",
    "threshold": {
-    "value": 18.2,
+    "value": 20.2,
     "unit": "mm",
     "method": "bottom 20% of eligible 30-day windows; ties at cutoff count as dry",
+    "window": "03-16..04-14",
     "reference_span": "1981-2025",
     "status": "complete"
    },
-   "median_mm": 58.8,
+   "median_mm": 69.4,
    "dry_count": 9,
    "denominator": 45,
    "shortcuts": {
-    "typical": 1993,
-    "dry": 2021,
-    "wet": 2023
+    "typical": 2001,
+    "dry": 2019,
+    "wet": 2012
    },
    "years": [
     {
      "year": 1981,
-     "start": "1981-05-16",
-     "end": "1981-06-14",
-     "total_mm": 22.1,
-     "status": "complete",
-     "rank": 11,
-     "of": 45,
-     "percentile": 24.4,
-     "is_dry": false,
-     "gwettop_window_mean": 0.62,
-     "gwetroot_window_mean": 0.66
-    },
-    {
-     "year": 1982,
-     "start": "1982-05-16",
-     "end": "1982-06-14",
-     "total_mm": 17.6,
-     "status": "complete",
-     "rank": 8,
-     "of": 45,
-     "percentile": 17.8,
-     "is_dry": true,
-     "gwettop_window_mean": 0.26,
-     "gwetroot_window_mean": 0.27
-    },
-    {
-     "year": 1983,
-     "start": "1983-05-16",
-     "end": "1983-06-14",
-     "total_mm": 55.1,
-     "status": "complete",
-     "rank": 21,
-     "of": 45,
-     "percentile": 46.7,
-     "is_dry": false,
-     "gwettop_window_mean": 0.79,
-     "gwetroot_window_mean": 0.84
-    },
-    {
-     "year": 1984,
-     "start": "1984-05-16",
-     "end": "1984-06-14",
-     "total_mm": 21.7,
-     "status": "complete",
-     "rank": 10,
-     "of": 45,
-     "percentile": 22.2,
-     "is_dry": false,
-     "gwettop_window_mean": 0.43,
-     "gwetroot_window_mean": 0.47
-    },
-    {
-     "year": 1985,
-     "start": "1985-05-16",
-     "end": "1985-06-14",
-     "total_mm": 99.4,
-     "status": "complete",
-     "rank": 32,
-     "of": 45,
-     "percentile": 71.1,
-     "is_dry": false,
-     "gwettop_window_mean": 0.8,
-     "gwetroot_window_mean": 0.84
-    },
-    {
-     "year": 1986,
-     "start": "1986-05-16",
-     "end": "1986-06-14",
-     "total_mm": 147.4,
-     "status": "complete",
-     "rank": 39,
-     "of": 45,
-     "percentile": 86.7,
-     "is_dry": false,
-     "gwettop_window_mean": 0.88,
-     "gwetroot_window_mean": 0.92
-    },
-    {
-     "year": 1987,
-     "start": "1987-05-16",
-     "end": "1987-06-14",
-     "total_mm": 138.7,
-     "status": "complete",
-     "rank": 38,
-     "of": 45,
-     "percentile": 84.4,
-     "is_dry": false,
-     "gwettop_window_mean": 0.87,
-     "gwetroot_window_mean": 0.9
-    },
-    {
-     "year": 1988,
-     "start": "1988-05-16",
-     "end": "1988-06-14",
-     "total_mm": 72.8,
-     "status": "complete",
-     "rank": 26,
-     "of": 45,
-     "percentile": 57.8,
-     "is_dry": false,
-     "gwettop_window_mean": 0.8,
-     "gwetroot_window_mean": 0.85
-    },
-    {
-     "year": 1989,
-     "start": "1989-05-16",
-     "end": "1989-06-14",
-     "total_mm": 28.9,
-     "status": "complete",
-     "rank": 15,
-     "of": 45,
-     "percentile": 33.3,
-     "is_dry": false,
-     "gwettop_window_mean": 0.51,
-     "gwetroot_window_mean": 0.55
-    },
-    {
-     "year": 1990,
-     "start": "1990-05-16",
-     "end": "1990-06-14",
-     "total_mm": 118,
-     "status": "complete",
-     "rank": 35,
-     "of": 45,
-     "percentile": 77.8,
-     "is_dry": false,
-     "gwettop_window_mean": 0.84,
-     "gwetroot_window_mean": 0.89
-    },
-    {
-     "year": 1991,
-     "start": "1991-05-16",
-     "end": "1991-06-14",
-     "total_mm": 3.5,
-     "status": "complete",
-     "rank": 2,
-     "of": 45,
-     "percentile": 4.4,
-     "is_dry": true,
-     "gwettop_window_mean": 0.28,
-     "gwetroot_window_mean": 0.31
-    },
-    {
-     "year": 1992,
-     "start": "1992-05-16",
-     "end": "1992-06-14",
-     "total_mm": 116.4,
-     "status": "complete",
-     "rank": 34,
-     "of": 45,
-     "percentile": 75.6,
-     "is_dry": false,
-     "gwettop_window_mean": 0.67,
-     "gwetroot_window_mean": 0.69
-    },
-    {
-     "year": 1993,
-     "start": "1993-05-16",
-     "end": "1993-06-14",
-     "total_mm": 58.8,
-     "status": "complete",
-     "rank": 23,
-     "of": 45,
-     "percentile": 51.1,
-     "is_dry": false,
-     "gwettop_window_mean": 0.63,
-     "gwetroot_window_mean": 0.66
-    },
-    {
-     "year": 1994,
-     "start": "1994-05-16",
-     "end": "1994-06-14",
-     "total_mm": 28,
-     "status": "complete",
-     "rank": 14,
-     "of": 45,
-     "percentile": 31.1,
-     "is_dry": false,
-     "gwettop_window_mean": 0.3,
-     "gwetroot_window_mean": 0.32
-    },
-    {
-     "year": 1995,
-     "start": "1995-05-16",
-     "end": "1995-06-14",
-     "total_mm": 32.9,
-     "status": "complete",
-     "rank": 16,
-     "of": 45,
-     "percentile": 35.6,
-     "is_dry": false,
-     "gwettop_window_mean": 0.38,
-     "gwetroot_window_mean": 0.4
-    },
-    {
-     "year": 1996,
-     "start": "1996-05-16",
-     "end": "1996-06-14",
-     "total_mm": 33.6,
-     "status": "complete",
-     "rank": 17,
-     "of": 45,
-     "percentile": 37.8,
-     "is_dry": false,
-     "gwettop_window_mean": 0.25,
-     "gwetroot_window_mean": 0.26
-    },
-    {
-     "year": 1997,
-     "start": "1997-05-16",
-     "end": "1997-06-14",
-     "total_mm": 39.5,
-     "status": "complete",
-     "rank": 18,
-     "of": 45,
-     "percentile": 40,
-     "is_dry": false,
-     "gwettop_window_mean": 0.28,
-     "gwetroot_window_mean": 0.29
-    },
-    {
-     "year": 1998,
-     "start": "1998-05-16",
-     "end": "1998-06-14",
-     "total_mm": 27.9,
-     "status": "complete",
-     "rank": 13,
-     "of": 45,
-     "percentile": 28.9,
-     "is_dry": false,
-     "gwettop_window_mean": 0.27,
-     "gwetroot_window_mean": 0.28
-    },
-    {
-     "year": 1999,
-     "start": "1999-05-16",
-     "end": "1999-06-14",
-     "total_mm": 119.7,
-     "status": "complete",
-     "rank": 36,
-     "of": 45,
-     "percentile": 80,
-     "is_dry": false,
-     "gwettop_window_mean": 0.78,
-     "gwetroot_window_mean": 0.82
-    },
-    {
-     "year": 2000,
-     "start": "2000-05-16",
-     "end": "2000-06-14",
-     "total_mm": 168.5,
-     "status": "complete",
-     "rank": 43,
-     "of": 45,
-     "percentile": 95.6,
-     "is_dry": false,
-     "gwettop_window_mean": 0.81,
-     "gwetroot_window_mean": 0.85
-    },
-    {
-     "year": 2001,
-     "start": "2001-05-16",
-     "end": "2001-06-14",
-     "total_mm": 65.6,
-     "status": "complete",
-     "rank": 24,
-     "of": 45,
-     "percentile": 53.3,
-     "is_dry": false,
-     "gwettop_window_mean": 0.79,
-     "gwetroot_window_mean": 0.83
-    },
-    {
-     "year": 2002,
-     "start": "2002-05-16",
-     "end": "2002-06-14",
-     "total_mm": 76.4,
-     "status": "complete",
-     "rank": 27,
-     "of": 45,
-     "percentile": 60,
-     "is_dry": false,
-     "gwettop_window_mean": 0.68,
-     "gwetroot_window_mean": 0.72
-    },
-    {
-     "year": 2003,
-     "start": "2003-05-16",
-     "end": "2003-06-14",
-     "total_mm": 137,
-     "status": "complete",
-     "rank": 37,
-     "of": 45,
-     "percentile": 82.2,
-     "is_dry": false,
-     "gwettop_window_mean": 0.75,
-     "gwetroot_window_mean": 0.77
-    },
-    {
-     "year": 2004,
-     "start": "2004-05-16",
-     "end": "2004-06-14",
-     "total_mm": 155.8,
-     "status": "complete",
-     "rank": 42,
-     "of": 45,
-     "percentile": 93.3,
-     "is_dry": false,
-     "gwettop_window_mean": 0.86,
-     "gwetroot_window_mean": 0.9
-    },
-    {
-     "year": 2005,
-     "start": "2005-05-16",
-     "end": "2005-06-14",
-     "total_mm": 13.9,
-     "status": "complete",
-     "rank": 6,
-     "of": 45,
-     "percentile": 13.3,
-     "is_dry": true,
-     "gwettop_window_mean": 0.28,
-     "gwetroot_window_mean": 0.3
-    },
-    {
-     "year": 2006,
-     "start": "2006-05-16",
-     "end": "2006-06-14",
-     "total_mm": 47.9,
-     "status": "complete",
-     "rank": 20,
-     "of": 45,
-     "percentile": 44.4,
-     "is_dry": false,
-     "gwettop_window_mean": 0.66,
-     "gwetroot_window_mean": 0.7
-    },
-    {
-     "year": 2007,
-     "start": "2007-05-16",
-     "end": "2007-06-14",
-     "total_mm": 5.8,
-     "status": "complete",
-     "rank": 4,
-     "of": 45,
-     "percentile": 8.9,
-     "is_dry": true,
-     "gwettop_window_mean": 0.47,
-     "gwetroot_window_mean": 0.51
-    },
-    {
-     "year": 2008,
-     "start": "2008-05-16",
-     "end": "2008-06-14",
-     "total_mm": 148.9,
-     "status": "complete",
-     "rank": 40,
-     "of": 45,
-     "percentile": 88.9,
-     "is_dry": false,
-     "gwettop_window_mean": 0.85,
-     "gwetroot_window_mean": 0.89
-    },
-    {
-     "year": 2009,
-     "start": "2009-05-16",
-     "end": "2009-06-14",
-     "total_mm": 88.5,
+     "start": "1981-03-16",
+     "end": "1981-04-14",
+     "total_mm": 83.9,
      "status": "complete",
      "rank": 30,
      "of": 45,
      "percentile": 66.7,
      "is_dry": false,
-     "gwettop_window_mean": 0.52,
-     "gwetroot_window_mean": 0.54
+     "gwettop_window_mean": 0.48,
+     "gwetroot_window_mean": 0.49
     },
     {
-     "year": 2010,
-     "start": "2010-05-16",
-     "end": "2010-06-14",
-     "total_mm": 0.9,
-     "status": "complete",
-     "rank": 1,
-     "of": 45,
-     "percentile": 2.2,
-     "is_dry": true,
-     "gwettop_window_mean": 0.28,
-     "gwetroot_window_mean": 0.3
-    },
-    {
-     "year": 2011,
-     "start": "2011-05-16",
-     "end": "2011-06-14",
-     "total_mm": 68.9,
-     "status": "complete",
-     "rank": 25,
-     "of": 45,
-     "percentile": 55.6,
-     "is_dry": false,
-     "gwettop_window_mean": 0.52,
-     "gwetroot_window_mean": 0.54
-    },
-    {
-     "year": 2012,
-     "start": "2012-05-16",
-     "end": "2012-06-14",
-     "total_mm": 153.5,
-     "status": "complete",
-     "rank": 41,
-     "of": 45,
-     "percentile": 91.1,
-     "is_dry": false,
-     "gwettop_window_mean": 0.87,
-     "gwetroot_window_mean": 0.91
-    },
-    {
-     "year": 2013,
-     "start": "2013-05-16",
-     "end": "2013-06-14",
-     "total_mm": 93.8,
-     "status": "complete",
-     "rank": 31,
-     "of": 45,
-     "percentile": 68.9,
-     "is_dry": false,
-     "gwettop_window_mean": 0.83,
-     "gwetroot_window_mean": 0.88
-    },
-    {
-     "year": 2014,
-     "start": "2014-05-16",
-     "end": "2014-06-14",
-     "total_mm": 14.8,
-     "status": "complete",
-     "rank": 7,
-     "of": 45,
-     "percentile": 15.6,
-     "is_dry": true,
-     "gwettop_window_mean": 0.25,
-     "gwetroot_window_mean": 0.27
-    },
-    {
-     "year": 2015,
-     "start": "2015-05-16",
-     "end": "2015-06-14",
-     "total_mm": 7.8,
-     "status": "complete",
-     "rank": 5,
-     "of": 45,
-     "percentile": 11.1,
-     "is_dry": true,
-     "gwettop_window_mean": 0.43,
-     "gwetroot_window_mean": 0.46
-    },
-    {
-     "year": 2016,
-     "start": "2016-05-16",
-     "end": "2016-06-14",
-     "total_mm": 80.7,
-     "status": "complete",
-     "rank": 28,
-     "of": 45,
-     "percentile": 62.2,
-     "is_dry": false,
-     "gwettop_window_mean": 0.47,
-     "gwetroot_window_mean": 0.48
-    },
-    {
-     "year": 2017,
-     "start": "2017-05-16",
-     "end": "2017-06-14",
-     "total_mm": 55.1,
-     "status": "complete",
-     "rank": 22,
-     "of": 45,
-     "percentile": 48.9,
-     "is_dry": false,
-     "gwettop_window_mean": 0.54,
-     "gwetroot_window_mean": 0.57
-    },
-    {
-     "year": 2018,
-     "start": "2018-05-16",
-     "end": "2018-06-14",
-     "total_mm": 102.4,
-     "status": "complete",
-     "rank": 33,
-     "of": 45,
-     "percentile": 73.3,
-     "is_dry": false,
-     "gwettop_window_mean": 0.69,
-     "gwetroot_window_mean": 0.72
-    },
-    {
-     "year": 2019,
-     "start": "2019-05-16",
-     "end": "2019-06-14",
-     "total_mm": 4.6,
+     "year": 1982,
+     "start": "1982-03-16",
+     "end": "1982-04-14",
+     "total_mm": 6.5,
      "status": "complete",
      "rank": 3,
      "of": 45,
      "percentile": 6.7,
      "is_dry": true,
-     "gwettop_window_mean": 0.26,
-     "gwetroot_window_mean": 0.28
+     "gwettop_window_mean": 0.21,
+     "gwetroot_window_mean": 0.23
     },
     {
-     "year": 2020,
-     "start": "2020-05-16",
-     "end": "2020-06-14",
-     "total_mm": 40.7,
-     "status": "complete",
-     "rank": 19,
-     "of": 45,
-     "percentile": 42.2,
-     "is_dry": false,
-     "gwettop_window_mean": 0.49,
-     "gwetroot_window_mean": 0.51
-    },
-    {
-     "year": 2021,
-     "start": "2021-05-16",
-     "end": "2021-06-14",
-     "total_mm": 18.2,
-     "status": "complete",
-     "rank": 9,
-     "of": 45,
-     "percentile": 20,
-     "is_dry": true,
-     "gwettop_window_mean": 0.36,
-     "gwetroot_window_mean": 0.39
-    },
-    {
-     "year": 2022,
-     "start": "2022-05-16",
-     "end": "2022-06-14",
-     "total_mm": 27.4,
-     "status": "complete",
-     "rank": 12,
-     "of": 45,
-     "percentile": 26.7,
-     "is_dry": false,
-     "gwettop_window_mean": 0.68,
-     "gwetroot_window_mean": 0.73
-    },
-    {
-     "year": 2023,
-     "start": "2023-05-16",
-     "end": "2023-06-14",
-     "total_mm": 188.5,
-     "status": "complete",
-     "rank": 45,
-     "of": 45,
-     "percentile": 100,
-     "is_dry": false,
-     "gwettop_window_mean": 0.88,
-     "gwetroot_window_mean": 0.92
-    },
-    {
-     "year": 2024,
-     "start": "2024-05-16",
-     "end": "2024-06-14",
-     "total_mm": 83.6,
-     "status": "complete",
-     "rank": 29,
-     "of": 45,
-     "percentile": 64.4,
-     "is_dry": false,
-     "gwettop_window_mean": 0.74,
-     "gwetroot_window_mean": 0.78
-    },
-    {
-     "year": 2025,
-     "start": "2025-05-16",
-     "end": "2025-06-14",
-     "total_mm": 183.5,
+     "year": 1983,
+     "start": "1983-03-16",
+     "end": "1983-04-14",
+     "total_mm": 167.9,
      "status": "complete",
      "rank": 44,
      "of": 45,
      "percentile": 97.8,
      "is_dry": false,
-     "gwettop_window_mean": 0.87,
-     "gwetroot_window_mean": 0.9
+     "gwettop_window_mean": 0.81,
+     "gwetroot_window_mean": 0.83
+    },
+    {
+     "year": 1984,
+     "start": "1984-03-16",
+     "end": "1984-04-14",
+     "total_mm": 79.1,
+     "status": "complete",
+     "rank": 28,
+     "of": 45,
+     "percentile": 62.2,
+     "is_dry": false,
+     "gwettop_window_mean": 0.51,
+     "gwetroot_window_mean": 0.53
+    },
+    {
+     "year": 1985,
+     "start": "1985-03-16",
+     "end": "1985-04-14",
+     "total_mm": 111.1,
+     "status": "complete",
+     "rank": 39,
+     "of": 45,
+     "percentile": 86.7,
+     "is_dry": false,
+     "gwettop_window_mean": 0.83,
+     "gwetroot_window_mean": 0.87
+    },
+    {
+     "year": 1986,
+     "start": "1986-03-16",
+     "end": "1986-04-14",
+     "total_mm": 104.9,
+     "status": "complete",
+     "rank": 38,
+     "of": 45,
+     "percentile": 84.4,
+     "is_dry": false,
+     "gwettop_window_mean": 0.82,
+     "gwetroot_window_mean": 0.87
+    },
+    {
+     "year": 1987,
+     "start": "1987-03-16",
+     "end": "1987-04-14",
+     "total_mm": 136.3,
+     "status": "complete",
+     "rank": 43,
+     "of": 45,
+     "percentile": 95.6,
+     "is_dry": false,
+     "gwettop_window_mean": 0.78,
+     "gwetroot_window_mean": 0.81
+    },
+    {
+     "year": 1988,
+     "start": "1988-03-16",
+     "end": "1988-04-14",
+     "total_mm": 73.5,
+     "status": "complete",
+     "rank": 26,
+     "of": 45,
+     "percentile": 57.8,
+     "is_dry": false,
+     "gwettop_window_mean": 0.77,
+     "gwetroot_window_mean": 0.81
+    },
+    {
+     "year": 1989,
+     "start": "1989-03-16",
+     "end": "1989-04-14",
+     "total_mm": 59.3,
+     "status": "complete",
+     "rank": 20,
+     "of": 45,
+     "percentile": 44.4,
+     "is_dry": false,
+     "gwettop_window_mean": 0.51,
+     "gwetroot_window_mean": 0.53
+    },
+    {
+     "year": 1990,
+     "start": "1990-03-16",
+     "end": "1990-04-14",
+     "total_mm": 117.4,
+     "status": "complete",
+     "rank": 40,
+     "of": 45,
+     "percentile": 88.9,
+     "is_dry": false,
+     "gwettop_window_mean": 0.67,
+     "gwetroot_window_mean": 0.69
+    },
+    {
+     "year": 1991,
+     "start": "1991-03-16",
+     "end": "1991-04-14",
+     "total_mm": 18,
+     "status": "complete",
+     "rank": 8,
+     "of": 45,
+     "percentile": 17.8,
+     "is_dry": true,
+     "gwettop_window_mean": 0.29,
+     "gwetroot_window_mean": 0.31
+    },
+    {
+     "year": 1992,
+     "start": "1992-03-16",
+     "end": "1992-04-14",
+     "total_mm": 48.5,
+     "status": "complete",
+     "rank": 16,
+     "of": 45,
+     "percentile": 35.6,
+     "is_dry": false,
+     "gwettop_window_mean": 0.4,
+     "gwetroot_window_mean": 0.42
+    },
+    {
+     "year": 1993,
+     "start": "1993-03-16",
+     "end": "1993-04-14",
+     "total_mm": 99.5,
+     "status": "complete",
+     "rank": 36,
+     "of": 45,
+     "percentile": 80,
+     "is_dry": false,
+     "gwettop_window_mean": 0.58,
+     "gwetroot_window_mean": 0.59
+    },
+    {
+     "year": 1994,
+     "start": "1994-03-16",
+     "end": "1994-04-14",
+     "total_mm": 10.6,
+     "status": "complete",
+     "rank": 5,
+     "of": 45,
+     "percentile": 11.1,
+     "is_dry": true,
+     "gwettop_window_mean": 0.3,
+     "gwetroot_window_mean": 0.32
+    },
+    {
+     "year": 1995,
+     "start": "1995-03-16",
+     "end": "1995-04-14",
+     "total_mm": 17.3,
+     "status": "complete",
+     "rank": 7,
+     "of": 45,
+     "percentile": 15.6,
+     "is_dry": true,
+     "gwettop_window_mean": 0.34,
+     "gwetroot_window_mean": 0.36
+    },
+    {
+     "year": 1996,
+     "start": "1996-03-16",
+     "end": "1996-04-14",
+     "total_mm": 28.5,
+     "status": "complete",
+     "rank": 11,
+     "of": 45,
+     "percentile": 24.4,
+     "is_dry": false,
+     "gwettop_window_mean": 0.21,
+     "gwetroot_window_mean": 0.21
+    },
+    {
+     "year": 1997,
+     "start": "1997-03-16",
+     "end": "1997-04-14",
+     "total_mm": 3.4,
+     "status": "complete",
+     "rank": 2,
+     "of": 45,
+     "percentile": 4.4,
+     "is_dry": true,
+     "gwettop_window_mean": 0.2,
+     "gwetroot_window_mean": 0.22
+    },
+    {
+     "year": 1998,
+     "start": "1998-03-16",
+     "end": "1998-04-14",
+     "total_mm": 23.3,
+     "status": "complete",
+     "rank": 10,
+     "of": 45,
+     "percentile": 22.2,
+     "is_dry": false,
+     "gwettop_window_mean": 0.26,
+     "gwetroot_window_mean": 0.27
+    },
+    {
+     "year": 1999,
+     "start": "1999-03-16",
+     "end": "1999-04-14",
+     "total_mm": 70.2,
+     "status": "complete",
+     "rank": 24,
+     "of": 45,
+     "percentile": 53.3,
+     "is_dry": false,
+     "gwettop_window_mean": 0.62,
+     "gwetroot_window_mean": 0.65
+    },
+    {
+     "year": 2000,
+     "start": "2000-03-16",
+     "end": "2000-04-14",
+     "total_mm": 50.5,
+     "status": "complete",
+     "rank": 17,
+     "of": 45,
+     "percentile": 37.8,
+     "is_dry": false,
+     "gwettop_window_mean": 0.71,
+     "gwetroot_window_mean": 0.75
+    },
+    {
+     "year": 2001,
+     "start": "2001-03-16",
+     "end": "2001-04-14",
+     "total_mm": 69.4,
+     "status": "complete",
+     "rank": 23,
+     "of": 45,
+     "percentile": 51.1,
+     "is_dry": false,
+     "gwettop_window_mean": 0.77,
+     "gwetroot_window_mean": 0.81
+    },
+    {
+     "year": 2002,
+     "start": "2002-03-16",
+     "end": "2002-04-14",
+     "total_mm": 90,
+     "status": "complete",
+     "rank": 32,
+     "of": 45,
+     "percentile": 71.1,
+     "is_dry": false,
+     "gwettop_window_mean": 0.63,
+     "gwetroot_window_mean": 0.66
+    },
+    {
+     "year": 2003,
+     "start": "2003-03-16",
+     "end": "2003-04-14",
+     "total_mm": 89.7,
+     "status": "complete",
+     "rank": 31,
+     "of": 45,
+     "percentile": 68.9,
+     "is_dry": false,
+     "gwettop_window_mean": 0.51,
+     "gwetroot_window_mean": 0.53
+    },
+    {
+     "year": 2004,
+     "start": "2004-03-16",
+     "end": "2004-04-14",
+     "total_mm": 73.3,
+     "status": "complete",
+     "rank": 25,
+     "of": 45,
+     "percentile": 55.6,
+     "is_dry": false,
+     "gwettop_window_mean": 0.67,
+     "gwetroot_window_mean": 0.7
+    },
+    {
+     "year": 2005,
+     "start": "2005-03-16",
+     "end": "2005-04-14",
+     "total_mm": 10.6,
+     "status": "complete",
+     "rank": 6,
+     "of": 45,
+     "percentile": 13.3,
+     "is_dry": true,
+     "gwettop_window_mean": 0.37,
+     "gwetroot_window_mean": 0.4
+    },
+    {
+     "year": 2006,
+     "start": "2006-03-16",
+     "end": "2006-04-14",
+     "total_mm": 118,
+     "status": "complete",
+     "rank": 41,
+     "of": 45,
+     "percentile": 91.1,
+     "is_dry": false,
+     "gwettop_window_mean": 0.65,
+     "gwetroot_window_mean": 0.67
+    },
+    {
+     "year": 2007,
+     "start": "2007-03-16",
+     "end": "2007-04-14",
+     "total_mm": 42.9,
+     "status": "complete",
+     "rank": 14,
+     "of": 45,
+     "percentile": 31.1,
+     "is_dry": false,
+     "gwettop_window_mean": 0.31,
+     "gwetroot_window_mean": 0.32
+    },
+    {
+     "year": 2008,
+     "start": "2008-03-16",
+     "end": "2008-04-14",
+     "total_mm": 129.5,
+     "status": "complete",
+     "rank": 42,
+     "of": 45,
+     "percentile": 93.3,
+     "is_dry": false,
+     "gwettop_window_mean": 0.69,
+     "gwetroot_window_mean": 0.71
+    },
+    {
+     "year": 2009,
+     "start": "2009-03-16",
+     "end": "2009-04-14",
+     "total_mm": 55,
+     "status": "complete",
+     "rank": 18,
+     "of": 45,
+     "percentile": 40,
+     "is_dry": false,
+     "gwettop_window_mean": 0.61,
+     "gwetroot_window_mean": 0.64
+    },
+    {
+     "year": 2010,
+     "start": "2010-03-16",
+     "end": "2010-04-14",
+     "total_mm": 34,
+     "status": "complete",
+     "rank": 12,
+     "of": 45,
+     "percentile": 26.7,
+     "is_dry": false,
+     "gwettop_window_mean": 0.43,
+     "gwetroot_window_mean": 0.45
+    },
+    {
+     "year": 2011,
+     "start": "2011-03-16",
+     "end": "2011-04-14",
+     "total_mm": 56.6,
+     "status": "complete",
+     "rank": 19,
+     "of": 45,
+     "percentile": 42.2,
+     "is_dry": false,
+     "gwettop_window_mean": 0.42,
+     "gwetroot_window_mean": 0.44
+    },
+    {
+     "year": 2012,
+     "start": "2012-03-16",
+     "end": "2012-04-14",
+     "total_mm": 216.9,
+     "status": "complete",
+     "rank": 45,
+     "of": 45,
+     "percentile": 100,
+     "is_dry": false,
+     "gwettop_window_mean": 0.85,
+     "gwetroot_window_mean": 0.88
+    },
+    {
+     "year": 2013,
+     "start": "2013-03-16",
+     "end": "2013-04-14",
+     "total_mm": 103,
+     "status": "complete",
+     "rank": 37,
+     "of": 45,
+     "percentile": 82.2,
+     "is_dry": false,
+     "gwettop_window_mean": 0.8,
+     "gwetroot_window_mean": 0.84
+    },
+    {
+     "year": 2014,
+     "start": "2014-03-16",
+     "end": "2014-04-14",
+     "total_mm": 2.8,
+     "status": "complete",
+     "rank": 1,
+     "of": 45,
+     "percentile": 2.2,
+     "is_dry": true,
+     "gwettop_window_mean": 0.3,
+     "gwetroot_window_mean": 0.33
+    },
+    {
+     "year": 2015,
+     "start": "2015-03-16",
+     "end": "2015-04-14",
+     "total_mm": 65.9,
+     "status": "complete",
+     "rank": 22,
+     "of": 45,
+     "percentile": 48.9,
+     "is_dry": false,
+     "gwettop_window_mean": 0.43,
+     "gwetroot_window_mean": 0.44
+    },
+    {
+     "year": 2016,
+     "start": "2016-03-16",
+     "end": "2016-04-14",
+     "total_mm": 10.5,
+     "status": "complete",
+     "rank": 4,
+     "of": 45,
+     "percentile": 8.9,
+     "is_dry": true,
+     "gwettop_window_mean": 0.24,
+     "gwetroot_window_mean": 0.26
+    },
+    {
+     "year": 2017,
+     "start": "2017-03-16",
+     "end": "2017-04-14",
+     "total_mm": 41.4,
+     "status": "complete",
+     "rank": 13,
+     "of": 45,
+     "percentile": 28.9,
+     "is_dry": false,
+     "gwettop_window_mean": 0.5,
+     "gwetroot_window_mean": 0.53
+    },
+    {
+     "year": 2018,
+     "start": "2018-03-16",
+     "end": "2018-04-14",
+     "total_mm": 97.9,
+     "status": "complete",
+     "rank": 34,
+     "of": 45,
+     "percentile": 75.6,
+     "is_dry": false,
+     "gwettop_window_mean": 0.66,
+     "gwetroot_window_mean": 0.68
+    },
+    {
+     "year": 2019,
+     "start": "2019-03-16",
+     "end": "2019-04-14",
+     "total_mm": 20.2,
+     "status": "complete",
+     "rank": 9,
+     "of": 45,
+     "percentile": 20,
+     "is_dry": true,
+     "gwettop_window_mean": 0.31,
+     "gwetroot_window_mean": 0.33
+    },
+    {
+     "year": 2020,
+     "start": "2020-03-16",
+     "end": "2020-04-14",
+     "total_mm": 80.4,
+     "status": "complete",
+     "rank": 29,
+     "of": 45,
+     "percentile": 64.4,
+     "is_dry": false,
+     "gwettop_window_mean": 0.4,
+     "gwetroot_window_mean": 0.41
+    },
+    {
+     "year": 2021,
+     "start": "2021-03-16",
+     "end": "2021-04-14",
+     "total_mm": 45.9,
+     "status": "complete",
+     "rank": 15,
+     "of": 45,
+     "percentile": 33.3,
+     "is_dry": false,
+     "gwettop_window_mean": 0.56,
+     "gwetroot_window_mean": 0.59
+    },
+    {
+     "year": 2022,
+     "start": "2022-03-16",
+     "end": "2022-04-14",
+     "total_mm": 63.6,
+     "status": "complete",
+     "rank": 21,
+     "of": 45,
+     "percentile": 46.7,
+     "is_dry": false,
+     "gwettop_window_mean": 0.54,
+     "gwetroot_window_mean": 0.57
+    },
+    {
+     "year": 2023,
+     "start": "2023-03-16",
+     "end": "2023-04-14",
+     "total_mm": 97.2,
+     "status": "complete",
+     "rank": 33,
+     "of": 45,
+     "percentile": 73.3,
+     "is_dry": false,
+     "gwettop_window_mean": 0.77,
+     "gwetroot_window_mean": 0.81
+    },
+    {
+     "year": 2024,
+     "start": "2024-03-16",
+     "end": "2024-04-14",
+     "total_mm": 74.6,
+     "status": "complete",
+     "rank": 27,
+     "of": 45,
+     "percentile": 60,
+     "is_dry": false,
+     "gwettop_window_mean": 0.56,
+     "gwetroot_window_mean": 0.58
+    },
+    {
+     "year": 2025,
+     "start": "2025-03-16",
+     "end": "2025-04-14",
+     "total_mm": 98.1,
+     "status": "complete",
+     "rank": 35,
+     "of": 45,
+     "percentile": 77.8,
+     "is_dry": false,
+     "gwettop_window_mean": 0.58,
+     "gwetroot_window_mean": 0.6
     }
    ],
    "eras": {
     "dry_spring": {
      "earlier": {
-      "count": 2,
+      "count": 5,
       "denominator": 20,
-      "pct": 10
+      "pct": 25
      },
      "recent": {
-      "count": 6,
+      "count": 3,
       "denominator": 20,
-      "pct": 30
+      "pct": 15
      },
-     "diff_pp": 20,
-     "result": "more_frequent_recent",
+     "diff_pp": -10,
+     "result": "less_frequent_recent",
      "caveat": "Descriptive comparison of two periods; not a trend, cause, or forecast."
     }
    }

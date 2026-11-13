@@ -1,4 +1,4 @@
-import type { CardKey } from "../content/strategies";
+import type { CardKey, Leg } from "../content/strategies";
 import type { FarmForm } from "./form";
 
 /*
@@ -19,6 +19,8 @@ export interface AppState {
   draft: FarmForm | null;
   card: CardKey;
   year: number | null; // null = the window's typical year
+  /** Which winter the page shows: 1 = corn → soybeans, 2 = soybeans → corn. */
+  leg: Leg;
   /** Rye end date chosen on the slider, MM-DD. null = the plan's proposed date. */
   ryeEnd: string | null;
   ryeOpen: boolean;
@@ -31,6 +33,7 @@ export interface AppState {
 export type Action =
   | { type: "selectCard"; card: CardKey }
   | { type: "selectYear"; year: number | null }
+  | { type: "selectLeg"; leg: Leg }
   | { type: "setRyeEnd"; md: string | null }
   | { type: "openRye" }
   | { type: "closeRye" }
@@ -43,7 +46,7 @@ export type Action =
   | { type: "setEmphasis"; emphasis: Emphasis }
   | { type: "openEvidence" }
   | { type: "closeEvidence" }
-  | { type: "applyLink"; view: { card?: CardKey; year?: number; ryeEnd?: string; priorities?: Priority[]; emphasis?: Emphasis } }
+  | { type: "applyLink"; view: { card?: CardKey; year?: number; leg?: Leg; ryeEnd?: string; priorities?: Priority[]; emphasis?: Emphasis } }
   | { type: "reset" };
 
 export const MAX_PRIORITIES = 2;
@@ -55,6 +58,7 @@ export function initialState(sample: FarmForm): AppState {
     draft: null,
     card: "cover",
     year: null,
+    leg: 1,
     ryeEnd: null,
     ryeOpen: false,
     priorities: [],
@@ -71,11 +75,15 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, card: action.card, year: action.card === state.card ? state.year : null };
     case "selectYear":
       return { ...state, year: action.year };
+    case "selectLeg":
+      // Each winter has its own planting window, so the year returns to that window's typical year.
+      return { ...state, leg: action.leg, year: action.leg === state.leg ? state.year : null };
     case "setRyeEnd":
       // Moving the rye date never changes the year, the soybean date or anything else.
       return { ...state, ryeEnd: action.md };
     case "openRye":
-      return { ...state, ryeOpen: true, card: "cover", year: state.card === "cover" ? state.year : null };
+      // The rye slider is for the winter before soybeans (leg 1).
+      return { ...state, ryeOpen: true, card: "cover", leg: 1, year: state.card === "cover" && state.leg === 1 ? state.year : null };
     case "closeRye":
       return { ...state, ryeOpen: false };
     case "openForm":
@@ -108,6 +116,7 @@ export function reducer(state: AppState, action: Action): AppState {
         ...state,
         card: v.card ?? "cover",
         year: v.year ?? null,
+        leg: v.leg ?? 1,
         ryeEnd: v.ryeEnd ?? null,
         priorities: v.priorities ?? [],
         emphasis: v.emphasis ?? "buffer",

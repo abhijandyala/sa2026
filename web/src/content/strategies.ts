@@ -15,10 +15,14 @@ export interface Claim {
   source: SourceId | null;
 }
 
+export type Leg = 1 | 2;
+
 export interface CardContent {
   key: CardKey;
-  planId: string;
-  earlierPlanId?: string;
+  /** Backend rotation ID (docs/api/presets.md). */
+  rotationId: string;
+  /** Each leg is its own plan: leg 1 = corn → soybeans, leg 2 = soybeans → corn. */
+  legs: Record<Leg, string>;
   name: string;
   subtitle: string;
   headings: { why: Claim[]; evidence: Claim[]; benefits: Claim[]; gaps: Claim[]; risks: Claim[] };
@@ -70,11 +74,12 @@ const c = (text: string, source: SourceId | null = null): Claim => ({ text, sour
 export const CARDS: CardContent[] = [
   {
     key: "current",
-    planId: "no_cover",
+    rotationId: "current_practice",
+    legs: { 1: "corn_soy__no_cover", 2: "soy_corn__no_cover" },
     name: "What you do now",
-    subtitle: "No planted winter cover · crop residue may remain",
+    subtitle: "No planted winter cover · residue may remain",
     headings: {
-      why: [c("The plan the other two are compared against. Same corn harvest and soybean dates; only the winter changes.")],
+      why: [c("The rotation the other two are compared against. Same harvest and planting dates; only the winters change.")],
       evidence: [c("Every spring since 1981 replayed for the same planting date with NASA rainfall for this area.", "nasa-power")],
       benefits: [c("No cover-crop seed, planting or termination work.", "ncs-soy-4")],
       gaps: [c("Residue cover, slope and storm intensity decide real erosion; this tool does not measure them.")],
@@ -83,10 +88,10 @@ export const CARDS: CardContent[] = [
   },
   {
     key: "cover",
-    planId: "rye_12d",
-    earlierPlanId: "rye_19d",
+    rotationId: "winter_cover",
+    legs: { 1: "corn_soy__rye", 2: "soy_corn__rye" },
     name: "Add winter cover",
-    subtitle: "Cereal rye after corn, ended before soybeans",
+    subtitle: "Cereal rye in both winters",
     headings: {
       why: [
         c("Cereal rye is one of the most popular cover crops planted before soybeans.", "ncs-soy-4"),
@@ -99,31 +104,33 @@ export const CARDS: CardContent[] = [
       benefits: [
         c("Can suppress weeds and, with no-till, help conserve soil moisture later in the season.", "ncs-soy-4"),
         c("Scavenges leftover nitrogen and can be seeded late after corn.", "sare-rye"),
+        c("Small grains can be planted after soybean harvest, so the second winter is covered too.", "ncs-cover"),
       ],
       gaps: [
         c("Days with living rye are planned from dates; actual establishment and growth are not measured."),
-        c("The second winter (soybeans to corn) is not evaluated in this version."),
+        c("The field-moisture check comes from soybean guidance, so it applies to the winter before soybeans only."),
       ],
       risks: [
         c("A living cover uses soil moisture. In a dry spring it can leave the seedbed too dry before planting.", "ncs-soy-4"),
+        c("Before corn, rye can tie up soil nitrogen as it breaks down, so plan the nitrogen rate.", "ncs-cover"),
         c("Extra seed, planting and termination work.", "ncs-soy-4"),
       ],
     },
   },
   {
     key: "grain",
-    planId: "wheat_double_crop",
+    rotationId: "add_grain_crop",
+    legs: { 1: "corn_soy__wheat_dc", 2: "soy_corn__no_cover" },
     name: "Add a grain crop",
-    subtitle: "Winter wheat for grain, then June soybeans",
+    subtitle: "Wheat for grain, then June soybeans",
     headings: {
       why: [c("Adds a third harvested crop to the same land over two years.")],
       evidence: [
         c("NC State reports lower yields for soybeans planted in June than in the Apr 20–May 20 window.", "ncs-soy-5"),
-        c("Every June planting window since 1981 replayed with NASA rainfall for this area.", "nasa-power"),
       ],
       benefits: [c("Wheat keeps the soil covered through the first winter.", "ncs-cover")],
       gaps: [
-        c("Wheat planting and harvest windows are not yet sourced, so the timing check shows unknown."),
+        c("The wheat winter is not evaluated yet: wheat planting and harvest windows are not sourced."),
         c("Prices, costs and profit are not part of this tool."),
       ],
       risks: [

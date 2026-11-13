@@ -33,12 +33,12 @@ export function Timeline({ rows }: { rows: Array<{ name: string; plan: Plan | nu
       <div className="timeline-scroll">
         <div className="timeline-grid">
           {rows.map(({ name, plan }) => {
-            if (!plan) {
+            if (!plan || !plan.sequence) {
               return (
                 <div className="tl-row" key={name}>
                   <div className="tl-label">
                     <strong>{name}</strong>
-                    <span>Not available yet</span>
+                    <span>{plan?.reason ? "Not evaluated yet: dates not sourced" : "Not available yet"}</span>
                   </div>
                   <div className="tl-track" />
                 </div>
@@ -51,10 +51,10 @@ export function Timeline({ rows }: { rows: Array<{ name: string; plan: Plan | nu
               w.type === "cover" ? { from: w.seed, to: w.terminate, kind: "cover" } : w.type === "winter_grain" ? { from: w.plant, to: w.harvest, kind: "wheat" } : null;
             const text =
               w.type === "cover"
-                ? `Rye ${monthDay(w.seed)}–${monthDay(w.terminate)} · soybeans ${monthDay(plant)}`
+                ? `Rye ${monthDay(w.seed)}–${monthDay(w.terminate)} · ${plan.sequence.next_crop_id === "field_corn" ? "corn" : "soybeans"} ${monthDay(plant)}`
                 : w.type === "winter_grain"
                   ? `Wheat ${monthDay(w.plant)}–${monthDay(w.harvest)} · soybeans ${monthDay(plant)}`
-                  : `No planted cover · soybeans ${monthDay(plant)}`;
+                  : `No planted cover · ${plan.sequence.next_crop_id === "field_corn" ? "corn" : "soybeans"} ${monthDay(plant)}`;
             return (
               <div className="tl-row" key={name}>
                 <div className="tl-label">
@@ -85,10 +85,10 @@ export function Timeline({ rows }: { rows: Array<{ name: string; plan: Plan | nu
         </div>
       </div>
       <figcaption id="timeline-caption" className="timeline-caption">
-        Calendar of planned operations, corn harvest to soybean planting. Colors show planned dates, not measured ground cover.
+        Calendar of planned operations, harvest to planting. Colors show planned dates, not measured ground cover.
         <span className="tl-key">
           <span className="tl-key-fallow" /> no planted cover (residue may remain) <span className="tl-key-cover" /> living rye{" "}
-          <span className="tl-key-wheat" /> wheat <span className="tl-key-plant" /> soybean planting
+          <span className="tl-key-wheat" /> wheat <span className="tl-key-plant" /> planting
         </span>
       </figcaption>
     </figure>
