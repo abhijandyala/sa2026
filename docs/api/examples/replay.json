@@ -1,7 +1,7 @@
 {
   "meta": {"plan_version": "pv_3f2a", "catalog_version": "v1", "snapshot_hash": "sha256:DRAFT", "request_id": "req_rep_2007", "draft": true},
   "year": 2007,
-  "plan_id": "rye_12d",
+  "plan_id": "corn_soy__rye",
   "dates": {"prev_harvest": "2006-09-20", "seed": "2006-10-01", "terminate": "2007-04-30", "next_plant": "2007-05-12", "spring_window": {"start": "2007-04-12", "end": "2007-05-11"}},
   "coverage": {"winter": "complete", "spring": "complete"},
   "spring": {"total_mm": 38.4, "rank": 3, "of": 45, "percentile": 6.7, "is_dry": true, "status": "complete"},

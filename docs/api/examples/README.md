@@ -8,11 +8,11 @@ These are hand-written drafts for the Union County sample, written so the fronte
 - Statuses use the CLAUDE.md vocabulary: `complete | partial | unavailable | unknown | inapplicable | unsupported | invalid_input | manual_check | insufficient_data`.
 - Thresholds (heavy rain, the dry cutoff) always come back in `thresholds`. **Don't hardcode them.** The heavy-rain definition is still pending from the handbook.
 
-**Stable plan IDs:** `no_cover`, `rye_12d`, `rye_19d`, `crimson_clover`, and later `wheat_double_crop`. The `label` field is a plain default; the frontend may show its own display names.
+**Plan and rotation IDs:** see `docs/api/presets.md`. Termination and planting dates are editable fields on a plan; the 12-day vs 19-day rye case is one plan (`corn_soy__rye`) edited, shown in `sensitivity.json`.
 
 | File | Endpoint |
 |---|---|
 | `years.json` | `GET /v1/years` |
 | `compare.json` | `POST /v1/plans/compare` |
 | `sensitivity.json` | `POST /v1/plans/sensitivity` |
-| `replay.json` | `GET /v1/seasons/{year}/replay?plan=rye_12d` |
+| `replay.json` | `GET /v1/seasons/{year}/replay?plan=corn_soy__rye` |

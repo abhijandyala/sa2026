@@ -1,6 +1,8 @@
 # Field Shift backend: agent rules
 
-Field Shift is a NASA Space Apps project, and this repo is **backend only**. The build plan is in `docs/phase-cards.md` and is the source of truth for what each phase builds and how it is accepted. The reference catalogs in `data/catalogs/v1/` are Perplexity's verbatim files. **Never edit them.** Report problems in `docs/catalog-gaps.md` instead.
+> **Scope:** these rules govern **backend work only**, meaning everything in this repo outside `web/`. The frontend lives in `web/` and follows its own `web/CLAUDE.md`. If you are working in `web/`, ignore this file. Before `backend` merges into `main`, the backend moves into a `backend/` folder and this file becomes `backend/CLAUDE.md`, so it applies only there.
+
+Field Shift is a NASA Space Apps project. The build plan is in `docs/phase-cards.md` and is the source of truth for what each phase builds and how it is accepted. The reference catalogs in `data/catalogs/v1/` are Perplexity's verbatim files. **Never edit them.** Report problems in `docs/catalog-gaps.md` instead.
 
 Two Claude agents build this in parallel: **Agent A** and **Agent B**. Your launch prompt tells you which one you are. If it doesn't, ask before touching code.
 

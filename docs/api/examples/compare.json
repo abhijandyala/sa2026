@@ -1,63 +1,233 @@
 {
-  "meta": {"plan_version": "pv_3f2a", "catalog_version": "v1", "snapshot_hash": "sha256:DRAFT", "request_id": "req_cmp_001", "draft": true},
-  "request_echo": {"location_id": "union_county_sample", "plan_ids": ["no_cover", "rye_12d", "rye_19d"]},
-  "thresholds": {
-    "heavy_rain": {"value": null, "unit": "mm", "method": "PENDING handbook definition", "reference_span": "1981-2025", "status": "unknown"},
-    "dry_spring": {"value": 61.2, "unit": "mm", "method": "bottom 20% of eligible 30-day windows; ties at cutoff count as dry", "window": "04-12..05-11", "reference_span": "1981-2025", "status": "complete"}
+  "meta": {
+    "plan_version": "pv_3f2a",
+    "catalog_version": "v1",
+    "snapshot_hash": "sha256:DRAFT",
+    "request_id": "req_cmp_001",
+    "draft": true
   },
-  "shared_eligible_years": {"spring": 45, "winter": 44},
+  "request_echo": {
+    "location_id": "union_county_sample",
+    "rotation_ids": [
+      "current_practice",
+      "winter_cover"
+    ]
+  },
+  "thresholds": {
+    "heavy_rain": {
+      "value": null,
+      "unit": "mm",
+      "method": "PENDING handbook definition",
+      "reference_span": "1981-2025",
+      "status": "unknown"
+    },
+    "dry_spring": {
+      "value": 61.2,
+      "unit": "mm",
+      "method": "bottom 20% of eligible 30-day windows; ties at cutoff count as dry",
+      "window": "04-12..05-11",
+      "reference_span": "1981-2025",
+      "status": "complete"
+    }
+  },
+  "shared_eligible_years": {
+    "spring": 45,
+    "winter": 44
+  },
   "plans": [
     {
-      "plan_id": "rye_12d",
-      "label": "Cereal rye, terminated 12 days before soybean",
-      "sequence": {"previous_crop_id": "field_corn", "prev_harvest": "09-20", "winter": {"type": "cover", "crop_id": "cereal_rye", "seed": "10-01", "terminate": "04-30"}, "next_crop_id": "soybean", "next_plant": "05-12"},
-      "calendar": {"living_cover_days_planned": 211, "days_without_planned_cover": 23, "termination_gap_days": 12, "establishment": "uncertain"},
+      "plan_id": "corn_soy__rye",
+      "label": "Cereal rye before soybean",
+      "sequence": {
+        "previous_crop_id": "field_corn",
+        "prev_harvest": "09-20",
+        "winter": {
+          "type": "cover",
+          "crop_id": "cereal_rye",
+          "seed": "10-01",
+          "terminate": "04-30"
+        },
+        "next_crop_id": "soybean",
+        "next_plant": "05-12"
+      },
+      "calendar": {
+        "living_cover_days_planned": 211,
+        "days_without_planned_cover": 23,
+        "termination_gap_days": 12,
+        "establishment": "uncertain"
+      },
       "winter": {
         "status": "complete",
-        "per_season_median": {"rain_mm_without_cover": 48.0, "heavy_rain_days_without_cover": null},
-        "segments": ["before_establishment", "living_cover", "after_termination"]
+        "per_season_median": {
+          "rain_mm_without_cover": 48.0,
+          "heavy_rain_days_without_cover": null
+        },
+        "segments": [
+          "before_establishment",
+          "living_cover",
+          "after_termination"
+        ]
       },
       "spring_checks": [
         {
           "check_id": "rye_soy_short_gap_moisture",
-          "rule_ids": ["cr_tt_03"],
+          "rule_ids": [
+            "cr_tt_03"
+          ],
           "label": "Would have prompted a field-moisture check",
           "fires_when": "gap < 14 days AND (dry replay OR grower low-moisture concern)",
-          "count": 9, "denominator": 45, "pct": 20.0,
-          "qualifying_years": [1986, 1988, 2001, 2006, 2007, 2011, 2012, 2017, 2023],
+          "count": 9,
+          "denominator": 45,
+          "pct": 20.0,
+          "qualifying_years": [
+            1986,
+            1988,
+            2001,
+            2006,
+            2007,
+            2011,
+            2012,
+            2017,
+            2023
+          ],
           "skipped_years": [],
-          "source": {"title": "NC State Soybean Production Guide: Rotational Considerations", "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations"}
+          "source": {
+            "title": "NC State Soybean Production Guide: Rotational Considerations",
+            "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations"
+          }
         }
       ],
       "other_checks": [
-        {"rule_id": "cr_tt_04", "verdict": "manual_check", "reason": "Applies only if insect pest spillover is a concern; grower input not provided"}
+        {
+          "rule_id": "cr_tt_04",
+          "verdict": "manual_check",
+          "reason": "Applies only if insect pest spillover is a concern; grower input not provided"
+        }
       ],
       "eras": {
         "rye_soy_short_gap_moisture": {
-          "earlier": {"count": 3, "denominator": 20, "pct": 15.0},
-          "recent": {"count": 5, "denominator": 20, "pct": 25.0},
+          "earlier": {
+            "count": 3,
+            "denominator": 20,
+            "pct": 15.0
+          },
+          "recent": {
+            "count": 5,
+            "denominator": 20,
+            "pct": 25.0
+          },
           "diff_pp": 10.0,
           "result": "more_frequent_recent",
           "caveat": "Descriptive comparison of two periods; not a trend, cause, or forecast."
         }
-      }
-    },
-    {
-      "plan_id": "rye_19d",
-      "label": "Cereal rye, terminated 19 days before soybean",
-      "calendar": {"living_cover_days_planned": 204, "days_without_planned_cover": 30, "termination_gap_days": 19, "establishment": "uncertain"},
-      "spring_checks": [
-        {"check_id": "rye_soy_short_gap_moisture", "rule_ids": ["cr_tt_03"], "count": 0, "denominator": 45, "pct": 0.0, "qualifying_years": [], "skipped_years": [], "label": "Gap is 14 days or more; short-gap check clears"}
+      },
+      "rotation_id": "winter_cover",
+      "leg": 1,
+      "editable": [
+        "prev_harvest",
+        "winter.seed",
+        "winter.terminate",
+        "next_plant"
       ],
-      "_note": "Remaining fields as in rye_12d."
+      "dates_assumed": true
     },
     {
-      "plan_id": "no_cover",
+      "plan_id": "corn_soy__no_cover",
       "label": "No planted winter cover",
-      "calendar": {"living_cover_days_planned": 0, "days_without_planned_cover": 234, "termination_gap_days": null, "establishment": "inapplicable"},
-      "residue_context": {"status": "unknown", "note": "Corn residue may remain; not measured"},
-      "_note": "Remaining fields as in rye_12d."
+      "calendar": {
+        "living_cover_days_planned": 0,
+        "days_without_planned_cover": 234,
+        "termination_gap_days": null,
+        "establishment": "inapplicable"
+      },
+      "residue_context": {
+        "status": "unknown",
+        "note": "Corn residue may remain; not measured"
+      },
+      "_note": "Remaining fields as in corn_soy__rye.",
+      "rotation_id": "current_practice",
+      "leg": 1
+    },
+    {
+      "plan_id": "soy_corn__rye",
+      "rotation_id": "winter_cover",
+      "leg": 2,
+      "label": "Cereal rye before corn",
+      "sequence": {
+        "previous_crop_id": "soybean",
+        "prev_harvest": "10-15",
+        "winter": {
+          "type": "cover",
+          "crop_id": "cereal_rye",
+          "seed": "10-20",
+          "terminate": "04-05"
+        },
+        "next_crop_id": "field_corn",
+        "next_plant": "04-15"
+      },
+      "dates_assumed": true,
+      "calendar": {
+        "living_cover_days_planned": 167,
+        "days_without_planned_cover": 15,
+        "termination_gap_days": 10,
+        "establishment": "uncertain"
+      },
+      "spring_window": {
+        "start": "03-16",
+        "end": "04-14"
+      },
+      "other_checks": [
+        {
+          "rule_id": "cr_tt_01",
+          "verdict": "preferred",
+          "reason": "Gap 10 days is within 7-14 days before corn"
+        },
+        {
+          "rule_id": "cr_nut_01",
+          "verdict": "manual_check",
+          "reason": "Corn after rye: plan N rate (immobilization)"
+        }
+      ],
+      "_note": "Leg 2 has its own spring window and denominators; never summed with leg 1."
+    },
+    {
+      "plan_id": "soy_corn__no_cover",
+      "rotation_id": "current_practice",
+      "leg": 2,
+      "_note": "Shape as above."
     }
   ],
-  "spring_window": {"start": "04-12", "end": "05-11", "note": "Same for all three plans because the planting date matches; rye date edits do not change it"}
+  "spring_window": {
+    "note": "Per plan. Leg 1 plans share 04-12..05-11; leg 2 plans share 03-16..04-14. Termination edits never change it; planting-date edits do."
+  },
+  "rotations": [
+    {
+      "rotation_id": "current_practice",
+      "label": "Current practice",
+      "legs": [
+        {
+          "leg": 1,
+          "plan_id": "corn_soy__no_cover"
+        },
+        {
+          "leg": 2,
+          "plan_id": "soy_corn__no_cover"
+        }
+      ]
+    },
+    {
+      "rotation_id": "winter_cover",
+      "label": "Winter cover",
+      "legs": [
+        {
+          "leg": 1,
+          "plan_id": "corn_soy__rye"
+        },
+        {
+          "leg": 2,
+          "plan_id": "soy_corn__rye"
+        }
+      ]
+    }
+  ]
 }

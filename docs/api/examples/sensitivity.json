@@ -1,6 +1,6 @@
 {
   "meta": {"plan_version": "pv_3f2a", "catalog_version": "v1", "snapshot_hash": "sha256:DRAFT", "request_id": "req_sens_001", "draft": true},
-  "base_plan_id": "rye_12d",
+  "base_plan_id": "corn_soy__rye",
   "varied": "terminate",
   "fixed": {"next_plant": "05-12", "seed": "10-01"},
   "check_id": "rye_soy_short_gap_moisture",
