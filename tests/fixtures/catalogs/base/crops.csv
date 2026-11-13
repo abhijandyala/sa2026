@@ -1,0 +1,3 @@
+crop_id,common_name,scientific_name,crop_role,summary,source_title,source_url,source_locator,verified_date
+crop_a,Crop A,,cash_crop,FIXTURE,FIXTURE source,https://example.test/fixture,FIXTURE locator,2026-01-01
+crop_b,Crop B,,cover_crop,FIXTURE,FIXTURE source,https://example.test/fixture,FIXTURE locator,2026-01-01

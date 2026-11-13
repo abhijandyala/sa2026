@@ -1,0 +1,3 @@
+fertilizer_id,product_name,manufacturer,grade,n_pct,p2o5_pct,k2o_pct,source_title,source_url,source_locator,verified_date
+fx_urea,Fixture urea,,46-0-0,46,0,0,FIXTURE source,https://example.test/fixture,FIXTURE locator,2026-01-01
+fx_mes,Fixture 12-40-0-10S-1Zn,,12-40-0-10S-1Zn,12,40,0,FIXTURE source,https://example.test/fixture,FIXTURE locator,2026-01-01

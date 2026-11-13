@@ -32,3 +32,4 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]  # long source strings and guidance text are fine

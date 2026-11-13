@@ -1,0 +1,5 @@
+rule_id,crop_id,region,rule_type,growth_stage,management_action,cultivar_or_maturity_group,production_system,previous_crop_id,next_crop_id,window_start_mm_dd,window_end_mm_dd,condition_key,operator,value_min,value_max,value_text,unit,exposure_duration,exposure_unit,suitability,applies_when,guidance,source_title,source_url,source_locator,verified_date
+fx_01,crop_a,Fixtureland,planting_window,,,,,,,04-20,05-20,,,,,,,,,preferred,,,FIXTURE source,https://example.test/fixture,FIXTURE locator,2026-01-01
+fx_02,crop_a,Fixtureland,weather_tolerance,,,,,,,,,soil_temp,gte,55,,,degF,,,acceptable,,,FIXTURE source,https://example.test/fixture,FIXTURE locator,2026-01-01
+fx_03,crop_b,Fixtureland,termination_timing,,,,,crop_a,crop_a,,,gap,between,7,14,,days,several,days,preferred,,,FIXTURE source,https://example.test/fixture,FIXTURE locator,2026-01-01
+fx_04,crop_a,Fixtureland,nutrient_guidance,,,,,,,,,n_rate,eq,0,,,lb_N_per_acre,,,,,,FIXTURE source,https://example.test/fixture,FIXTURE locator,2026-01-01
