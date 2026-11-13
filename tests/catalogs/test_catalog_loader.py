@@ -255,3 +255,10 @@ def test_duplicate_header_columns_are_rejected(mutate):
     cat = load_catalog(d)
     assert (CROPS_FILE, 1, "header") in keys(cat)
     assert cat.crops == []
+
+
+def test_crop_dropped_for_a_parse_error_also_orphans_its_rules(mutate):
+    cat = load_catalog(mutate(CROPS_FILE, 3, "verified_date", "not-a-date"))
+    assert (CROPS_FILE, 3, "verified_date") in keys(cat)
+    assert (RULES_FILE, 4, "crop_id") in keys(cat)
+    assert "fx_03" not in {r.rule_id for r in cat.rules}

@@ -300,8 +300,7 @@ def load_catalog(directory: Path | str = DEFAULT_CATALOG_DIR) -> Catalog:
     crop_issues = validate.validate_crops(crops)
     issues += crop_issues
     # Rules may only reference crops that survived validation.
-    bad_crop_rows = {i.row for i in crop_issues if i.severity == "error"}
-    usable_crop_ids = {c.crop_id for r, c in crops if r not in bad_crop_rows}
+    usable_crop_ids = {c.crop_id for _, c in _usable(crops, issues, validate.CROPS_FILE)}
     issues += validate.validate_rules(rules, usable_crop_ids)
     issues += validate.validate_fertilizers(ferts)
 

@@ -1,0 +1,124 @@
+"""Explicit mapping from catalog ``region`` text to North Carolina region tags.
+
+Guidance only applies to a field when the rule's ``region`` text maps to the field's region. The
+mapping is an explicit table: a ``region`` string that is not in the table is ``unknown``, never
+guessed. The tags are deliberately coarse (the catalog does not support finer matching):
+
+* ``mountains``, ``piedmont``, ``coastal_plain`` and ``tidewater`` are mutually exclusive tags for
+  where a field sits. Tidewater is the eastern edge of the Coastal Plain; a field there is tagged
+  ``tidewater`` (and matches rules written for the Coastal Plain).
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Literal
+
+NC_REGION_TAGS = ("mountains", "piedmont", "coastal_plain", "tidewater")
+
+# Which tags a plan region also satisfies (tidewater is part of the Coastal Plain).
+_IMPLIES = {"tidewater": {"tidewater", "coastal_plain"}}
+
+RegionMatch = Literal["match", "no_match", "unknown"]
+
+
+@dataclass(frozen=True)
+class RegionRule:
+    """How one catalog ``region`` string maps onto field region tags."""
+
+    scope: Literal["nc_all", "nc_tags", "outside_nc", "us_general"]
+    tags: frozenset[str] = frozenset()  # for nc_tags
+    exclude: frozenset[str] = frozenset()  # for nc_all
+    note: str = ""
+
+
+def _tags(*t: str) -> frozenset[str]:
+    return frozenset(t)
+
+
+_NC_ALL = RegionRule("nc_all")
+
+# Every distinct ``region`` string in data/catalogs/v1/crop_rules.csv.
+REGION_MAP: dict[str, RegionRule] = {
+    "North Carolina statewide": _NC_ALL,
+    "North Carolina": _NC_ALL,
+    "North Carolina (Arkansas data)": RegionRule(
+        "nc_all", note="NC guide table that cites Arkansas data; applies statewide"
+    ),
+    "North Carolina (11-location trials)": _NC_ALL,
+    "Southeastern US (NC study)": _NC_ALL,
+    "NC Piedmont": RegionRule("nc_tags", _tags("piedmont")),
+    "NC Piedmont (Cleveland County)": RegionRule("nc_tags", _tags("piedmont")),
+    "NC Piedmont and mountains": RegionRule("nc_tags", _tags("piedmont", "mountains")),
+    "NC Piedmont and western NC": RegionRule("nc_tags", _tags("piedmont", "mountains")),
+    "NC Coastal Plain": RegionRule("nc_tags", _tags("coastal_plain", "tidewater")),
+    "Hertford County NC (northeastern)": RegionRule("nc_tags", _tags("coastal_plain", "tidewater")),
+    "Northeastern NC (Hertford County article)": RegionRule(
+        "nc_tags", _tags("coastal_plain", "tidewater")
+    ),
+    "NC outside Tidewater": RegionRule("nc_all", exclude=_tags("tidewater")),
+    "NC excluding Tidewater": RegionRule("nc_all", exclude=_tags("tidewater")),
+    # Broad multi-state regions that include North Carolina.
+    "General US": RegionRule("us_general"),
+    "Southern US": RegionRule("us_general"),
+    "Eastern US crimson clover zone": RegionRule("us_general"),
+    # Other places: kept as sourced context, never applied to an NC field automatically.
+    "Pennsylvania": RegionRule("outside_nc"),
+    "Virginia Piedmont": RegionRule("outside_nc"),
+    "Indiana (Purdue Extension reference)": RegionRule("outside_nc"),
+    "Alabama research": RegionRule("outside_nc"),
+}
+
+
+def normalize_field_region(text: str | None) -> str | None:
+    """Turn a free-text field region ("NC Piedmont", "Union County") into a region tag, or ``None``."""
+    if not text:
+        return None
+    t = text.strip().lower().replace("_", " ")
+    if "tidewater" in t:
+        return "tidewater"
+    if "coastal" in t:
+        return "coastal_plain"
+    if "piedmont" in t or t.startswith("union county"):
+        return "piedmont"
+    if "mountain" in t or "western nc" in t:
+        return "mountains"
+    return None
+
+
+def region_match(rule_region: str | None, field_region: str | None) -> tuple[RegionMatch, str]:
+    """Does a rule written for ``rule_region`` apply to a field in ``field_region``?
+
+    ``field_region`` is a free-text region or tag. Returns ``(match, reason)``.
+    """
+    if not rule_region:
+        return "unknown", "rule has no region text"
+    rule = REGION_MAP.get(rule_region)
+    if rule is None:
+        return "unknown", f"rule region '{rule_region}' is not in the region mapping table"
+    if rule.scope == "outside_nc":
+        return "no_match", f"rule region '{rule_region}' is outside North Carolina"
+    if rule.scope == "us_general":
+        return "match", f"rule region '{rule_region}' covers North Carolina"
+    tag = normalize_field_region(field_region)
+    if rule.scope == "nc_all":
+        if tag is None:
+            if rule.exclude:
+                return (
+                    "unknown",
+                    f"rule region '{rule_region}' excludes {sorted(rule.exclude)} "
+                    "and the field region is not known",
+                )
+            return "match", f"rule region '{rule_region}' covers all of North Carolina"
+        if _IMPLIES.get(tag, {tag}) & rule.exclude:
+            return "no_match", f"rule region '{rule_region}' excludes the field's region ({tag})"
+        return "match", f"rule region '{rule_region}' covers the field's region ({tag})"
+    # nc_tags
+    if tag is None:
+        return "unknown", (
+            f"rule region '{rule_region}' is specific to {sorted(rule.tags)}; "
+            "the field region is not known"
+        )
+    if _IMPLIES.get(tag, {tag}) & rule.tags:
+        return "match", f"rule region '{rule_region}' covers the field's region ({tag})"
+    return "no_match", f"rule region '{rule_region}' does not cover the field's region ({tag})"
