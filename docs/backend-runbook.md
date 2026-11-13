@@ -14,7 +14,7 @@ curl -X POST localhost:8000/v1/plans/compare -H 'content-type: application/json'
      -d '{"rotation_ids": ["current_practice", "winter_cover"]}'
 ```
 
-With `FIELDSHIFT_OFFLINE=1`, weather comes only from `data/snapshots/union_county/` and every live provider (NWS, USDM, USDA SDA, NASA POWER) is skipped and reported `unavailable`; plan comparison, replay, sensitivity and years all still work. A test (`tests/api/test_api_contract.py::test_offline_demo_...`) starts a fresh process that refuses every non-loopback connection and exercises those endpoints.
+With `FIELDSHIFT_OFFLINE=1`, weather comes only from `data/snapshots/union_county/` and no live provider (NWS, USDM, USDA SDA, NASA POWER) is called. A provider with a still-valid on-disk cache entry (SDA 30 days, `data/cache/`, not committed, so empty in a fresh clone) is answered from it and labelled `cached(<time>)`; otherwise it is reported `unavailable`; plan comparison, replay, sensitivity and years all still work. A test (`tests/api/test_api_contract.py::test_offline_demo_...`) starts a fresh process that refuses every non-loopback connection and exercises those endpoints.
 
 Python 3.12 is the target. The code is also 3.11-compatible (no PEP 695 syntax) because the Homebrew 3.12 on one development Mac has a broken `pyexpat`.
 
@@ -58,7 +58,7 @@ python scripts/reproduce_replay.py --raw data/snapshots/union_county/raw/power_d
 
 ## 4. Error taxonomy
 
-HTTP 400 is only for invalid input; everything else is a 200 with a status in the body, so a partial result is preserved.
+HTTP 400 is only for invalid input (typed `{field, code, message}` issues); everything else is a 200 with a status in the body, so a partial result is preserved. Unknown paths/methods (404/405) and unexpected errors (500, no detail beyond a fixed code) use the same envelope with the four metadata fields.
 
 | Card term | Where it appears | Status string |
 |---|---|---|
@@ -75,7 +75,7 @@ Other statuses: `complete`, `partial`, `insufficient_data` (era or cutoff has to
 | Provider | Used for | Timeout | Cache policy | Offline behaviour |
 |---|---|---|---|---|
 | NASA POWER Daily | weather history (build only) | 120 s, 3 retries (2 s, 4 s, 8 s backoff) | permanent: the committed snapshot in `data/snapshots/` | never called at serve time; `python -m fieldshift.weather build` is the only fetch |
-| USDA SDA | soil | 15 s | 30 days on disk (`data/cache/sda`, gitignored) | `unavailable` |
+| USDA SDA | soil | 15 s | 30 days on disk (`data/cache/sda`, gitignored) | `cached(<time>)` if a valid copy exists, else `unavailable` |
 | NWS API | forecast / alerts | 10 s | 15 min / 5 min | `unavailable` |
 | US Drought Monitor | county drought | 10 s | 6 h | `unavailable` |
 
@@ -83,7 +83,7 @@ Freshness labels: `fresh | cached(<time>) | snapshot | unavailable`. `data_sourc
 
 ## 6. Logging and privacy
 
-The access log records method, path (no query string), status and duration only; request and response bodies are never logged. A filter also redacts `grower`, `residue_report`, `observations` and `low_moisture_concern` if one ever appears in a log message. Fixtures and examples are synthetic or the real public NASA series; there is no real grower data in the repo.
+The access log records method, path (no query string), status and duration only; request and response bodies are never logged. uvicorn's own access log has its query strings stripped, and any log message that mentions `grower`, `residue_report`, `observations` or `low_moisture_concern` is replaced by a fixed placeholder (whole-message redaction, because values cannot be parsed out of free text safely). Fixtures and examples are synthetic or the real public NASA series; there is no real grower data in the repo.
 
 ## 7. Sources
 

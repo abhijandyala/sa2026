@@ -484,17 +484,126 @@
         "title": "GrowerInputs",
         "type": "object"
       },
-      "HTTPValidationError": {
+      "HealthResponse": {
+        "additionalProperties": false,
         "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "title": "Detail",
-            "type": "array"
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "offline": {
+            "title": "Offline",
+            "type": "boolean"
+          },
+          "snapshot_hash": {
+            "title": "Snapshot Hash",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "weather": {
+            "additionalProperties": true,
+            "title": "Weather",
+            "type": "object"
           }
         },
-        "title": "HTTPValidationError",
+        "required": [
+          "meta",
+          "status",
+          "offline",
+          "snapshot_hash",
+          "weather"
+        ],
+        "title": "HealthResponse",
+        "type": "object"
+      },
+      "InvalidInputResponse": {
+        "additionalProperties": false,
+        "description": "HTTP 400. Flat envelope: typed issues plus the four metadata fields.",
+        "properties": {
+          "catalog_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Version"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/IssueOut"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "plan_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Version"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "snapshot_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Hash"
+          },
+          "status": {
+            "const": "invalid_input",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "issues",
+          "plan_version",
+          "catalog_version",
+          "snapshot_hash",
+          "request_id"
+        ],
+        "title": "InvalidInputResponse",
+        "type": "object"
+      },
+      "IssueOut": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "code",
+          "message"
+        ],
+        "title": "IssueOut",
         "type": "object"
       },
       "KeyRainDay": {
@@ -1512,6 +1621,71 @@
         "title": "SensitivityResponse",
         "type": "object"
       },
+      "ServerErrorResponse": {
+        "additionalProperties": false,
+        "description": "HTTP 500: no detail beyond a fixed code; the cause is in the server log.",
+        "properties": {
+          "catalog_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Version"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/IssueOut"
+            },
+            "title": "Issues",
+            "type": "array"
+          },
+          "plan_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Version"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "snapshot_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Hash"
+          },
+          "status": {
+            "const": "unavailable",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "issues",
+          "plan_version",
+          "catalog_version",
+          "snapshot_hash",
+          "request_id"
+        ],
+        "title": "ServerErrorResponse",
+        "type": "object"
+      },
       "SharedYears": {
         "additionalProperties": false,
         "properties": {
@@ -1817,46 +1991,6 @@
         "title": "UnsupportedResponse",
         "type": "object"
       },
-      "ValidationError": {
-        "properties": {
-          "ctx": {
-            "title": "Context",
-            "type": "object"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "title": "Location",
-            "type": "array"
-          },
-          "msg": {
-            "title": "Message",
-            "type": "string"
-          },
-          "type": {
-            "title": "Error Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
-        "title": "ValidationError",
-        "type": "object"
-      },
       "WinterManagement": {
         "additionalProperties": false,
         "description": "What occupies the field between the previous harvest and the next planting.\n\n* ``none``: bare/fallow (any crop residue is context only, never living cover);\n* ``cover``: a cover crop seeded then terminated;\n* ``winter_grain``: a harvested winter grain (Phase 12; double-crop path).",
@@ -2106,13 +2240,31 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Health Health Get",
-                  "type": "object"
+                  "$ref": "#/components/schemas/HealthResponse"
                 }
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Health"
@@ -2133,6 +2285,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Get Crops",
@@ -2155,6 +2327,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Post Fertilizer",
@@ -2177,6 +2369,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Post Irrigation",
@@ -2234,15 +2446,25 @@
             },
             "description": "Successful Response"
           },
-          "422": {
+          "400": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/InvalidInputResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Get Live Route",
@@ -2265,6 +2487,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Post Resolve",
@@ -2287,6 +2529,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Post Check",
@@ -2319,15 +2581,25 @@
             },
             "description": "Successful Response"
           },
-          "422": {
+          "400": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/InvalidInputResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Compare",
@@ -2350,6 +2622,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Post Find",
@@ -2390,15 +2682,25 @@
             },
             "description": "Successful Response"
           },
-          "422": {
+          "400": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/InvalidInputResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Sensitivity",
@@ -2421,6 +2723,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Rotations",
@@ -2474,15 +2796,25 @@
             },
             "description": "Successful Response"
           },
-          "422": {
+          "400": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/InvalidInputResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Replay Get",
@@ -2533,15 +2865,25 @@
             },
             "description": "Successful Response"
           },
-          "422": {
+          "400": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/InvalidInputResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Replay Post",
@@ -2599,15 +2941,25 @@
             },
             "description": "Successful Response"
           },
-          "422": {
+          "400": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/InvalidInputResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Get Soil Route",
@@ -2644,15 +2996,25 @@
             },
             "description": "Successful Response"
           },
-          "422": {
+          "400": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/InvalidInputResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Years",
@@ -2674,6 +3036,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Get Zones",
@@ -2696,6 +3078,26 @@
               }
             },
             "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
           }
         },
         "summary": "Post Zones Analyze",

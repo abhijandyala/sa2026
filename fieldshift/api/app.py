@@ -6,15 +6,18 @@ snapshot under ``data/snapshots/`` and never opens a network connection.
 
 from __future__ import annotations
 
+import logging
 import os
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from fieldshift.api.logs import AccessLogMiddleware, install_scrub_filter
 from fieldshift.api.routes import router as core_router
+from fieldshift.api.schemas import HealthResponse, InvalidInputResponse, ServerErrorResponse
 from fieldshift.field.routes import router as field_router
 from fieldshift.planner.routes import router as planner_router
 from fieldshift.report.http import issue
@@ -63,10 +66,30 @@ def create_app() -> FastAPI:
             content={"status": "invalid_input", "issues": issues, **response_meta()},
         )
 
-    for r in (core_router, planner_router, field_router, tools_router):
-        app.include_router(r)
+    def envelope(status_code: int, status: str, field: str, code: str, message: str) -> JSONResponse:
+        return JSONResponse(
+            status_code=status_code,
+            content={"status": status, "issues": [issue(field, code, message)], **response_meta()},
+        )
 
-    @app.get("/health")
+    @app.exception_handler(StarletteHTTPException)
+    async def _http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
+        """404/405 and friends carry the same metadata envelope as every other error."""
+        field = "method" if exc.status_code == 405 else "path"
+        code = {404: "not_found", 405: "method_not_allowed"}.get(exc.status_code, "http_error")
+        return envelope(exc.status_code, "invalid_input", field, code, str(exc.detail))
+
+    @app.exception_handler(Exception)
+    async def _unexpected(_: Request, exc: Exception) -> JSONResponse:
+        logging.getLogger("fieldshift").exception("unhandled error: %s", type(exc).__name__)
+        return envelope(500, "unavailable", "server", "internal_error",
+                        "unexpected error; the cause is in the server log")
+
+    error_docs = {400: {"model": InvalidInputResponse}, 500: {"model": ServerErrorResponse}}
+    for r in (core_router, planner_router, field_router, tools_router):
+        app.include_router(r, responses=error_docs)
+
+    @app.get("/health", response_model=HealthResponse, responses=error_docs)
     def health() -> dict:
         snap = load_snapshot()
         cov = snap.manifest["coverage"]
@@ -83,7 +106,28 @@ def create_app() -> FastAPI:
             },
         }
 
+    _drop_422(app)
     return app
+
+
+
+def _drop_422(app: FastAPI) -> None:
+    """Validation errors are reported as HTTP 400 ``invalid_input``; document that, not FastAPI's 422."""
+    original = app.openapi
+
+    def openapi() -> dict:
+        if app.openapi_schema:
+            return app.openapi_schema
+        spec = original()
+        for methods in spec.get("paths", {}).values():
+            for op in methods.values():
+                op.get("responses", {}).pop("422", None)
+        for name in ("HTTPValidationError", "ValidationError"):
+            spec.get("components", {}).get("schemas", {}).pop(name, None)
+        app.openapi_schema = spec
+        return spec
+
+    app.openapi = openapi  # type: ignore[method-assign]
 
 
 app = create_app()

@@ -42,8 +42,8 @@ def test_a_corrupted_example_fails_validation():
 
 
 SPECS = {e.name: e for e in contract.example_specs()}
-SCHEMA_CHECKED = ["compare", "compare_unsupported_location", "replay", "sensitivity", "years",
-                  "rotations"]
+SCHEMA_CHECKED = ["compare", "compare_unsupported_location", "error_invalid_input", "health",
+                  "replay", "sensitivity", "years", "rotations"]
 
 
 @pytest.mark.parametrize("name", SCHEMA_CHECKED)
@@ -113,15 +113,64 @@ def test_grower_entered_text_never_reaches_the_logs(caplog):
     assert "/v1/plans/compare" in caplog.text and "residue_report" not in caplog.text
 
 
-def test_scrub_filter_redacts_grower_fields_in_any_log_message(caplog):
-    from fieldshift.api.logs import install_scrub_filter
+@pytest.mark.parametrize("message", [
+    "payload residue_report='stalks everywhere'",
+    'body {"grower": {"observations": ["a \\"quoted\\" ]note", "b"]}, "x": 1} tail-secret',
+    "low_moisture_concern=True residue_report=\"he said \\\"hi\\\" ] }\" trailing-secret",
+    "OBSERVATIONS: [nested [brackets] and } braces] trailing-secret",
+])
+def test_scrub_filter_removes_the_whole_message_when_grower_fields_appear(caplog, message):
+    from fieldshift.api.logs import REDACTED, install_scrub_filter
 
     install_scrub_filter()
-    log = logging.getLogger("fieldshift.test")
     with caplog.at_level(logging.INFO, logger="fieldshift"):
-        log.info("payload residue_report='stalks everywhere' observations=['a','b'] ok=1")
-    for rec in caplog.records:
-        assert "stalks everywhere" not in rec.getMessage() and "[redacted]" in rec.getMessage()
+        logging.getLogger("fieldshift.test").info(message)
+    (rec,) = [r for r in caplog.records if r.name == "fieldshift.test"]
+    assert rec.getMessage() == REDACTED
+    assert "secret" not in rec.getMessage() and "stalks" not in rec.getMessage()
+
+
+def test_uvicorn_access_log_drops_query_strings():
+    from fieldshift.api.logs import QueryStripFilter
+
+    rec = logging.LogRecord("uvicorn.access", logging.INFO, "", 0,
+                            '%s - "%s %s HTTP/%s" %d',
+                            ("127.0.0.1:5", "GET", "/v1/soil?lat=35.1&lon=-80.2", "1.1", 200), None)
+    assert QueryStripFilter().filter(rec)
+    assert "lat=" not in rec.getMessage() and "/v1/soil" in rec.getMessage()
+
+
+def test_framework_errors_carry_the_metadata_envelope():
+    client = TestClient(create_app(), raise_server_exceptions=False)
+    for resp, code in ((client.get("/v1/nope"), "not_found"),
+                       (client.delete("/v1/plans/compare"), "method_not_allowed")):
+        body = resp.json()
+        assert resp.status_code in (404, 405) and body["status"] == "invalid_input"
+        assert body["issues"][0]["code"] == code
+        assert {"plan_version", "catalog_version", "snapshot_hash", "request_id"} <= set(body)
+
+
+def test_unhandled_errors_return_a_500_envelope_without_leaking_details(monkeypatch):
+    import fieldshift.api.routes as routes
+
+    def boom(*a, **k):
+        raise RuntimeError("secret internal detail")
+
+    monkeypatch.setattr(routes.engine, "compare_plans", boom)
+    client = TestClient(create_app(), raise_server_exceptions=False)
+    r = client.post("/v1/plans/compare", json={"plan_ids": ["corn_soy__rye"], "include_soil": False})
+    body = r.json()
+    assert r.status_code == 500 and body["status"] == "unavailable"
+    assert body["issues"][0]["code"] == "internal_error" and "secret" not in r.text
+    assert body["request_id"]
+
+
+def test_openapi_documents_400_not_422_and_the_error_schema():
+    op = OPENAPI["paths"]["/v1/plans/compare"]["post"]
+    assert "422" not in op["responses"] and "400" in op["responses"]
+    assert "HTTPValidationError" not in OPENAPI["components"]["schemas"]
+    ref = op["responses"]["400"]["content"]["application/json"]["schema"]["$ref"]
+    assert ref.endswith("/InvalidInputResponse")
 
 
 def test_offline_demo_serves_the_sample_and_core_calculations_with_the_network_disabled():
