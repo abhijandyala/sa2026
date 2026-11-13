@@ -19,6 +19,7 @@ from fieldshift.metrics.winter import (
     BEFORE_ESTABLISHMENT,
     LIVING_COVER,
     NO_PLANNED_COVER,
+    ThresholdMismatchError,
     compute_winter,
 )
 from fieldshift.seasons.align import build_calendar
@@ -222,3 +223,26 @@ def test_real_season_totals_are_consistent(union):
     assert w.total_rain_mm == pytest.approx(sum(s.rain_mm for s in w.segments.values()), abs=1e-2)
     assert w.heavy_rain_days == len(w.heavy_rain_events)
     assert all(e.precip_mm >= ts.get(HEAVY_RAIN_NAME).value for e in w.heavy_rain_events)
+
+
+# --- Phase 3 review fixes --------------------------------------------------------------------
+
+
+def test_rain_totals_survive_when_no_heavy_rain_threshold_can_be_computed():
+    days = pd.date_range("1981-01-01", "2025-06-30", freq="D")
+    series = DailySeries(pd.DataFrame({"date": days, "precip_mm": 0.0, "gwettop": 0.5,
+                                       "gwetroot": 0.5}))
+    ts = build_threshold_set(series, HASH)  # all-zero record: no wet days
+    assert ts.get(HEAVY_RAIN_NAME).value is None
+    p = plan("rye")
+    w = compute_winter(p, build_calendar(p, 2010), series, ts, HASH)
+    assert w.status == Status.PARTIAL and not w.eligible
+    assert w.total_rain_mm == 0.0 and w.rain_outside_cover_mm == 0.0  # known zero, not None
+    assert w.heavy_rain_days is None and w.heavy_rain_days_outside_cover is None
+    assert "heavy_rain_threshold_unavailable" in w.reasons
+
+
+def test_thresholds_from_another_snapshot_are_rejected():
+    p = plan("rye")
+    with pytest.raises(ThresholdMismatchError):
+        compute_winter(p, build_calendar(p, 2022), weather(), thresholds(), "another-hash")

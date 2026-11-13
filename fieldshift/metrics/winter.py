@@ -33,6 +33,10 @@ OUTSIDE_SEGMENTS = (BEFORE_ESTABLISHMENT, AFTER_TERMINATION, NO_PLANNED_COVER)
 ALL_SEGMENTS = (LIVING_COVER, *OUTSIDE_SEGMENTS)
 
 
+class ThresholdMismatchError(ValueError):
+    """Thresholds were frozen from a different weather snapshot than the one being used."""
+
+
 class _M(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -121,6 +125,10 @@ def compute_winter(
     snapshot_hash: str,
 ) -> WinterExposure:
     """Winter exposure for one season. Totals are ``None`` unless the window is complete."""
+    if thresholds.snapshot_hash != snapshot_hash:
+        raise ThresholdMismatchError(
+            "thresholds were frozen from a different snapshot than the one in use"
+        )
     heavy = thresholds.get(HEAVY_RAIN_NAME)
     cov = season_coverage(cal, series).metrics["winter"]
     labels = winter_day_segments(cal)
@@ -130,28 +138,27 @@ def compute_winter(
     status, reasons = cov.status, list(cov.reasons)
     if plan.winter.kind == "winter_grain":  # Phase 12 path
         status, reasons = Status.UNSUPPORTED, ["winter_grain_path_not_enabled"]
-    elif heavy.value is None:
-        status, reasons = Status.UNAVAILABLE, [*reasons, "heavy_rain_threshold_unavailable"]
-    computable = status == Status.COMPLETE
+    rain_ok = status == Status.COMPLETE  # rain totals depend only on the weather window
+    heavy_ok = rain_ok and heavy.value is not None
+    if rain_ok and not heavy_ok:  # rain is known; only the heavy-rain count is missing
+        status, reasons = Status.PARTIAL, [*reasons, "heavy_rain_threshold_unavailable"]
 
     seg_days = {s: int((labels == s).sum()) for s in ALL_SEGMENTS}
     segments: dict[str, SegmentTotals] = {}
     events: list[HeavyRainEvent] = []
-    heavy_flag = (precip >= heavy.value) if heavy.value is not None else precip.isna()
+    heavy_flag = (precip >= heavy.value) if heavy.value is not None else precip.isna() & False
     for s in ALL_SEGMENTS:
         mask = labels == s
-        if not computable:
-            segments[s] = SegmentTotals(days=seg_days[s], rain_mm=None, heavy_rain_days=None)
-            continue
         segments[s] = SegmentTotals(
             days=seg_days[s],
-            rain_mm=round(float(precip[mask].sum()), 3),
-            heavy_rain_days=int((heavy_flag & mask).sum()),
+            rain_mm=round(float(precip[mask].sum()), 3) if rain_ok else None,
+            heavy_rain_days=int((heavy_flag & mask).sum()) if heavy_ok else None,
         )
-    if computable:
+    if heavy_ok:
         for ts in precip.index[heavy_flag.to_numpy()]:
             events.append(HeavyRainEvent(
                 date=ts.date(), precip_mm=round(float(precip[ts]), 3), segment=str(labels[ts])))
+    computable = status == Status.COMPLETE
 
     outside = [segments[s] for s in OUTSIDE_SEGMENTS]
     outside_days = sum(seg_days[s] for s in OUTSIDE_SEGMENTS)
@@ -169,13 +176,13 @@ def compute_winter(
         window_days=cal.winter_days,
         living_cover_days=seg_days[LIVING_COVER],
         days_outside_cover=outside_days,
-        total_rain_mm=round(float(precip.sum()), 3) if computable else None,
-        heavy_rain_days=len(events) if computable else None,
+        total_rain_mm=round(float(precip.sum()), 3) if rain_ok else None,
+        heavy_rain_days=len(events) if heavy_ok else None,
         rain_outside_cover_mm=(
-            round(sum(s.rain_mm for s in outside), 3) if computable else None  # type: ignore[misc]
+            round(sum(s.rain_mm for s in outside), 3) if rain_ok else None  # type: ignore[misc]
         ),
         heavy_rain_days_outside_cover=(
-            sum(s.heavy_rain_days for s in outside) if computable else None  # type: ignore[misc]
+            sum(s.heavy_rain_days for s in outside) if heavy_ok else None  # type: ignore[misc]
         ),
         segments=segments,
         heavy_rain_events=events,

@@ -219,7 +219,7 @@ class Threshold(_Model):
     method: str
     value: float | None
     unit: str
-    parameters: FrozenMap = Field(default_factory=dict)
+    parameters: FrozenMap = Field(default_factory=FrozenDict)
     reference_span: str
     n_reference: int
     status: Status = Status.COMPLETE

@@ -251,3 +251,11 @@ def test_threshold_set_is_deeply_immutable():
         ts.thresholds["heavy_rain_mm"].parameters["extra"] = 1
     assert isinstance(ts.thresholds["heavy_rain_mm"].parameters["months"], tuple)
     assert ts.threshold_set_id == before
+
+
+def test_omitted_threshold_parameters_default_is_immutable():
+    from fieldshift.contracts import Threshold
+
+    t = Threshold(name="n", method="m", value=1.0, unit="mm", reference_span="x", n_reference=1)
+    with pytest.raises(TypeError):
+        t.parameters["x"] = 1
