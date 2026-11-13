@@ -182,3 +182,24 @@ def test_bad_water_table_depth_is_rejected(index, bad):
     assert r.status == "invalid_input" and r.issues[0].field == "water_table_depth_in"
     zero = check_irrigation(index, crop_id="soybean", water_table_depth_in=0)
     assert zero.water_table["flagged"] is True  # a real 0 in is a real depth
+
+
+def test_extreme_amounts_are_rejected_not_overflowed(index):
+    huge = [{"date": "2025-07-01", "precip_in": 1e308}, {"date": "2025-07-02", "precip_in": 1e308}]
+    r = check_irrigation(index, **{**FULL, "weather": huge})
+    assert r.status == "invalid_input" and r.issues[0].field == "weather.0.precip_mm"
+    assert (
+        check_irrigation(
+            index,
+            **{
+                **FULL,
+                "weather": days(1),
+                "irrigation": [{"date": "2025-07-01", "amount_in": 1e308}],
+            },
+        ).status
+        == "invalid_input"
+    )
+    assert (
+        check_irrigation(index, **{**FULL, "awc_in": 1e308, "weather": days(1)}).issues[0].field
+        == "awc_in"
+    )

@@ -35,6 +35,8 @@ _GRADE_RE = re.compile(rf"^({_NUM})-({_NUM})-({_NUM})((?:-{_NUM}[A-Za-z]+)*)$")
 #: Catalog rows that deliberately carry no automatic N rate, keyed by crop.
 MAX_TARGET_LB_PER_ACRE = 100_000.0  # far beyond any real rate; guards overflow
 MAX_AREA_ACRES = 10_000_000.0
+MAX_RATE_LB_PER_ACRE = 1_000_000.0
+MIN_GRADE_PCT = 0.01  # a nonzero grade below this is a typo, and its rate would overflow
 NO_AUTO_N_RULE = {"field_corn": "fc_nut_01", "soybean": "sb_nut_01"}
 
 NutrientOutcome = Literal["met", "excess", "shortfall", "not_requested"]
@@ -134,6 +136,12 @@ def resolve_product(product: Product, index: CatalogIndex) -> ProductInfo | Fert
         if g is None:
             return _bad("product.grade", "bad_grade", f"'{product.grade}' is not an N-P-K grade")
         n, p, k, extra = g
+        if any(0 < v < MIN_GRADE_PCT for v in (n, p, k)):
+            return _bad(
+                "product.grade",
+                "grade_range",
+                f"a nonzero grade percentage must be at least {MIN_GRADE_PCT:g}",
+            )
         if min(n, p, k) < 0 or max(n, p, k) > 100 or n + p + k > 100:
             return _bad(
                 "product.grade",
@@ -224,6 +232,15 @@ def calculate(
         )
     basis = basis or next(n for n in NUTRIENTS if n in want)
     rate = alone[basis]
+    total = rate * area if area else 0.0
+    if (
+        not all(math.isfinite(x) for x in (*alone.values(), rate, total))
+        or rate > MAX_RATE_LB_PER_ACRE
+    ):
+        return _bad(
+            "targets", "result_out_of_range",
+            "the calculation does not give a usable rate for this product and target",
+        )  # fmt: skip
 
     lines: list[NutrientLine] = []
     for nut in NUTRIENTS:

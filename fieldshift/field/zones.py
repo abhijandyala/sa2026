@@ -199,6 +199,15 @@ def analyze_zones(
     by_id = {f.zone_id: f for f in findings}
 
     prompts: list[Prompt] = []
+    for c in changes or []:
+        if c.zone_id is not None and c.zone_id not in by_id:
+            prompts.append(
+                Prompt(zone_id=c.zone_id, kind="note", status=Status.MANUAL_CHECK,
+                       reason=f"a {c.kind.replace('_', ' ')} was reported for unknown zone "
+                       f"'{c.zone_id}', so no zone was flagged verify: check the zone id",
+                       reported_on=c.reported_on)
+            )  # fmt: skip
+
     for rep in ponding or []:
         f = by_id.get(rep.zone_id)
         if f is None:

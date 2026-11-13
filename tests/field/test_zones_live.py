@@ -310,3 +310,12 @@ def test_cache_keys_are_per_point_so_counties_never_cross():
 def test_usdm_values_must_be_percentages(val):
     with pytest.raises(ValueError):
         parse_usdm_csv(USDM.replace("100.00", val, 1))
+
+
+def test_change_report_for_an_unknown_zone_is_never_silently_ignored(zs):
+    a = analyze_zones(
+        zs, changes=[ChangeReport(kind="regrading", reported_on="2030-01-01", zone_id="nope")]
+    )
+    assert not any(f.verify for f in a.findings)
+    (p,) = a.prompts
+    assert p.kind == "note" and p.status == "manual_check" and "unknown zone" in p.reason

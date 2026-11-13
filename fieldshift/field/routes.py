@@ -161,5 +161,13 @@ async def post_zones_analyze(request: Request) -> Any:
                 for e in exc.errors()
             ]
         )
-    result = analyze_zones(load_zones(), ponding=ponding, heavy_rain_days=heavy, changes=changes)
+    zs = load_zones()
+    unknown = [
+        issue(f"changes.{i}.zone_id", "unknown_zone", f"zone '{c.zone_id}' is not in this field")
+        for i, c in enumerate(changes)
+        if c.zone_id is not None and zs.zone(c.zone_id) is None
+    ]
+    if unknown:
+        return invalid(unknown)
+    result = analyze_zones(zs, ponding=ponding, heavy_rain_days=heavy, changes=changes)
     return {"meta": response_meta(), "result": result.model_dump(mode="json")}

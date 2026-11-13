@@ -127,3 +127,13 @@ def test_huge_or_overflowing_numbers_are_typed_errors_not_500s_or_nulls(index):
 def test_nutrient_lines_use_outcome_not_status(index):
     r = calculate({"n_lb_per_acre": 60}, UREA, index)
     assert not hasattr(r.nutrients[0], "status") and r.nutrients[0].outcome == "met"
+
+
+def test_tiny_grades_and_overflowing_results_are_typed_errors(index):
+    for grade in ("0.000000001-0-0", "0.0001-0-0"):
+        r = calculate({"n_lb_per_acre": 100}, Product(grade=grade), index)
+        assert r.status == "invalid_input" and r.issues[0].code == "grade_range"
+    ok = calculate({"n_lb_per_acre": 1}, Product(grade="0.01-0-0"), index)
+    assert ok.status == "complete" and ok.product_lb_per_acre == 10000.0
+    big = calculate({"n_lb_per_acre": 99999}, Product(grade="0.01-0-0"), index, area_acres=9e6)
+    assert big.status == "invalid_input"

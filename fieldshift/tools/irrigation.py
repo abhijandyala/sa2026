@@ -27,6 +27,8 @@ from fieldshift.catalogs.models import CropRule
 from fieldshift.contracts import FieldIssue, Status
 
 MM_PER_INCH = 25.4
+MAX_DAILY_IN = 100.0  # beyond any real daily rain or irrigation amount; guards overflow
+MAX_AWC_IN = 1000.0
 GENERAL_STAGES = frozenset({"season", "critical_stages"})
 
 
@@ -218,11 +220,11 @@ def _parse_weather(rows: Any) -> tuple[list[tuple[date, float]] | None, FieldIss
                 code="missing_value",
                 message="a day has no precipitation value; blanks are not treated as 0",
             )
-        if p is None or p < 0:
+        if p is None or p < 0 or p > MAX_DAILY_IN:
             return None, FieldIssue(
                 field=f"weather.{i}.precip_mm",
                 code="invalid_value",
-                message="precipitation must be a finite number >= 0",
+                message=f"precipitation must be a finite number between 0 and {MAX_DAILY_IN:g} in/day",
             )
         out[d] = p
     ordered = sorted(out.items())
@@ -308,8 +310,14 @@ def check_irrigation(
     awc = _num(awc_in)
     if awc_in is None:
         missing.append("awc_in (soil available water capacity to rooting depth, inches)")
-    elif awc is None or awc <= 0:
-        return _bad(crop_id, stage, "awc_in", "invalid_value", "awc_in must be a finite number > 0")
+    elif awc is None or awc <= 0 or awc > MAX_AWC_IN:
+        return _bad(
+            crop_id,
+            stage,
+            "awc_in",
+            "invalid_value",
+            f"awc_in must be a finite number > 0 and at most {MAX_AWC_IN:g}",
+        )
     start = _num(start_storage_in)
     if start_storage_in is None:
         missing.append("start_storage_in (available water at the start, inches)")
@@ -340,7 +348,7 @@ def check_irrigation(
         for i, r in enumerate(irrigation):
             d = _day(r.get("date")) if isinstance(r, dict) else None
             a = _num(r.get("amount_in")) if isinstance(r, dict) else None
-            if d is None or a is None or a < 0:
+            if d is None or a is None or a < 0 or a > MAX_DAILY_IN:
                 return _bad(
                     crop_id,
                     stage,

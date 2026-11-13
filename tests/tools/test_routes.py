@@ -192,3 +192,11 @@ def test_fertilizer_route_overflow_is_400(client):
         "/v1/fertilizer/calc", content=big.encode(), headers={"content-type": "application/json"}
     )
     assert r.status_code == 400 and r.json()["issues"][0]["field"] == "targets.n_lb_per_acre"
+
+
+def test_zones_analyze_rejects_unknown_change_zone(client):
+    r = client.post(
+        "/v1/zones/analyze",
+        json={"changes": [{"kind": "regrading", "reported_on": "2030-01-01", "zone_id": "nope"}]},
+    )
+    assert r.status_code == 400 and r.json()["issues"][0]["field"] == "changes.0.zone_id"
