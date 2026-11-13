@@ -216,7 +216,8 @@ def test_cross_calendar_comparison_is_labeled_and_uses_raw_totals_only(ctx):
 def test_cross_calendar_rejects_a_non_soybean_comparison(ctx):
     corn = load_samples().plans["soy_corn__no_cover"].plan
     r = run(ctx, maturity_group=5, full_season_plan=corn)
-    assert r["cross_calendar"]["status"] == "invalid_input"
+    assert r["status"] == "invalid_input" and r["issues"][0]["field"] == "compare_to_plan"
+    assert "cross_calendar" not in r
 
 
 def test_season_results_do_not_depend_on_the_weather_year(ctx):
@@ -239,7 +240,7 @@ def test_wrong_plan_shapes_and_chronology(ctx):
         prev_harvest="09-20", wheat_plant="09-01", wheat_harvest="06-05", soybean_plant="06-12"
     )
     r = run(ctx, bad)
-    assert r["status"] == "invalid_input" and r["issues"][0]["field"].startswith("winter")
+    assert r["status"] == "invalid_input" and r["issues"][0]["field"].startswith("plan.winter")
     late = plan_from_dates(
         prev_harvest="09-20", wheat_plant="10-25", wheat_harvest="06-20", soybean_plant="06-10"
     )
@@ -322,3 +323,97 @@ def test_a_plan_that_breaks_in_some_historical_year_is_invalid_input(ctx):
     )
     r = evaluate_wheat_double_crop(p, ctx, year=2028)
     assert r["status"] == "invalid_input" and "planting year" in r["issues"][0]["message"]
+
+
+# ------------------------------------------------------------------ review fixes (phase-12-B)
+
+
+def test_an_invalid_comparison_plan_is_a_typed_error_not_a_500(client):
+    base = load_samples().plans["corn_soy__rye"].plan.model_dump(mode="json")
+    bad = {**base, "winter": {**base["winter"], "seed": "09-01"}}  # seeding before harvest
+    r = client.post(
+        "/v1/plans/wheat", json={**FLAT, "maturity_group": 5, "year": YEAR, "compare_to_plan": bad}
+    )
+    assert r.status_code == 400 and r.json()["issues"][0]["field"].startswith(
+        "compare_to_plan.winter"
+    )
+    corn = load_samples().plans["soy_corn__no_cover"].plan.model_dump(mode="json")
+    r2 = client.post("/v1/plans/wheat", json={**FLAT, "year": YEAR, "compare_to_plan": corn})
+    assert r2.status_code == 400 and r2.json()["issues"][0]["field"] == "compare_to_plan"
+    leap = {
+        **base,
+        "winter": {**base["winter"], "seed": "02-28", "terminate": "02-29"},
+        "prev_harvest": "10-01",
+        "next_plant": "03-10",
+    }
+    r3 = client.post("/v1/plans/wheat", json={**FLAT, "year": 2028, "compare_to_plan": leap})
+    assert r3.status_code == 400 and "planting year" in r3.json()["issues"][0]["message"]
+
+
+def test_maturity_group_in_inputs_is_validated_like_the_top_level_value(client, ctx):
+    r = client.post(
+        "/v1/plans/wheat", json={**FLAT, "year": YEAR, "inputs": {"maturity_group": 99}}
+    )
+    assert r.status_code == 400 and r.json()["issues"][0]["field"] == "inputs.maturity_group"
+    for blank in ("", None, "  "):
+        ok = client.post(
+            "/v1/plans/wheat", json={**FLAT, "year": YEAR, "inputs": {"maturity_group": blank}}
+        )
+        mgr = ok.json()["result"]["maturity_group"]
+        assert ok.status_code == 200 and mgr["status"] == "unknown" and mgr["input"] is None
+    via_inputs = client.post(
+        "/v1/plans/wheat", json={**FLAT, "year": YEAR, "inputs": {"maturity_group": 3}}
+    ).json()
+    assert via_inputs["result"]["maturity_group"]["input"] == 3.0
+    assert via_inputs["result"]["rule_checks"]["flagged"]
+    zero = client.post(
+        "/v1/plans/wheat", json={**FLAT, "year": YEAR, "inputs": {"maturity_group": 0}}
+    ).json()
+    assert (
+        zero["result"]["maturity_group"]["input"] == 0.0
+        and zero["result"]["maturity_group"]["status"] == "complete"
+    )
+    both = client.post(
+        "/v1/plans/wheat",
+        json={**FLAT, "year": YEAR, "maturity_group": 5, "inputs": {"maturity_group": 3}},
+    )
+    assert both.status_code == 400 and both.json()["issues"][0]["code"] == "conflict"
+    same = client.post(
+        "/v1/plans/wheat",
+        json={**FLAT, "year": YEAR, "maturity_group": 5, "inputs": {"maturity_group": "5"}},
+    )
+    assert same.status_code == 200
+
+
+def test_plan_version_changes_with_the_maturity_group_and_the_comparison_plan(client):
+    def version(**extra):
+        return client.post("/v1/plans/wheat", json={**FLAT, "year": YEAR, **extra}).json()["meta"][
+            "plan_version"
+        ]
+
+    assert version(maturity_group=3) != version(maturity_group=5)
+    assert version(maturity_group=5) == version(
+        inputs={"maturity_group": 5}
+    )  # same effective input
+    assert version(maturity_group=5) != version(
+        maturity_group=5, compare_to_plan_id="corn_soy__no_cover"
+    )
+    assert version() == version()
+
+
+def test_median_total_uses_the_true_median_for_an_even_number_of_seasons(ctx):
+    import statistics
+
+    from fieldshift.compare import engine
+
+    p = plan_from_dates(
+        prev_harvest="09-20",
+        wheat_plant="10-25",
+        wheat_harvest="07-05",
+        soybean_plant="07-15",
+        production_system="conventional",
+    )
+    r = run(ctx, p, maturity_group=5)
+    totals = list(engine.reference_for(ctx, "07-15").totals.values())
+    assert len(totals) % 2 == 0  # the record ends 06-30, so 2025 is not eligible: 44 seasons
+    assert r["spring"]["median_total_mm"] == pytest.approx(statistics.median(totals), abs=1e-3)

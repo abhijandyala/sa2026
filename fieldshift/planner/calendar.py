@@ -127,8 +127,11 @@ def _check_actions(check: CheckResult, cal: SeasonCalendar, index: CatalogIndex)
             continue
         due, why = _check_date(c, rule.management_action, cal)
         trigger = f"rule {c.rule_id}" + (f" ({rule.applies_when})" if rule.applies_when else "")
-        if c.rule_id in GATES:
-            trigger += "; fires when the spring is dry or the grower reports the concern"
+        gate = GATES.get(c.rule_id)
+        if gate == "dry_or_moisture_concern":
+            trigger += "; fires when the spring is dry or the grower reports a low-moisture concern"
+        elif gate == "pest_spillover_concern":
+            trigger += "; fires only when the grower reports an insect-pest spillover concern"
         status = (
             Status.UNKNOWN if c.status == "unknown"
             else Status.MANUAL_CHECK if c.status == "manual_check" or c.flagged

@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 from fieldshift.catalogs.index import CatalogIndex
 from fieldshift.contracts import Plan, Status
 from fieldshift.metrics.rules import GATES
-from fieldshift.planner.calendar import ActionCalendar, build_action_calendar
+from fieldshift.planner.calendar import ActionCalendar, build_action_calendar, plan_year_issues
 from fieldshift.planner.checker import default_planting_year
 from fieldshift.planner.finder import find_plans
 
@@ -42,7 +42,9 @@ class Divergence(BaseModel):
 
 
 class SwitchCondition(BaseModel):
-    kind: Literal["dry_or_moisture_concern", "unresolved_flags", "grower_decision"]
+    kind: Literal[
+        "dry_or_moisture_concern", "pest_spillover_concern", "unresolved_flags", "grower_decision"
+    ]
     text: str
     rule_ids: list[str] = Field(default_factory=list)
     inputs_needed: list[str] = Field(default_factory=list)
@@ -136,14 +138,20 @@ def _switch_condition(
             rule_ids=gated,
         )
     if div is not None and div.action_id == "terminate" and gated:
+        dry = [r for r in addressed if GATES[r] == "dry_or_moisture_concern"]
+        pest = [r for r in addressed if GATES[r] == "pest_spillover_concern"]
+        parts, needed = [], []
+        if dry:
+            parts.append("the spring is running dry or the grower reports a low-moisture concern")
+            needed.append("a field moisture check or a grower-reported low-moisture concern")
+        if pest:
+            parts.append("the grower reports an insect-pest spillover concern")
+            needed.append("a grower-reported pest-spillover concern")
         return SwitchCondition(
-            kind="dry_or_moisture_concern",
-            text=(
-                f"Switch to the fallback {when} if the spring is running dry or the grower reports "
-                f"a low-moisture concern: {div.what}."
-            ),
+            kind="dry_or_moisture_concern" if dry else "pest_spillover_concern",
+            text=f"Switch to the fallback {when} if {' or if '.join(parts)}: {div.what}.",
             rule_ids=addressed,
-            inputs_needed=["a field moisture check or a grower-reported concern"],
+            inputs_needed=needed,
         )
     cleared = sorted(d_flags - f_flags)
     if cleared:
@@ -161,48 +169,61 @@ def _switch_condition(
     )
 
 
-def suggest_fallback(plan: Plan, index: CatalogIndex, *, year: int | None = None) -> Plan | None:
-    """A catalog-supported alternative winter option for the same cash-crop pair, or ``None``.
+def _candidate_fallbacks(plan: Plan, index: CatalogIndex, year: int) -> list[Plan]:
+    """Fallback candidates in preference order (not yet validated)."""
+    from fieldshift.planner.finder import _gaps
+    from fieldshift.seasons.align import build_calendar
 
-    Prefers the option with the fewest moisture flags and then the most living cover; never the
-    default's own winter management.
-    """
+    out: list[Plan] = []
     cover = plan.winter
     if cover.kind == "cover" and cover.crop_id and cover.terminate:
         # The natural fallback keeps the seeding and only ends the cover earlier, so the decision
         # is made in spring, when the dry signal is known.
-        from datetime import timedelta as _td
-
-        from fieldshift.planner.finder import _gaps
-        from fieldshift.seasons.align import build_calendar
-
         try:
-            cal = build_calendar(plan, year or default_planting_year())
+            cal = build_calendar(plan, year)
         except Exception:  # noqa: BLE001 - invalid plans are reported by the caller
-            return None
+            return []
         if cal.cover is not None and cal.termination_gap_days is not None:
-            larger = [g for g in _gaps(index, cover.crop_id, plan.next_crop_id, plan.region)
-                      if g > cal.termination_gap_days]  # fmt: skip
-            if larger:
-                terminate = cal.plant - _td(days=min(larger))
-                new = cover.model_copy(
-                    update={"terminate": f"{terminate.month:02d}-{terminate.day:02d}"}
-                )
-                return plan.model_copy(
-                    update={"winter": new, "plan_id": f"{plan.plan_id}__fallback_gap{min(larger)}"}
+            for g in sorted(g for g in _gaps(index, cover.crop_id, plan.next_crop_id, plan.region)
+                            if g > cal.termination_gap_days):  # fmt: skip
+                t = cal.plant - timedelta(days=g)
+                new = cover.model_copy(update={"terminate": f"{t.month:02d}-{t.day:02d}"})
+                out.append(
+                    plan.model_copy(
+                        update={"winter": new, "plan_id": f"{plan.plan_id}__fallback_gap{g}"}
+                    )
                 )
     res = find_plans(plan, index, priorities=["limited_water", "soil_protection"], year=year)
+    cur = plan.winter
     for opt in res.options:
-        w, cur = opt.winter, plan.winter
+        w = opt.winter
         if (w.kind, w.crop_id, w.seed, w.terminate) != (
             cur.kind,
             cur.crop_id,
             cur.seed,
             cur.terminate,
         ):
-            return plan.model_copy(
-                update={"winter": w, "plan_id": f"{plan.plan_id}__fallback_{opt.option_id}"}
+            out.append(
+                plan.model_copy(
+                    update={"winter": w, "plan_id": f"{plan.plan_id}__fallback_{opt.option_id}"}
+                )
             )
+    return out
+
+
+def suggest_fallback(plan: Plan, index: CatalogIndex, *, year: int | None = None) -> Plan | None:
+    """A catalog-supported alternative winter option for the same cash-crop pair, or ``None``.
+
+    Prefers a later gap-based termination (same seeding), then the finder's best option; never the
+    default's own winter management. A candidate that breaks in the requested year or in ANY
+    historical planting year (a Feb 28/29 date, for example) is skipped.
+    """
+    from fieldshift.compare.engine import YEARS
+
+    year = year or default_planting_year()
+    for cand in _candidate_fallbacks(plan, index, year):
+        if not plan_year_issues(cand, [year, *YEARS]):
+            return cand
     return None
 
 

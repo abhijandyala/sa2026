@@ -244,14 +244,11 @@ async def post_wheat(request: Request, ctx: Annotated[Context, Depends(get_conte
         inputs=inputs, full_season_plan=full,
     )  # fmt: skip
     if result["status"] == "invalid_input":
-        return invalid(
-            [
-                issue(
-                    f"plan.{i['field']}" if i["field"] != "maturity_group" else "maturity_group",
-                    i["code"],
-                    i["message"],
-                )
-                for i in result["issues"]
-            ]
-        )
-    return {"meta": response_meta(plan_version(plan, result["year"], inputs)), "result": result}
+        return invalid([issue(i["field"], i["code"], i["message"]) for i in result["issues"]])
+    # plan_version covers everything that changes the result: the effective inputs (including
+    # the maturity group, however it was given) and the comparison plan.
+    from fieldshift.planner.wheat_path import _effective_inputs
+
+    effective, _ = _effective_inputs(body.get("maturity_group"), inputs)
+    versioned = {**effective, "_compare_to_plan": full.model_dump(mode="json") if full else None}
+    return {"meta": response_meta(plan_version(plan, result["year"], versioned)), "result": result}

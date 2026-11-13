@@ -338,6 +338,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - Every number in the field note resolves to an audit entry, and a test walks all of them.
 - One fixed alternative and one changed planting calendar both produce correct notes.
 
+
+**Status (B, 2026-11-13): done (JSON-only note).** `planner/calendar.py` (actions with zone/trigger/evidence/status, typical/dry/wet scenarios, edit diff with reasons), `planner/backup.py` (default + fallback, switch condition by the rule's own gate, deadline, next check, fixed-plan comparison; backtest `unavailable`), `report/audit.py`, `report/field_note.py`, `report/routes.py` (`POST /v1/plans/calendar|backup|note`, `GET /v1/plans/{id}/note`). A test walks every number in the note to an audit entry. Codex r1 (3 high, 4 medium) and r2 (2 medium) fixed with tests; no r3. Assumption labeled: next check = deadline - 7 days. Wetness playback is the replay's (A) with the modeled label; the note carries window means.
 ---
 
 ## Phase 10 — API contract and reliability (Abhi handoff)
@@ -399,6 +401,8 @@ Start this in parallel with Phase 6, then finalize it here.
 - A wheat→double-crop plan shows its own planting window dates, and the comparison against full-season soybean is explicitly labeled as different-calendar.
 - Without wheat rows, the path returns `unavailable: catalog_missing` and everything else still works.
 
+
+**Status (B, 2026-11-13): double-crop path done; SMAP skipped (stretch).** `planner/wheat_path.py` + `POST /v1/plans/wheat`, `GET /v1/plans/wheat/template`. Grower enters wheat plant/harvest and soybean planting dates (catalog v2 has no numeric Piedmont windows); MG checked with `sb_v2_mg_mid_june/july` (planting-date context, mid-month = 15th +/- 7 days, assumed) and `sb_rc_03`; qualitative and map rows `manual_check`; `organic_grain` rows inapplicable to conventional; dry label uses its own window baseline; cross-calendar comparison against full-season soybean is labeled `different-calendar` with raw totals only; catalog v1 gives `unavailable: catalog_missing`. Codex r1 (1 high, 3 medium) fixed with tests. **Left for A:** `analyze_plan` still returns unavailable for `winter_grain` plans; route them to `evaluate_wheat_double_crop`. The Phase 9 field note does not cover wheat plans yet.
 ---
 
 ## Phase order at a glance

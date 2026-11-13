@@ -263,3 +263,41 @@ def test_calendar_summaries_use_the_requested_year_not_2025(ctx, rye):
     )
     assert b.comparison["fallback_minus_default"]["living_cover_days_planned"] == -3
     assert b.comparison["fallback_minus_default"]["termination_gap_days"] == 3
+
+
+# ------------------------------------------------------------------ review fixes (phase-9-B r2)
+
+
+def test_pest_gated_rule_gets_a_pest_switch_condition_not_a_dry_one(ctx, rye):
+    from fieldshift.contracts import GrowerInputs
+
+    worried = edited(rye, terminate="04-23").model_copy(  # a 19-day gap: outside 21-28
+        update={"grower": GrowerInputs(observations=["pest_spillover_concern"]), "plan_id": "pest"}
+    )
+    cal = build_action_calendar(worried, ctx.index, year=YEAR)
+    check = by_id(cal)["check:cr_tt_04"]
+    assert check.flagged and "insect-pest" in check.trigger and "dry" not in check.trigger
+    b = build_backup_plan(worried, None, ctx.index, year=YEAR, as_of=date(2027, 4, 1))
+    sc = b.switch_condition
+    assert sc.kind == "pest_spillover_concern" and sc.rule_ids == ["cr_tt_04"]
+    assert "pest" in sc.text and "dry" not in sc.text.lower() and "moisture" not in sc.text.lower()
+    assert sc.inputs_needed == ["a grower-reported pest-spillover concern"]
+
+
+def test_dry_gate_trigger_text_is_specific_to_the_moisture_rule(ctx, rye):
+    c = by_id(build_action_calendar(rye, ctx.index, year=YEAR))["check:cr_tt_03"]
+    assert "low-moisture concern" in c.trigger and "pest" not in c.trigger
+
+
+def test_suggested_fallback_never_returns_a_plan_that_breaks_in_a_historical_year(ctx, rye):
+    from fieldshift.compare.engine import YEARS
+    from fieldshift.planner.calendar import plan_year_issues
+
+    # a fallback gap of 14 days before Mar 14 lands on Feb 29 in 2028 only
+    tricky = edited(rye, seed="02-28", terminate="03-01").model_copy(
+        update={"prev_harvest": "10-01", "next_plant": "03-14", "plan_id": "tricky"}
+    )
+    fb = suggest_fallback(tricky, ctx.index, year=2028)
+    assert fb is None or plan_year_issues(fb, [2028, *YEARS]) == []
+    b = build_backup_plan(tricky, None, ctx.index, year=2028)
+    assert b.status in ("complete", "unsupported")

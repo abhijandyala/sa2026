@@ -140,3 +140,15 @@ def test_a_plan_valid_in_the_requested_year_but_not_in_every_replay_year_is_a_ty
             r.json()["issues"][0]["field"].startswith("plan.winter")
             and "planting year" in r.json()["issues"][0]["message"]
         )
+
+
+def test_backup_route_with_a_suggestion_that_would_break_in_some_year_is_not_a_500(client):
+    from fieldshift.api.samples import load_samples
+
+    p = load_samples().plans["corn_soy__rye"].plan.model_dump(mode="json")
+    p["winter"].update(seed="02-28", terminate="03-01")
+    p["prev_harvest"], p["next_plant"] = "10-01", "03-14"
+    r = client.post("/v1/plans/backup", json={"plan": p, "year": 2028})
+    assert r.status_code in (200, 400), r.text
+    if r.status_code == 200:
+        assert r.json()["backup"]["status"] in ("complete", "unsupported")

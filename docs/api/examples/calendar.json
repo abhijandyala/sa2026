@@ -90,7 +90,7 @@
         "kind": "check",
         "label": "Consider ending rye at least 14 days before soybean planting when low soil moisture is a concern.",
         "status": "unknown",
-        "trigger": "rule cr_tt_03 (Low soil moisture is a concern before soybean planting); fires when the spring is dry or the grower reports the concern; due on the cover crop's termination date",
+        "trigger": "rule cr_tt_03 (Low soil moisture is a concern before soybean planting); fires when the spring is dry or the grower reports a low-moisture concern; due on the cover crop's termination date",
         "zone": null
       },
       {

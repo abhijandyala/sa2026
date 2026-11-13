@@ -21,6 +21,7 @@ If the catalog has no wheat planting rows (catalog v1) the path is
 
 from __future__ import annotations
 
+import statistics
 from datetime import date
 from typing import Any
 
@@ -89,7 +90,7 @@ def _spring_block(plan: Plan, ctx: Any, ts: Any, label: str) -> dict[str, Any]:
     name = f"{SPRING_DRY_PREFIX}{plan.next_plant}"
     cutoff = ts.get(name)
     totals = sorted(s.total_mm for s in eligible if s.total_mm is not None)
-    median = round(totals[len(totals) // 2], 3) if totals else None
+    median = round(float(statistics.median(totals)), 3) if totals else None
     ind = dry_spring_indicator(springs)
     era = compare_eras("dry_spring", ind, ts, threshold_names=[name])
     first = bundles[0].cal
@@ -161,22 +162,25 @@ def evaluate_wheat_double_crop(
         return {
             **base,
             "status": str(Status.INVALID_INPUT),
-            "issues": [i.model_dump() for i in exc.issues],
+            "issues": [{**i.model_dump(), "field": f"plan.{i.field}"} for i in exc.issues],
         }
     assert cal.grain is not None
     from fieldshift.compare.engine import YEARS
     from fieldshift.planner.calendar import plan_year_issues
 
-    year_issues = plan_year_issues(plan, YEARS)  # the replay runs every historical year
+    year_issues = [
+        {**i, "field": f"plan.{i['field']}"} for i in plan_year_issues(plan, YEARS)
+    ]  # the replay runs every historical year
     if year_issues:
         return {**base, "status": str(Status.INVALID_INPUT), "issues": year_issues}
+    if full_season_plan is not None:
+        bad = _comparison_issues(full_season_plan, YEARS)
+        if bad:
+            return {**base, "status": str(Status.INVALID_INPUT), "issues": bad}
 
-    mg_issue = _mg_issue(maturity_group)
-    if mg_issue is not None:
-        return {**base, "status": str(Status.INVALID_INPUT), "issues": [mg_issue.model_dump()]}
-    all_inputs = {**(inputs or {})}
-    if maturity_group is not None and str(maturity_group).strip() != "":
-        all_inputs["maturity_group"] = float(maturity_group)
+    all_inputs, mg_issues = _effective_inputs(maturity_group, inputs)
+    if mg_issues:
+        return {**base, "status": str(Status.INVALID_INPUT), "issues": mg_issues}
 
     from fieldshift.planner.checker import facts_from_calendar
 
@@ -257,7 +261,46 @@ def evaluate_wheat_double_crop(
     return out
 
 
-def _mg_issue(mg: Any) -> FieldIssue | None:
+def _comparison_issues(full: Plan, years: Any) -> list[dict[str, str]]:
+    """The comparison plan must be a valid full-season soybean plan in every replay year."""
+    from fieldshift.planner.calendar import plan_year_issues
+
+    if full.next_crop_id != "soybean" or full.winter.kind == "winter_grain":
+        return [{"field": "compare_to_plan", "code": "not_full_season_soybean",
+                 "message": "the comparison plan must be a full-season soybean plan"}]  # fmt: skip
+    return [{**i, "field": f"compare_to_plan.{i['field']}"} for i in plan_year_issues(full, years)]
+
+
+def _effective_inputs(
+    maturity_group: Any, inputs: dict[str, Any] | None
+) -> tuple[dict[str, Any], list[dict[str, str]]]:
+    """Merge ``maturity_group`` and ``inputs`` into one validated input set.
+
+    The top-level value and ``inputs.maturity_group`` must agree if both are given. A blank or
+    null value means "not entered" (unknown), never 0; a real 0 is kept.
+    """
+    out = {k: v for k, v in (inputs or {}).items() if k != "maturity_group"}
+    candidates: list[tuple[str, Any]] = []
+    for field, raw in (
+        ("maturity_group", maturity_group),
+        ("inputs.maturity_group", (inputs or {}).get("maturity_group")),
+    ):
+        if raw is None or (isinstance(raw, str) and not raw.strip()):
+            continue
+        issue = _mg_issue(raw, field)
+        if issue is not None:
+            return {}, [issue.model_dump()]
+        candidates.append((field, float(raw)))
+    values = {v for _, v in candidates}
+    if len(values) > 1:
+        return {}, [{"field": "inputs.maturity_group", "code": "conflict",
+                     "message": "maturity_group and inputs.maturity_group disagree"}]  # fmt: skip
+    if values:
+        out["maturity_group"] = values.pop()
+    return out, []
+
+
+def _mg_issue(mg: Any, field: str = "maturity_group") -> FieldIssue | None:
     if mg is None or (isinstance(mg, str) and not mg.strip()):
         return None
     try:
@@ -266,7 +309,7 @@ def _mg_issue(mg: Any) -> FieldIssue | None:
         v = float("nan")
     if isinstance(mg, bool) or v != v or v in (float("inf"), float("-inf")) or not 0 <= v <= 10:
         return FieldIssue(
-            field="maturity_group",
+            field=field,
             code="invalid_value",
             message="maturity_group must be a number from 0 to 10",
         )
