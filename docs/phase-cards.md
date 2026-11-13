@@ -79,6 +79,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - Fixture CSVs with a bad operator, a dangling crop ref, a reversed `between`, a duplicate ID, or a grade mismatch each produce the exact file, row, and field.
 - The `exposure_duration` value `several` (`sb_wt_02`) is preserved as qualitative and is not coerced.
 
+
+**Status (B, 2026-11-13): done.** v1 catalogs load (5 crops, 85 rules, 5 fertilizers; only the two blank-`verified_date` warnings). Codex review r1 (3 medium) and r2 (1 medium: parse-error crops orphaning rules) all fixed with tests; no r3 run.
 ---
 
 ## Phase 1 — NASA weather ingestion and offline snapshot (Union County)
@@ -197,6 +199,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 4. Weather missing for the window, with a grower-reported concern: the check still fires from the concern, and the calendar metrics stay valid; the dryness metric is `unavailable`.
 5. Editing the planting date recomputes the window and the rank.
 
+
+**Status (B, 2026-11-13): 4b (rule engine) done; 4a and the regression cases are A's.** `fieldshift/metrics/rules.py` (+ `field/regions.py`) covers applicability, `manual_check`/`unknown`, catalog-declared conflicts, `cr_tt_03` (gap < 14 and (dry or concern); clears at gap >= 14 even with dryness missing) and optional `cr_tt_04`, and per-check qualifying/skipped/count/denominator. It reads the real `SeasonFacts`. Codex r1 (7 medium) and r2 (4 medium) fixed with tests; no r3 run. A: pass regression cases 1-5 once 4a lands (see docs/handoff.md).
 ---
 
 ## Phase 5 — Two-period comparison (1981–2000 vs 2006–2025)
@@ -275,6 +279,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - `fc_pw_01` and `fc_pw_02` are both returned and flagged as a conflict.
 - An unsupported crop or location returns `unsupported` (distinct from `unknown`).
 
+
+**Status (B, 2026-11-13): done.** `planner/checker.py`, `finder.py`, `crops.py`, `routes.py` (`POST /v1/plans/check`, `POST /v1/plans/find`, `GET /v1/crops`). Acceptance cases tested. Codex r1 (3 P1, 3 P2) and r2 (1 P1, 1 P2) fixed with tests; no r3 run. **Left for A:** mount the router in `api/app.py` (handoff).
 ---
 
 ## Phase 8 — Locations and soil
@@ -300,6 +306,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - When SDA times out, the plan comparison still succeeds and `soil.status = unavailable`.
 - A point outside NC returns `unsupported_location`.
 
+
+**Status (B, 2026-11-13): done, except two items that are A's.** `field/location.py`, `soil.py`, `evidence.py`, `routes.py` (`POST /v1/locations/resolve`, `GET /v1/soil`). Union sample resolves offline; SDA failure gives `soil.status=unavailable`; outside NC gives `unsupported_location` (coarse offline outline, ~10 km at the border). Codex r1 (1 high, 7 medium) and r2 (4 medium) fixed with tests; no r3 run. **Left for A:** mount the router, and call `get_soil()` from plan comparison (handoff).
 ---
 
 ## Phase 9 — Decision tools: action calendar, backup plan, field note, audit

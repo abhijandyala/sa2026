@@ -100,8 +100,8 @@ class LocationResult(BaseModel):
 #: Good to roughly 10 km at the border, which is enough to reject neighbouring-state cities.
 NC_OUTLINE = [
     (36.55, -75.88), (36.54, -77.00), (36.54, -80.00), (36.59, -81.68),  # Virginia border
-    (36.25, -81.90), (36.00, -82.10), (35.85, -82.55), (35.75, -83.00),  # Tennessee border
-    (35.55, -83.50), (35.45, -84.00), (35.00, -84.32),
+    (36.35, -81.90), (36.14, -82.20), (36.00, -82.40), (35.90, -82.95),  # Tennessee border
+    (35.77, -83.15), (35.60, -83.50), (35.55, -83.90), (35.30, -84.25), (35.00, -84.32),
     (35.00, -83.10), (35.20, -82.40), (35.19, -81.04), (34.99, -80.93),  # Georgia / S. Carolina
     (34.82, -80.80), (34.80, -79.67), (33.85, -78.55),
     (33.90, -77.95), (34.50, -76.90), (34.70, -76.50), (35.25, -75.52),  # Atlantic coast
@@ -163,6 +163,14 @@ def _snapshot_cell(snapshot_dir: Path) -> tuple[Snapshot | None, dict[str, Any] 
     except (SnapshotError, OSError, ValueError):
         return None, None
     return snap, snap.manifest["grid"]["derived_cell"]
+
+
+def _safe_support(snap: Snapshot, source: str, freshness: str) -> WeatherSupport | None:
+    """:func:`_support_from`, or ``None`` when the manifest is malformed."""
+    try:
+        return _support_from(snap, source, freshness)
+    except (KeyError, TypeError, AttributeError, ValueError):
+        return None
 
 
 def _same_cell(a: dict[str, Any], b: dict[str, Any]) -> bool:
@@ -246,37 +254,47 @@ def resolve_location(
     at_reference = snap is not None and snap_cell is not None and _same_cell(cell, snap_cell)
 
     # ---- weather
+    def unavailable_weather(why: str) -> WeatherSupport:
+        return WeatherSupport(
+            supported=False, status=Status.UNAVAILABLE, source="none",
+            freshness="unavailable", reason=why,
+        )  # fmt: skip
+
+    weather: WeatherSupport | None = None
     if at_reference:
         assert snap is not None
-        weather = _support_from(snap, "snapshot", "snapshot")
+        weather = _safe_support(snap, "snapshot", "snapshot") or unavailable_weather(
+            "the committed snapshot manifest is malformed"
+        )
     else:
         cached: Snapshot | None = None
         try:
             cached = load_snapshot(cache_root / cid)
-        except (SnapshotError, OSError, ValueError):
+        except (SnapshotError, OSError, ValueError, KeyError, TypeError):
             cached = None
         if cached is not None:
-            when = cached.manifest.get("retrieval", {}).get("retrieved_at", "unknown time")
-            weather = _support_from(cached, "cache", f"cached({when})")
-        elif fetch_history and not offline:
             try:
-                fetched = fetch_cell_history(cell, cache_root, fetch)
-                weather = _support_from(fetched, "fetched", "fresh")
-            except Exception as exc:  # noqa: BLE001 - any provider failure is an unavailable result
-                weather = WeatherSupport(
-                    supported=False, status=Status.UNAVAILABLE, source="none",
-                    freshness="unavailable", reason=f"history fetch failed: {type(exc).__name__}: {exc}",
-                )  # fmt: skip
-        else:
-            why = (
-                "offline mode: no cached history for this grid cell"
-                if offline
-                else "no cached history for this grid cell; request it with fetch_history"
-            )
-            weather = WeatherSupport(
-                supported=False, status=Status.UNAVAILABLE, source="none",
-                freshness="unavailable", reason=why,
-            )  # fmt: skip
+                when = cached.manifest.get("retrieval", {}).get("retrieved_at", "unknown time")
+            except AttributeError:
+                when = "unknown time"
+            weather = _safe_support(cached, "cache", f"cached({when})")  # None if malformed
+        if weather is None:
+            if fetch_history and not offline:
+                try:
+                    fetched = fetch_cell_history(cell, cache_root, fetch)
+                    weather = _safe_support(fetched, "fetched", "fresh") or unavailable_weather(
+                        "the fetched history has a malformed manifest"
+                    )
+                except Exception as exc:  # noqa: BLE001 - any provider failure is unavailable
+                    weather = unavailable_weather(
+                        f"history fetch failed: {type(exc).__name__}: {exc}"
+                    )
+            else:
+                weather = unavailable_weather(
+                    "offline mode: no usable cached history for this grid cell"
+                    if offline
+                    else "no usable cached history for this grid cell; request it with fetch_history"
+                )
 
     # ---- guidance region
     tag = normalize_field_region(region)

@@ -1,3 +1,6 @@
+import json
+import shutil
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -174,6 +177,8 @@ def test_evidence_requires_a_date_and_finite_numbers():
     "lat,lon,inside",
     [(35.23, -80.84, True), (35.60, -82.55, True), (35.78, -78.64, True), (34.23, -77.94, True),
      (36.20, -81.67, True), (34.98, -80.55, True), (35.07, -77.04, True),
+     (35.89, -82.83, True), (35.09, -84.03, True), (35.43, -83.45, True), (35.49, -82.99, True),
+     (36.31, -82.35, False), (35.71, -83.51, False),
      (34.00, -81.03, False), (32.78, -79.93, False), (34.85, -82.40, False), (35.96, -83.92, False),
      (36.85, -75.98, False), (37.54, -77.44, False), (33.50, -79.00, False), (34.70, -84.00, False)],
 )  # fmt: skip
@@ -263,3 +268,57 @@ def test_soil_route_follows_offline_mode_without_touching_the_network(
     r = client.get("/v1/soil", params={"lat": UNION[0], "lon": UNION[1]})
     assert r.status_code == 200 and r.json()["soil"]["status"] == "unavailable"
     assert "offline" in r.json()["soil"]["reason"]
+
+
+def test_malformed_weather_cache_manifest_is_unavailable_not_a_500(tmp_path):
+    cid = "cell_+35.500_-79.375"
+    d = tmp_path / cid
+    d.mkdir()
+    # a valid parquet next to a manifest that parses but lacks required keys
+    snap_dir = DEFAULT_SNAPSHOT_DIR
+    shutil.copy(snap_dir / "daily.parquet", d / "daily.parquet")
+    good = json.loads((snap_dir / "manifest.json").read_text())
+    for broken in ({}, {**good, "coverage": {}}, {**good, "retrieval": "oops"}):
+        (d / "manifest.json").write_text(json.dumps(broken))
+        r = resolve_location(35.4, -79.2, cache_dir=tmp_path, fetch=no_network, offline=True)
+        assert r.status in ("partial", "complete") and r.weather is not None
+
+
+def test_evidence_units_are_converted_or_rejected():
+    b = EvidenceBundle(
+        observations=[
+            GrowerObservation(kind="soil_temp_f", value=10.0, unit="C", observed_on="2025-04-01"),
+            GrowerObservation(
+                kind="water_table_depth_in", value=91.44, unit="cm", observed_on="2025-04-01"
+            ),
+        ]
+    )
+    got = b.as_rule_inputs()
+    assert got["soil_temp_f"] == pytest.approx(50.0) and got[
+        "water_table_depth_in"
+    ] == pytest.approx(36.0)
+    with pytest.raises(ValueError, match="not supported"):
+        GrowerObservation(
+            kind="water_table_depth_in", value=10, unit="furlongs", observed_on="2025-04-01"
+        )
+    with pytest.raises(ValueError, match="not supported"):
+        GrowerObservation(kind="soil_temp_f", value=50, unit="cm", observed_on="2025-04-01")
+    plain = EvidenceBundle(
+        observations=[GrowerObservation(kind="soil_temp_f", value=50, observed_on="2025-04-01")]
+    )
+    assert plain.as_rule_inputs()["soil_temp_f"] == 50  # no unit = the input's own unit
+
+
+def test_missing_query_parameters_are_typed_400s_with_metadata():
+    app = FastAPI()
+    app.include_router(router)
+    c = TestClient(app)
+    for path in ("/v1/soil", "/v1/live"):
+        r = c.get(path)
+        assert r.status_code == 400 and r.json()["status"] == "invalid_input"
+        assert {i["field"] for i in r.json()["issues"]} == {
+            "lat",
+            "lon",
+        } and "request_id" in r.json()
+        only = c.get(path, params={"lat": "35"})
+        assert [i["field"] for i in only.json()["issues"]] == ["lon"]

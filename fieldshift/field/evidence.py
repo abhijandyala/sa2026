@@ -12,7 +12,7 @@ import math
 from datetime import date
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 # Grower soil-test fields that map onto rule-engine inputs (see ``metrics.rules.NUMERIC_INPUTS``).
 _SOIL_TEST_INPUTS = {"soil_ph": "soil_ph"}
@@ -21,6 +21,23 @@ _OBSERVATION_INPUTS = {
     "soil_temp_f": "soil_temp_f",
     "water_table_depth_in": "water_table_depth_in",
 }
+# Accepted units per mapped observation, as functions into the input's own unit. A unit that is
+# not listed is rejected rather than silently read in the input's unit.
+_UNIT_TO_INPUT = {
+    "soil_temp_f": {
+        None: lambda v: v, "f": lambda v: v, "degf": lambda v: v, "\u00b0f": lambda v: v,
+        "c": lambda v: v * 9 / 5 + 32, "degc": lambda v: v * 9 / 5 + 32,
+        "\u00b0c": lambda v: v * 9 / 5 + 32,
+    },
+    "water_table_depth_in": {
+        None: lambda v: v, "in": lambda v: v, "inch": lambda v: v, "inches": lambda v: v,
+        "cm": lambda v: v / 2.54, "m": lambda v: v * 39.37007874, "ft": lambda v: v * 12,
+    },
+}  # fmt: skip
+
+
+def _unit_key(unit: str | None) -> str | None:
+    return unit.strip().lower() if unit and unit.strip() else None
 
 
 class _Evidence(BaseModel):
@@ -45,6 +62,16 @@ class GrowerObservation(_Evidence):
         if isinstance(v, float) and not math.isfinite(v):
             raise ValueError("value must be finite")
         return v
+
+    @model_validator(mode="after")
+    def _unit_is_usable(self) -> GrowerObservation:
+        table = _UNIT_TO_INPUT.get(self.kind)
+        if table is not None and _unit_key(self.unit) not in table:
+            raise ValueError(
+                f"unit '{self.unit}' is not supported for {self.kind}; use one of "
+                f"{sorted(k for k in table if k)}"
+            )
+        return self
 
 
 class SoilTest(_Evidence):
@@ -95,8 +122,9 @@ class EvidenceBundle(BaseModel):
             for attr, name in _SOIL_TEST_INPUTS.items():
                 consider(name, getattr(t, attr), t)
         for o in self.observations:
-            if o.kind in _OBSERVATION_INPUTS:
-                consider(_OBSERVATION_INPUTS[o.kind], o.value, o)
+            if o.kind in _OBSERVATION_INPUTS and isinstance(o.value, int | float):
+                convert = _UNIT_TO_INPUT[o.kind][_unit_key(o.unit)]
+                consider(_OBSERVATION_INPUTS[o.kind], convert(float(o.value)), o)
         return found
 
     def as_rule_inputs(self, *, zone_id: str | None = None) -> dict[str, float]:

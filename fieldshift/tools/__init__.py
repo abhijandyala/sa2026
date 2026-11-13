@@ -1,1 +1,1 @@
-"""Field Shift backend."""
+"""Field tools: irrigation and fertilizer (Phase 11)."""
