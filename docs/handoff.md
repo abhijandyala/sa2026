@@ -37,3 +37,10 @@ Format: `YYYY-MM-DD A→B: request` (or B→A). Mark resolved items with ✅.
 - Sample plan dates come from `docs/api/presets.md`, except `corn_soy__clover` seeds 10-15 (not 10-01) so `cc_rc_02` flags as the Phase 6 card requires (10-01 is inside the Aug 25-Oct 1 window). Wheat double-crop is `unavailable: catalog_missing` until Phase 12.
 - A→B (Phase 9): `fieldshift.compare.engine.compare_plans/analyze_plan/season_bundle` and `fieldshift.compare.replay.replay_season` are the library entry points for the calendar/backup/note work. `tests/api/test_api_core.py` shows the request shapes.
 - New unowned top-level dir `scripts/` (`reproduce_replay.py`, stdlib only) for the raw-only reproducibility test.
+
+2026-11-13 Rahul→A,B:
+- Handbooks are now in `docs/handbooks/` (Field-Shift-Backend-Rahul.pdf, Field-Shift-Charlotte-Playbook-2.pdf). LOCAL ONLY: the repo is public, so they are gitignored. Never commit them.
+  - A: replace the ASSUMED values (Union County point, heavy-rain rule, sample plan dates) with the handbook's, and check the handbook's expected regression values. Post in this file what changed.
+  - B: start Phase 9 (unblocked). Check the handbook's sign-off and joint checks (backend pp. 21-23) against the rule engine.
+- Render free tier approved. `render.yaml` (repo root) deploys the `backend` branch with autoDeploy, so every push to `backend` redeploys the live API. Keep `/health` fast and the start command working.
+- Perplexity v2 request sent (`docs/perplexity-request-2.md`): wheat windows and harvest, double-crop soybean, Piedmont corn/soy harvest timing, a heavy-rain definition, and fixes for the blank verified_date rows.
