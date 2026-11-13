@@ -158,7 +158,10 @@ def test_unhandled_errors_return_a_500_envelope_without_leaking_details(monkeypa
 
     monkeypatch.setattr(routes.engine, "compare_plans", boom)
     client = TestClient(create_app(), raise_server_exceptions=False)
-    r = client.post("/v1/plans/compare", json={"plan_ids": ["corn_soy__rye"], "include_soil": False})
+    origin = {"Origin": "http://localhost:5173"}
+    r = client.post("/v1/plans/compare", json={"plan_ids": ["corn_soy__rye"], "include_soil": False},
+                    headers=origin)
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:5173"  # readable by the UI
     body = r.json()
     assert r.status_code == 500 and body["status"] == "unavailable"
     assert body["issues"][0]["code"] == "internal_error" and "secret" not in r.text
@@ -207,3 +210,31 @@ def test_generating_the_contract_does_not_leak_offline_mode_into_the_environment
     import os
 
     assert "FIELDSHIFT_OFFLINE" not in os.environ
+
+
+def test_405_keeps_the_allow_header_and_errors_carry_cors(caplog):
+    client = TestClient(create_app(), raise_server_exceptions=False)
+    r = client.delete("/v1/plans/compare", headers={"Origin": "http://localhost:5173"})
+    assert r.status_code == 405 and "POST" in r.headers["allow"]
+    assert r.headers["access-control-allow-origin"] == "http://localhost:5173"
+    assert client.get("/v1/nope", headers={"Origin": "http://localhost:5173"}).headers[
+        "access-control-allow-origin"] == "http://localhost:5173"
+
+
+def test_exception_tracebacks_never_carry_message_text_into_logs(caplog, monkeypatch):
+    import fieldshift.api.routes as routes
+
+    secret = "GROWER-SECRET-TRACEBACK-77"
+
+    def boom(*a, **k):
+        raise RuntimeError(f"bad value: {secret}")
+
+    monkeypatch.setattr(routes.engine, "compare_plans", boom)
+    caplog.set_level(logging.DEBUG)
+    client = TestClient(create_app(), raise_server_exceptions=False)
+    r = client.post("/v1/plans/compare", json={"plan_ids": ["corn_soy__rye"], "include_soil": False})
+    assert r.status_code == 500 and secret not in r.text
+    text = caplog.text + "".join(
+        (rec.exc_text or "") + str(rec.getMessage()) for rec in caplog.records)
+    assert "RuntimeError" in text and "unhandled" in text
+    assert secret not in text

@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 import time
+import traceback
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -23,6 +24,13 @@ from starlette.responses import Response
 LOGGER_NAME = "fieldshift.access"
 _GROWER_KEYS = ("residue_report", "observations", "low_moisture_concern", "grower")
 REDACTED = "[redacted: log message mentioned grower fields]"
+
+
+def _locations_only(exc_info) -> str:
+    _type, exc, tb = exc_info
+    frames = [f"  {f.filename}:{f.lineno} in {f.name}" for f in traceback.extract_tb(tb)]
+    return "\n".join(["Traceback (code locations only; messages withheld):", *frames,
+                      type(exc).__name__])
 
 
 class ScrubFilter(logging.Filter):
@@ -35,7 +43,14 @@ class ScrubFilter(logging.Filter):
             return True
         lowered = msg.lower()
         if any(key in lowered for key in _GROWER_KEYS):
-            record.msg, record.args, record.exc_info, record.exc_text = REDACTED, None, None, None
+            record.msg, record.args = REDACTED, None
+        if record.exc_info and record.exc_info[1] is not None:
+            # Exception messages can embed request input (e.g. a validation error echoing a
+            # value), so a traceback is reduced to code locations and the exception type.
+            record.exc_text = _locations_only(record.exc_info)
+            record.exc_info = None
+        elif record.exc_text:
+            record.exc_text = "(traceback withheld)"
         return True
 
 
@@ -56,12 +71,40 @@ def _add_once(logger: logging.Logger, flt: logging.Filter) -> None:
 
 def install_scrub_filter() -> None:
     """Attach the filters to our loggers, uvicorn's access logger and the root handlers."""
-    for name in (LOGGER_NAME, "fieldshift"):
+    for name in (LOGGER_NAME, "fieldshift", "uvicorn.error", "uvicorn"):
         _add_once(logging.getLogger(name), ScrubFilter())
     _add_once(logging.getLogger("uvicorn.access"), QueryStripFilter())
     for handler in logging.getLogger().handlers:
         if not any(isinstance(f, ScrubFilter) for f in handler.filters):
             handler.addFilter(ScrubFilter())
+
+
+class ErrorEnvelopeMiddleware(BaseHTTPMiddleware):
+    """Turns an unhandled exception into the 500 envelope *inside* the CORS middleware, so the
+    browser can read it. The log line carries the exception type only."""
+
+    async def dispatch(self, request: Request, call_next) -> Response:  # type: ignore[override]
+        try:
+            return await call_next(request)
+        except Exception as exc:  # noqa: BLE001
+            logging.getLogger("fieldshift").error(
+                "unhandled %s on %s %s", type(exc).__name__, request.method, request.url.path,
+                exc_info=exc,
+            )
+            from fastapi.responses import JSONResponse
+
+            from fieldshift.report.http import issue
+            from fieldshift.report.meta import response_meta
+
+            return JSONResponse(
+                status_code=500,
+                content={
+                    "status": "unavailable",
+                    "issues": [issue("server", "internal_error",
+                                     "unexpected error; the cause is in the server log")],
+                    **response_meta(),
+                },
+            )
 
 
 class AccessLogMiddleware(BaseHTTPMiddleware):

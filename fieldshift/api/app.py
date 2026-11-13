@@ -6,7 +6,6 @@ snapshot under ``data/snapshots/`` and never opens a network connection.
 
 from __future__ import annotations
 
-import logging
 import os
 
 from fastapi import FastAPI, Request
@@ -15,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from fieldshift.api.logs import AccessLogMiddleware, install_scrub_filter
+from fieldshift.api.logs import AccessLogMiddleware, ErrorEnvelopeMiddleware, install_scrub_filter
 from fieldshift.api.routes import router as core_router
 from fieldshift.api.schemas import HealthResponse, InvalidInputResponse, ServerErrorResponse
 from fieldshift.field.routes import router as field_router
@@ -46,6 +45,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Field Shift backend", version="1.0.0")
     install_scrub_filter()
     app.add_middleware(AccessLogMiddleware)
+    app.add_middleware(ErrorEnvelopeMiddleware)  # inside CORS (added below) so 500s get CORS headers
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins(),
@@ -66,10 +66,14 @@ def create_app() -> FastAPI:
             content={"status": "invalid_input", "issues": issues, **response_meta()},
         )
 
-    def envelope(status_code: int, status: str, field: str, code: str, message: str) -> JSONResponse:
+    def envelope(
+        status_code: int, status: str, field: str, code: str, message: str,
+        headers: dict[str, str] | None = None,
+    ) -> JSONResponse:
         return JSONResponse(
             status_code=status_code,
             content={"status": status, "issues": [issue(field, code, message)], **response_meta()},
+            headers=headers,
         )
 
     @app.exception_handler(StarletteHTTPException)
@@ -77,13 +81,8 @@ def create_app() -> FastAPI:
         """404/405 and friends carry the same metadata envelope as every other error."""
         field = "method" if exc.status_code == 405 else "path"
         code = {404: "not_found", 405: "method_not_allowed"}.get(exc.status_code, "http_error")
-        return envelope(exc.status_code, "invalid_input", field, code, str(exc.detail))
-
-    @app.exception_handler(Exception)
-    async def _unexpected(_: Request, exc: Exception) -> JSONResponse:
-        logging.getLogger("fieldshift").exception("unhandled error: %s", type(exc).__name__)
-        return envelope(500, "unavailable", "server", "internal_error",
-                        "unexpected error; the cause is in the server log")
+        return envelope(exc.status_code, "invalid_input", field, code, str(exc.detail),
+                        headers=getattr(exc, "headers", None))
 
     error_docs = {400: {"model": InvalidInputResponse}, 500: {"model": ServerErrorResponse}}
     for r in (core_router, planner_router, field_router, tools_router):

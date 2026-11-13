@@ -354,6 +354,8 @@ Start this in parallel with Phase 6, then finalize it here.
 - With the network disabled in a fresh clone, `make offline-demo` serves the sample and all core calculations.
 - A contract test checks that the example responses validate against the schema.
 
+**Status (A, 2026-11-13): done.** `api/{contract,logs,schemas}.py`, frozen `docs/api/openapi.json`, real examples + requests in `docs/api/examples/` (replacing the drafts), `docs/backend-runbook.md`. Contract tests validate every example against the schema and fail on drift (`python -m fieldshift.api.contract --check`); typed 400/500/404/405 envelopes with the four metadata fields (OpenAPI documents 400, not 422); freshness labels in `data_sources`; log scrubbing (whole-message redaction, tracebacks reduced to locations, uvicorn query strings stripped); offline-demo verified in a fresh process that refuses non-loopback connections. Codex r1 (2 high, 2 medium, 1 low) and r2 (1 high, 1 medium, 1 low) fixed with tests; no r3.
+
 ---
 
 ## Phase 11 — Field tools: zones, live conditions, irrigation, fertilizer
