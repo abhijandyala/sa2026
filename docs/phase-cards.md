@@ -366,6 +366,8 @@ Start this in parallel with Phase 6, then finalize it here.
 - 120 lb N/ac with urea (46%) gives 260.9 lb product/ac. Asking for a P target with urea gives a "product supplies no P₂O₅" result, not a divide-by-zero.
 - When NWS is down, the live block is `unavailable` and the history is unchanged.
 
+
+**Status (B, 2026-11-13): done.** `field/zones.py` (+ sample `data/samples/zones.json`), `field/live.py`, `tools/irrigation.py`, `tools/fertilizer.py`, `tools/routes.py`, zone/live routes in `field/routes.py`. Acceptance cases tested (120 lb N urea = 260.9 lb/ac; P target with urea = `product_supplies_none`; NWS down = live block `unavailable`, history unchanged). Codex r1 (1 high, 8 medium) fixed with tests; no r2 run. **Left for A:** mount the field and tools routers (handoff).
 ---
 
 ## Phase 12 — Winter wheat double-crop and SMAP (when evidence lands)

@@ -151,3 +151,34 @@ def test_unsupported_crop_and_water_table_rule(index):
     assert (
         check_irrigation(index, crop_id="field_corn", water_table_depth_in=10).water_table is None
     )
+
+
+# ------------------------------------------------------------------ review fixes (phase-11-B)
+
+
+def test_gapped_weather_is_rejected_and_names_the_missing_days(index):
+    w = [{"date": "2025-07-01", "precip_mm": 0}, {"date": "2025-07-31", "precip_mm": 0}]
+    r = check_irrigation(index, **{**FULL, "weather": w})
+    assert r.status == "invalid_input" and r.issues[0].code == "gapped_dates"
+    assert "missing 29" in r.issues[0].message and "2025-07-02" in r.issues[0].message
+    assert check_irrigation(index, **{**FULL, "weather": days(31)}).status == "complete"
+
+
+def test_stage_ranges_and_general_stages_match(index):
+    ids = {c.rule_id for c in stage_checks(index, "soybean", "R2")}
+    assert "sb_wd_06" in ids  # R2 is inside R1-R5
+    assert "sb_wd_06" not in {c.rule_id for c in stage_checks(index, "soybean", "R6")}
+    corn = {c.rule_id for c in stage_checks(index, "field_corn", "anything")}
+    assert "fc_wd_01" in corn  # "critical stages" is a general row
+
+
+def test_stage_normalization_does_not_split_words_containing_to():
+    assert norm_stage("tomato") == "tomato" and norm_stage("R1 to R5") == "r1_to_r5"
+
+
+@pytest.mark.parametrize("bad", [-5, float("nan"), float("inf"), "deep", True])
+def test_bad_water_table_depth_is_rejected(index, bad):
+    r = check_irrigation(index, crop_id="soybean", water_table_depth_in=bad)
+    assert r.status == "invalid_input" and r.issues[0].field == "water_table_depth_in"
+    zero = check_irrigation(index, crop_id="soybean", water_table_depth_in=0)
+    assert zero.water_table["flagged"] is True  # a real 0 in is a real depth

@@ -137,6 +137,11 @@ def get_zones() -> Any:
     return {"meta": response_meta(), "zones": zones_as_dict(load_zones())}
 
 
+def _list_or_empty(body: dict[str, Any], key: str) -> Any:
+    v = body.get(key)
+    return [] if v is None else v
+
+
 @router.post("/zones/analyze")
 async def post_zones_analyze(request: Request) -> Any:
     """Body: ``{ponding?: [{zone_id, reported_on}], heavy_rain_days?: [date], changes?: [{kind, reported_on, zone_id?}]}``."""
@@ -145,9 +150,10 @@ async def post_zones_analyze(request: Request) -> Any:
         return err
     assert body is not None
     try:
-        ponding = TypeAdapter(list[PondingReport]).validate_python(body.get("ponding") or [])
-        changes = TypeAdapter(list[ChangeReport]).validate_python(body.get("changes") or [])
-        heavy = TypeAdapter(list[date]).validate_python(body.get("heavy_rain_days") or [])
+        # Only an absent or null field defaults to []; anything else must be a valid list.
+        ponding = TypeAdapter(list[PondingReport]).validate_python(_list_or_empty(body, "ponding"))
+        changes = TypeAdapter(list[ChangeReport]).validate_python(_list_or_empty(body, "changes"))
+        heavy = TypeAdapter(list[date]).validate_python(_list_or_empty(body, "heavy_rain_days"))
     except ValidationError as exc:
         return invalid(
             [

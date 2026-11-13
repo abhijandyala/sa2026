@@ -281,3 +281,32 @@ def test_json_zone_file_round_trips():
 
     d = zones_as_dict(load_zones())
     assert d["zones"][0]["drainage"]["class"] and json.dumps(d)
+
+
+# ------------------------------------------------------------------ review fixes (phase-11-B)
+
+
+def test_nws_outage_with_a_warm_cache_is_still_unavailable():
+    cache = LiveCache()
+    get_live(34.98, -80.55, client=make_client([]), now=NOW, cache=cache, offline=False)
+    down = make_client([], down=("api.weather.gov",))
+    later = NOW + timedelta(minutes=30)  # forecast and alerts expired; drought still cached
+    b = get_live(34.98, -80.55, client=down, now=later, cache=cache, offline=False)
+    assert b.status == Status.UNAVAILABLE
+    assert b.forecast.status == b.alerts.status == Status.UNAVAILABLE
+    assert b.drought.status == Status.COMPLETE and b.drought.freshness.startswith("cached(")
+
+
+def test_cache_keys_are_per_point_so_counties_never_cross():
+    calls, cache = [], LiveCache()
+    client = make_client(calls)
+    get_live(34.98, -80.55, client=client, now=NOW, cache=cache, offline=False)
+    n = len(calls)
+    get_live(34.99, -80.55, client=client, now=NOW, cache=cache, offline=False)  # ~1 km away
+    assert len(calls) > n  # not served from the first point's cache
+
+
+@pytest.mark.parametrize("val", ["nan", "inf", "-1", "101", "x"])
+def test_usdm_values_must_be_percentages(val):
+    with pytest.raises(ValueError):
+        parse_usdm_csv(USDM.replace("100.00", val, 1))

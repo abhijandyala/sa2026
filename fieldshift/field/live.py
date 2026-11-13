@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import csv
 import io
+import math
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -210,8 +211,10 @@ def parse_usdm_csv(text: str) -> dict[str, Any]:
     for c in ("None", *_CATS):
         try:
             cats[c] = float(row[c])
-        except (KeyError, ValueError):
+        except (KeyError, ValueError, TypeError):
             raise ValueError(f"Drought Monitor row has no value for {c}") from None
+        if not (math.isfinite(cats[c]) and 0.0 <= cats[c] <= 100.0):
+            raise ValueError(f"Drought Monitor value for {c} is not a percentage: {cats[c]}")
     present = [c for c in _CATS if cats[c] > 0]
     return {
         "map_date": row["MapDate"],
@@ -258,7 +261,7 @@ def get_live(
     now = now or datetime.now(UTC)
     cache = DEFAULT_CACHE if cache is None else cache
     offline = is_offline() if offline is None else offline
-    key = f"{lat:.2f},{lon:.2f}"  # ~1 km: forecasts do not vary faster than that
+    key = f"{lat:.4f},{lon:.4f}"  # ~10 m: alerts and the county depend on the exact point
     owns = client is None
     http = client or httpx.Client(timeout=NWS_TIMEOUT_S)
     try:
@@ -299,9 +302,15 @@ def get_live(
         if owns:
             http.close()
 
+    # NWS (forecast + alerts) is the live feed: when it is down the block is unavailable, even if
+    # an older drought reading is still cached (each part keeps showing its own state).
+    nws_up = Status.COMPLETE in (forecast.status, alerts.status)
     parts = [forecast, alerts, drought]
     n_ok = sum(p.status == Status.COMPLETE for p in parts)
-    status = Status.COMPLETE if n_ok == 3 else Status.UNAVAILABLE if n_ok == 0 else Status.PARTIAL
+    if not nws_up:
+        status = Status.UNAVAILABLE
+    else:
+        status = Status.COMPLETE if n_ok == 3 else Status.PARTIAL
     return LiveBlock(
         status=status, county_fips=fips, forecast=forecast, alerts=alerts, drought=drought
     )

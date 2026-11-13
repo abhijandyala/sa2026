@@ -446,7 +446,7 @@ def _eval_numeric(rule: CropRule, view: SeasonView) -> _Outcome:
         value = float(raw)
         if not math.isfinite(value):
             raise ValueError(raw)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return _Outcome("invalid_input", f"input '{name}'={raw!r} is not a finite number")
     met = _compare(rule, value)
     verb = "meets" if met else "does not meet"

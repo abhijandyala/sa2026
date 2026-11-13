@@ -18,7 +18,7 @@ def test_120_lb_n_with_urea_is_260_9_lb_product(index):
     assert r.product_lb_per_acre == 260.9
     assert r.product_lb_per_acre_exact == pytest.approx(120 / 0.46)
     n = r.nutrients[0]
-    assert n.status == "met" and n.delivered_lb_per_acre == pytest.approx(120.0, abs=0.01)
+    assert n.outcome == "met" and n.delivered_lb_per_acre == pytest.approx(120.0, abs=0.01)
     assert r.total_product_lb == pytest.approx(2608.7, abs=0.1)
     assert r.total_product_short_tons == pytest.approx(1.304, abs=0.001)
     assert r.derivation == "calculation"
@@ -37,7 +37,7 @@ def test_zero_target_for_a_zero_content_nutrient_is_fine(index):
     r = calculate({"n_lb_per_acre": 46, "p2o5_lb_per_acre": 0}, UREA, index)
     assert r.status == "complete" and r.product_lb_per_acre == 100.0
     p = next(n for n in r.nutrients if n.nutrient == "p2o5")
-    assert p.target_lb_per_acre == 0 and p.delivered_lb_per_acre == 0 and p.status == "met"
+    assert p.target_lb_per_acre == 0 and p.delivered_lb_per_acre == 0 and p.outcome == "met"
 
 
 def test_multiple_targets_set_by_a_basis_nutrient_and_show_the_tradeoff(index):
@@ -45,13 +45,13 @@ def test_multiple_targets_set_by_a_basis_nutrient_and_show_the_tradeoff(index):
     r = calculate({"n_lb_per_acre": 60, "p2o5_lb_per_acre": 40}, mes, index)
     assert r.basis_nutrient == "n" and r.product_lb_per_acre == 500.0
     n, p, k = r.nutrients
-    assert (n.status, p.status, k.status) == ("met", "excess", "not_requested")
+    assert (n.outcome, p.outcome, k.outcome) == ("met", "excess", "not_requested")
     assert p.delivered_lb_per_acre == 200 and p.difference_lb_per_acre == 160
     assert p.rate_alone_lb_product_per_acre == 100.0
     assert any("one rate" in x for x in r.notes) and any("blend" in x for x in r.notes)
     assert any("10S" in x for x in r.notes)  # sulfur in the grade is noted, not computed
     by_p = calculate({"n_lb_per_acre": 60, "p2o5_lb_per_acre": 40}, mes, index, basis="p2o5")
-    assert by_p.product_lb_per_acre == 100.0 and by_p.nutrients[0].status == "shortfall"
+    assert by_p.product_lb_per_acre == 100.0 and by_p.nutrients[0].outcome == "shortfall"
     assert by_p.nutrients[0].difference_lb_per_acre == -48.0
 
 
@@ -80,7 +80,7 @@ def test_never_invents_an_n_rate(index):
         {"k2o_lb_per_acre": 60}, Product(fertilizer_id="mop_0_0_60"), index, crop_id="soybean"
     )
     assert k.status == "complete" and any("sb_nut_01" in n for n in k.notes)
-    assert all(n.nutrient != "n" or n.status == "not_requested" for n in k.nutrients)
+    assert all(n.nutrient != "n" or n.outcome == "not_requested" for n in k.nutrients)
 
 
 @pytest.mark.parametrize(
@@ -114,3 +114,16 @@ def test_parse_grade():
     assert parse_grade("12-40-0-10S-1Zn") == (12.0, 40.0, 0.0, "10S-1Zn")
     assert parse_grade("46-0-0") == (46.0, 0.0, 0.0, None)
     assert parse_grade("46-0") is None
+
+
+def test_huge_or_overflowing_numbers_are_typed_errors_not_500s_or_nulls(index):
+    for bad in (10**400, 1e308, 1e12):
+        r = calculate({"n_lb_per_acre": bad}, UREA, index)
+        assert r.status == "invalid_input" and r.issues[0].field.startswith("targets")
+    r = calculate({"n_lb_per_acre": 1}, UREA, index, area_acres=10**400)
+    assert r.status == "invalid_input" and r.issues[0].field == "area_acres"
+
+
+def test_nutrient_lines_use_outcome_not_status(index):
+    r = calculate({"n_lb_per_acre": 60}, UREA, index)
+    assert not hasattr(r.nutrients[0], "status") and r.nutrients[0].outcome == "met"

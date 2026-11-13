@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import math
 import re
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -27,13 +27,13 @@ from fieldshift.catalogs.models import CropRule
 from fieldshift.contracts import FieldIssue, Status
 
 MM_PER_INCH = 25.4
-GENERAL_STAGES = frozenset({"season", "critical stages"})
+GENERAL_STAGES = frozenset({"season", "critical_stages"})
 
 
 def norm_stage(s: str | None) -> str:
     """``"R1-R5"`` / ``"R1 to R5"`` / ``"R1_to_R5"`` -> ``"r1_to_r5"``."""
     t = (s or "").strip().lower()
-    t = re.sub(r"\s*(-|–|to)\s*", "_to_", t)
+    t = re.sub(r"\s*[-–]\s*|\s+to\s+", "_to_", t)
     return re.sub(r"[\s_]+", "_", t)
 
 
@@ -111,9 +111,25 @@ def _wd_rules(index: CatalogIndex, crop_id: str) -> list[CropRule]:
     return [r for r in index.rules_for_crop(crop_id) if "_wd_" in r.rule_id]
 
 
+_R_RANGE = re.compile(r"^r(\d)_to_r(\d)$")
+
+
+def _stage_set(norm: str) -> set[str]:
+    """``"r1_to_r5"`` -> ``{"r1", ..., "r5"}``; ``"ve_and_r1_to_r5"`` -> ve plus that range."""
+    out: set[str] = set()
+    for part in norm.split("_and_"):
+        m = _R_RANGE.match(part)
+        if m and int(m.group(1)) <= int(m.group(2)):
+            out |= {f"r{i}" for i in range(int(m.group(1)), int(m.group(2)) + 1)}
+        out.add(part)
+    return out
+
+
 def _stage_matches(rule: CropRule, stage: str) -> bool:
     rs = norm_stage(rule.growth_stage)
-    return bool(rs) and (rs == stage or stage in rs.split("_and_") or rs in GENERAL_STAGES)
+    if not rs:
+        return False
+    return rs in GENERAL_STAGES or bool(_stage_set(stage) & _stage_set(rs))
 
 
 def stage_checks(index: CatalogIndex, crop_id: str, stage: str | None) -> list[StageCheck]:
@@ -209,16 +225,29 @@ def _parse_weather(rows: Any) -> tuple[list[tuple[date, float]] | None, FieldIss
                 message="precipitation must be a finite number >= 0",
             )
         out[d] = p
-    return sorted(out.items()), None
+    ordered = sorted(out.items())
+    if len(ordered) > 1:
+        first, last = ordered[0][0], ordered[-1][0]
+        missing = [
+            first + timedelta(days=k) for k in range((last - first).days + 1)
+            if first + timedelta(days=k) not in out
+        ]  # fmt: skip
+        if missing:
+            shown = ", ".join(map(str, missing[:5])) + (" ..." if len(missing) > 5 else "")
+            return None, FieldIssue(
+                field="weather", code="gapped_dates",
+                message=f"weather must cover every day from {first} to {last}; missing {len(missing)}: {shown}",
+            )  # fmt: skip
+    return ordered, None
 
 
 def water_table_check(index: CatalogIndex, crop_id: str, depth_in: Any) -> dict[str, Any] | None:
     rule = index.rule("sb_wd_07") if crop_id == "soybean" else None
     if rule is None or rule.value_min is None:
         return None
-    depth = _num(depth_in)
-    if depth is None:
+    if depth_in is None:
         return None
+    depth = depth_in
     hit = depth <= rule.value_min
     return {
         "rule_id": rule.rule_id,
@@ -252,6 +281,17 @@ def check_irrigation(
     res.stage_checks = stage_checks(index, crop_id, stage)
     demand = crop_demand(index, crop_id, stage)
     res.crop_demand = demand
+    if water_table_depth_in is not None:
+        wt = _num(water_table_depth_in)
+        if wt is None or wt < 0:
+            return _bad(
+                crop_id,
+                stage,
+                "water_table_depth_in",
+                "invalid_value",
+                "water_table_depth_in must be a finite number >= 0 (inches)",
+            )
+        water_table_depth_in = wt
     res.water_table = water_table_check(index, crop_id, water_table_depth_in)
     if demand is not None and demand.illustrative:
         res.notes.append(

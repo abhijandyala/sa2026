@@ -33,9 +33,11 @@ SHORT_TONS = 2000.0
 _NUM = r"\d+(?:\.\d+)?"
 _GRADE_RE = re.compile(rf"^({_NUM})-({_NUM})-({_NUM})((?:-{_NUM}[A-Za-z]+)*)$")
 #: Catalog rows that deliberately carry no automatic N rate, keyed by crop.
+MAX_TARGET_LB_PER_ACRE = 100_000.0  # far beyond any real rate; guards overflow
+MAX_AREA_ACRES = 10_000_000.0
 NO_AUTO_N_RULE = {"field_corn": "fc_nut_01", "soybean": "sb_nut_01"}
 
-NutrientStatus = Literal["met", "excess", "shortfall", "not_requested", "product_supplies_none"]
+NutrientOutcome = Literal["met", "excess", "shortfall", "not_requested"]
 
 
 class Product(BaseModel):
@@ -61,7 +63,7 @@ class ProductInfo(BaseModel):
 class NutrientLine(BaseModel):
     nutrient: str
     label: str
-    status: NutrientStatus
+    outcome: NutrientOutcome  # a per-nutrient result, not a status-vocabulary value
     target_lb_per_acre: float | None
     delivered_lb_per_acre: float | None
     difference_lb_per_acre: float | None  # delivered - target; > 0 excess, < 0 shortfall
@@ -95,7 +97,7 @@ def _finite(v: Any) -> float | None:
         return None
     try:
         x = float(v)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
     return x if math.isfinite(x) else None
 
@@ -205,9 +207,16 @@ def calculate(
     area = None
     if area_acres is not None:
         area = _finite(area_acres)
-        if area is None or area <= 0:
-            return _bad("area_acres", "bad_area", "area_acres must be a number > 0")
+        if area is None or area <= 0 or area > MAX_AREA_ACRES:
+            return _bad(
+                "area_acres", "bad_area", "area_acres must be a number > 0 and at most 10,000,000"
+            )
 
+    if any(t > MAX_TARGET_LB_PER_ACRE for t in want.values()):
+        return _bad(
+            "targets", "target_too_large",
+            f"targets above {MAX_TARGET_LB_PER_ACRE:g} lb/ac are rejected",
+        )  # fmt: skip
     alone = {nut: (t / (pct[nut] / 100.0) if t > 0 else 0.0) for nut, t in want.items()}
     if basis is not None and basis not in want:
         return _bad(
@@ -222,7 +231,7 @@ def calculate(
         if nut not in want:
             lines.append(
                 NutrientLine(
-                    nutrient=nut, label=LABELS[nut], status="not_requested", target_lb_per_acre=None,
+                    nutrient=nut, label=LABELS[nut], outcome="not_requested", target_lb_per_acre=None,
                     delivered_lb_per_acre=round(delivered, 2), difference_lb_per_acre=None,
                     rate_alone_lb_product_per_acre=None,
                     total_delivered_lb=round(delivered * area, 1) if area else None,
@@ -230,12 +239,12 @@ def calculate(
             )  # fmt: skip
             continue
         diff = delivered - want[nut]
-        status: NutrientStatus = (
+        outcome: NutrientOutcome = (
             "met" if abs(diff) < 0.005 else ("excess" if diff > 0 else "shortfall")
         )
         lines.append(
             NutrientLine(
-                nutrient=nut, label=LABELS[nut], status=status, target_lb_per_acre=want[nut],
+                nutrient=nut, label=LABELS[nut], outcome=outcome, target_lb_per_acre=want[nut],
                 delivered_lb_per_acre=round(delivered, 2), difference_lb_per_acre=round(diff, 2),
                 rate_alone_lb_product_per_acre=round(alone[nut], 1),
                 total_delivered_lb=round(delivered * area, 1) if area else None,

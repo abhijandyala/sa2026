@@ -170,3 +170,25 @@ def test_live_route_validation_and_unsupported(client):
     assert client.get("/v1/live", params={"lat": "abc", "lon": 1}).status_code == 400
     out = client.get("/v1/live", params={"lat": 40.7, "lon": -74.0}).json()
     assert out["status"] == "unsupported" and out["code"] == "unsupported_location"
+
+
+@pytest.mark.parametrize("bad", [False, 0, "", "x", {"a": 1}])
+def test_zones_analyze_rejects_non_list_reports(client, bad):
+    for key in ("ponding", "changes", "heavy_rain_days"):
+        r = client.post("/v1/zones/analyze", json={key: bad})
+        assert r.status_code == 400, (key, bad)
+    assert client.post("/v1/zones/analyze", json={"ponding": None}).status_code == 200
+
+
+def test_fertilizer_route_overflow_is_400(client):
+    r = client.post(
+        "/v1/fertilizer/calc",
+        content=b'{"targets":{"n_lb_per_acre":1e400},"product":{"grade":"46-0-0"}}',
+        headers={"content-type": "application/json"},
+    )
+    assert r.status_code == 400
+    big = '{"targets":{"n_lb_per_acre":' + "9" * 400 + '},"product":{"grade":"46-0-0"}}'
+    r = client.post(
+        "/v1/fertilizer/calc", content=big.encode(), headers={"content-type": "application/json"}
+    )
+    assert r.status_code == 400 and r.json()["issues"][0]["field"] == "targets.n_lb_per_acre"

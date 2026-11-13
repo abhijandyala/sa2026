@@ -1,0 +1,11 @@
+CHANGES NEEDED
+
+- high | fieldshift/tools/irrigation.py:212 | Gapped weather dates return `complete`; July 1–31 with only endpoints counts two days’ demand. | Require consecutive daily coverage and report missing dates.
+- medium | fieldshift/tools/irrigation.py:116 | Stage matching misses soybean R2 within R1–R5; normalized `critical_stages` also misses `GENERAL_STAGES`. | Match stage ranges and normalize general-stage constants.
+- medium | fieldshift/tools/fertilizer.py:97 | Huge integers cause HTTP 500; finite `1e308` targets overflow into a `complete` result with null calculations. | Catch conversion overflow and reject nonfinite calculation results with typed 400s.
+- medium | fieldshift/tools/irrigation.py:219 | Negative water-table depths trigger guidance; malformed/nonfinite supplied depths are silently ignored. | Validate supplied depths as finite and nonnegative; return typed 400s.
+- medium | fieldshift/field/routes.py:148 | `or []` accepts `false`, `0`, and empty strings as valid report lists. | Default only absent/null values; validate all supplied values.
+- medium | fieldshift/tools/fertilizer.py:64 | Nutrient `status` emits vocabulary outside CLAUDE.md (`met`, `excess`, `shortfall`, `not_requested`). | Move nutrient outcomes to a separate field and reserve `status` for approved values.
+- medium | fieldshift/field/live.py:261 | Rounded point keys share alerts and permanently cached county mappings across distinct locations, potentially crossing county boundaries. | Use precise point keys for alerts and county resolution.
+- medium | fieldshift/field/live.py:212 | USDM accepts NaN, infinity, and percentages outside 0–100 as complete data. | Validate finite percentage bounds before caching; mark malformed responses unavailable.
+- medium | fieldshift/field/live.py:304 | After warming the cache, an NWS outage returns `partial` while drought remains cached, violating the card’s `unavailable` acceptance check. | Align aggregate outage status with the card and add a warm-cache outage test.
