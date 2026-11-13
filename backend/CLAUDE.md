@@ -1,6 +1,6 @@
 # Field Shift backend: agent rules
 
-> **Scope:** these rules govern **backend work only**, meaning everything in this repo outside `web/`. The frontend lives in `web/` and follows its own `web/CLAUDE.md`. If you are working in `web/`, ignore this file. Before `backend` merges into `main`, the backend moves into a `backend/` folder and this file becomes `backend/CLAUDE.md`, so it applies only there.
+> **Scope:** these rules govern **backend work only**, meaning everything under `backend/`. All paths below are relative to `backend/`; run commands (pytest, ruff, make, the Codex review) from `backend/`. The frontend lives in `web/` and follows its own `web/CLAUDE.md`. If you are working in `web/`, ignore this file. Deployment is Railway (`backend/railway.json`; Railway service root directory `backend`).
 
 Field Shift is a NASA Space Apps project. The build plan is in `docs/phase-cards.md` and is the source of truth for what each phase builds and how it is accepted. The reference catalogs in `data/catalogs/v1/` are Perplexity's verbatim files. **Never edit them.** Report problems in `docs/catalog-gaps.md` instead.
 
@@ -87,7 +87,7 @@ Missing values are `None` paired with a status, never 0.
 
 **After you finish each card (and each half of Phase 4), and before you start the next one, run a Codex review.** Do not ask the user first. This is standing permission.
 
-Run it from the repo root. Fill in `<N>`, `<AGENT>` and the file list:
+Run it from `backend/`. Fill in `<N>`, `<AGENT>` and the file list:
 
 ```bash
 codex exec \

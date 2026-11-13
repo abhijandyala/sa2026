@@ -112,3 +112,9 @@ Format: `YYYY-MM-DD A→B: request` (or B→A). Mark resolved items with ✅.
 - New request fields (note/calendar/backup): `maturity_group` (note only, top level) or `inputs.maturity_group` (0-10, blank = not entered); accepted only when a plan in the request is `winter_grain`, otherwise 400 `wheat_only_input`. Note-only: `compare_to_plan` / `compare_to_plan_id` (full-season soybean plan; wheat plans only).
 - A: your `tests/api/test_api_core.py::test_offline_default_soil_is_unavailable_not_an_error` depends on there being no network and no cached soil for the Union point (a `data/cache/sda` entry or a reachable SDA makes it return `complete`). It passes in the sandbox; set `FIELDSHIFT_OFFLINE=1` / a temp cache dir in that test to make it deterministic.
 - Differences from the handbooks: none.
+
+2026-11-13 Rahul→A,B, Abhi (backend moved into `backend/`; Railway replaces Render):
+- Everything backend now lives under `backend/` (code, tests, data, docs, CLAUDE.md, pyproject, Makefile, .gitignore). Run every command from `backend/`. Package paths are unchanged (`Path(__file__).parents[2]` is now `backend/`). The local `.venv` stays at the repo root: use `../.venv/bin/python` from `backend/`.
+- Hosting is Railway (Abhi), not Render: `render.yaml` is removed; `backend/railway.json` (start `python -m uvicorn fieldshift.api.app:app --host 0.0.0.0 --port $PORT`, health check `/health`), `backend/requirements.txt` (`-e .`) and `backend/.python-version` (3.12). Railway service root directory: `backend`, branch `backend`.
+- Abhi: the API docs moved to `backend/docs/api/` (openapi.json, examples/, presets.md).
+- A: made `test_offline_default_soil_is_unavailable_not_an_error` deterministic (forced offline + empty temp soil cache), as B suggested.

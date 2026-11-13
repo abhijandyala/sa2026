@@ -158,7 +158,16 @@ def test_compare_ignores_soil_failure(client, monkeypatch):
     assert r.json()["plans"][0]["status"] == "complete"
 
 
-def test_offline_default_soil_is_unavailable_not_an_error(client):
+def test_offline_default_soil_is_unavailable_not_an_error(client, monkeypatch, tmp_path):
+    # Deterministic: force offline and an empty soil cache (a reachable SDA or a cached
+    # data/cache/sda entry would otherwise make this return `complete`).
+    import fieldshift.field.soil as soil
+
+    real_get_soil = soil.get_soil
+    monkeypatch.setattr(
+        soil, "get_soil",
+        lambda *a, **k: real_get_soil(*a, **{**k, "offline": True, "cache_dir": tmp_path}),
+    )
     body = post(client, "/v1/plans/compare", {"plan_ids": ["corn_soy__rye"]}).json()
     assert body["soil"]["status"] == "unavailable"
 

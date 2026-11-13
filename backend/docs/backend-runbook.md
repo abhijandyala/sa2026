@@ -1,5 +1,7 @@
 # Field Shift backend runbook
 
+> Run every command below from the `backend/` folder (`cd backend`). Hosting: Railway, configured by `railway.json` (service root directory `backend`, start `python -m uvicorn fieldshift.api.app:app --host 0.0.0.0 --port $PORT`, health check `/health`).
+
 Backend only. The frontend reads the contract in `docs/api/openapi.json` and the generated examples in `docs/api/examples/`.
 
 ## 1. Run it offline

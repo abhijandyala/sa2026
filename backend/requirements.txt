@@ -1,0 +1,3 @@
+# Used by Railway's Python builder. Installs this package (editable) and its
+# runtime dependencies from pyproject.toml, so data/ paths resolve next to fieldshift/.
+-e .
