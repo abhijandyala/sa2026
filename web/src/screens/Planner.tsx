@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { APP_NAME, TAGLINE, TASK_TITLE } from "../config";
-import { CARDS } from "../content/strategies";
+import { CARDS, cardByKey } from "../content/strategies";
+import type { Client } from "../api/client";
 import { sameForm, sampleForm } from "../state/form";
 import { hasPendingEdits, initialState, reducer } from "../state/model";
 import { applyUrlView, fromHash, toHash } from "../state/url";
-import type { ApplyOutcome, Loaded } from "../state/useData";
+import { useReplay, type ApplyOutcome, type Loaded } from "../state/useData";
 import { buildView, validYears } from "../view/build";
 import { Banner, Button, StatusPill } from "../ui/components";
 import { EvidenceDrawer } from "./planner/EvidenceDrawer";
@@ -12,6 +13,7 @@ import { FarmFormDrawer } from "./planner/FarmFormDrawer";
 import { StrategyCard } from "./planner/StrategyCard";
 import { Timeline } from "./planner/Timeline";
 import { YearStrip } from "./planner/YearStrip";
+import { WeatherDetail } from "./planner/WeatherDetail";
 
 /*
   Layout B (decided Nov 12): header, weather control (years strip), 3D band capped near
@@ -24,7 +26,9 @@ export function Planner({
   apply,
   applying,
   hasLiveApi,
+  client,
 }: {
+  client: Client;
   data: Loaded;
   apply: (form: ReturnType<typeof sampleForm>) => Promise<ApplyOutcome>;
   applying: boolean;
@@ -42,11 +46,19 @@ export function Planner({
     if (next !== window.location.hash) history.replaceState(null, "", next);
   }, [state]);
 
+  // Follow the link when only the hash changes (a pasted share link, Back/Forward).
+  useEffect(() => {
+    const onHash = () => dispatch({ type: "applyLink", view: fromHash(window.location.hash, years) });
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, [years]);
+
   const view = useMemo(() => buildView(data, { card: state.card, year: state.year }), [data, state.card, state.year]);
   const selectedCard = view.cards.find((c) => c.key === state.card) ?? view.cards[0]!;
   const rye19 = data.compare.plans.find((p) => p.plan_id === "rye_19d") ?? null;
   const rye19Check = rye19?.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture");
   const pending = hasPendingEdits(state);
+  const replay = useReplay(client, view.selectedYear?.year ?? null, cardByKey(state.card).planId, data.origin);
 
   const onApply = async () => {
     const draft = state.draft ?? state.applied;
@@ -150,6 +162,8 @@ export function Planner({
           />
         ))}
       </section>
+
+      <WeatherDetail view={view} replay={replay} onSelectYear={(year) => dispatch({ type: "selectYear", year })} />
 
       <section className="calendar" aria-labelledby="calendar-title">
         <h2 id="calendar-title" className="section-title">

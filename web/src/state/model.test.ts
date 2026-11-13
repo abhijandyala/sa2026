@@ -133,3 +133,19 @@ describe("shareable links", () => {
     expect(toHash(base)).not.toMatch(/union|harvest|moisture|irrigation|soil=/i);
   });
 });
+
+describe("following a link in an open tab", () => {
+  it("applies the link's view and keeps the dates", () => {
+    let s = reducer(base, { type: "openForm" });
+    s = reducer(s, { type: "editDraft", patch: { soyPlant: "2027-05-18" } });
+    s = reducer(s, { type: "applied", form: s.draft! });
+    s = reducer(s, { type: "applyLink", view: { card: "grain", year: 2014 } });
+    expect(s).toMatchObject({ card: "grain", year: 2014 });
+    expect(s.applied.soyPlant).toBe("2027-05-18");
+  });
+
+  it("treats missing parts as the defaults", () => {
+    const s = reducer({ ...base, card: "grain", year: 2014, priorities: ["soil"] }, { type: "applyLink", view: {} });
+    expect(s).toMatchObject({ card: "cover", year: null, priorities: [] });
+  });
+});

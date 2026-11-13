@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createClient, latestOnly, type Failure, type Origin } from "../api/client";
-import type { CompareResponse, SensitivityResponse, YearsResponse } from "../api/schema";
+import { createClient, latestOnly, type Client, type Failure, type Origin } from "../api/client";
+import type { CompareResponse, ReplayResponse, SensitivityResponse, YearsResponse } from "../api/schema";
 import { LOAD_TIMEOUT_MS, LIVE_TIMEOUT_MS, SAMPLE_BASE, API_BASE, SAMPLE_LOCATION_ID } from "../config";
 import { toPlanInputs, type FarmForm } from "./form";
 
@@ -78,5 +78,33 @@ export function useData() {
     [liveClient],
   );
 
-  return { state, retry: load, apply, applying, hasLiveApi: client.hasLiveApi };
+  return { state, retry: load, apply, applying, hasLiveApi: client.hasLiveApi, client };
+}
+
+export type ReplayState =
+  | { status: "idle" }
+  | { status: "loading"; year: number }
+  | { status: "ready"; data: ReplayResponse }
+  | { status: "error"; year: number; failure: Failure };
+
+/**
+ * Daily detail for the selected year (card 3.3). Loads on demand; while it loads the
+ * previous year's detail is not shown, so a chart can never show the wrong year.
+ */
+export function useReplay(client: Client, year: number | null, planId: string | null, origin: Origin): ReplayState {
+  const [state, setState] = useState<ReplayState>({ status: "idle" });
+  const order = useRef(latestOnly());
+  useEffect(() => {
+    if (year === null || !planId) {
+      setState({ status: "idle" });
+      return;
+    }
+    const t = order.current.next();
+    setState({ status: "loading", year });
+    client.replay(year, planId, origin).then((r) => {
+      if (!order.current.isLatest(t)) return;
+      setState(r.ok ? { status: "ready", data: r.data } : { status: "error", year, failure: r });
+    });
+  }, [client, year, planId, origin]);
+  return state;
 }

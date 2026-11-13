@@ -65,6 +65,34 @@ export interface CardVM {
   checks: OtherCheck[];
 }
 
+/** One bar in the rainfall chart (card 3.3). Values straight from the backend. */
+export interface BarVM {
+  year: number;
+  mm: number | null;
+  status: SpringYear["status"];
+  isDry: boolean | null;
+  selected: boolean;
+}
+
+export interface ChartVM {
+  bars: BarVM[];
+  medianMm: number | null;
+  cutoffMm: number | null;
+  /** Axis top, rounded up to a clean step. Drawing scale only; fixed per planting window. */
+  axisMax: number;
+  axisStep: number;
+  excluded: number[];
+}
+
+export interface WetnessVM {
+  points: Array<{ year: number; value: number; selected: boolean }>;
+  selected: number | null;
+  missingYears: number[];
+}
+
+/** Playbook p.23: show at least 15 complete years before relative labels. */
+export const MIN_COMPLETE_YEARS = 15;
+
 export interface ViewModel {
   dataKind: DataKind;
   locationLabel: string;
@@ -76,6 +104,12 @@ export interface ViewModel {
   tiles: TileVM[];
   selectedYear: YearVM | null;
   shortcuts: { typical: number | null; dry: number | null };
+  /** Too few complete years, or the backend did not rank this window: no dry labels anywhere. */
+  labelsWithheld: boolean;
+  /** No meaningful dry contrast (the backend sent no dry replay year). */
+  contrastWithheld: boolean;
+  chart: ChartVM;
+  wetness: WetnessVM;
   cards: CardVM[];
   thresholds: CompareResponse["thresholds"];
   eraSpans: { earlier: string; recent: string };
@@ -99,6 +133,12 @@ function eraVM(era: Era | undefined, spans: { earlier: string; recent: string })
   };
 }
 
+/** Same gate as the strip, for any planting window. */
+function withheld(w: SpringWindow | null): boolean {
+  if (!w || w.threshold.status !== "complete" || w.dry_count === null) return true;
+  return w.years.filter((y) => y.status === "complete").length < MIN_COMPLETE_YEARS;
+}
+
 function plantedLabel(plan: Plan): string {
   const w = plan.sequence.winter;
   if (w.type === "cover") return "rye";
@@ -117,20 +157,62 @@ export function buildView(
   const selectedContent = CARDS.find((c) => c.key === sel.card) ?? CARDS[0]!;
   const selectedPlan = planById.get(selectedContent.planId) ?? null;
   const window = windowFor(compare, selectedPlan);
-  const year = sel.year ?? window?.shortcuts.typical ?? years.shortcuts.typical;
+  const year =
+    sel.year ??
+    window?.shortcuts.typical ??
+    window?.years.find((y) => y.status === "complete")?.year ??
+    years.shortcuts.typical;
+
+  const complete = (window?.years ?? []).filter((y) => y.status === "complete");
+  const labelsWithheld =
+    !window ||
+    window.threshold.status !== "complete" ||
+    window.dry_count === null ||
+    complete.length < MIN_COMPLETE_YEARS;
+  const contrastWithheld = labelsWithheld || !window?.shortcuts.dry;
+  const typicalYear = labelsWithheld ? null : (window?.shortcuts.typical ?? null);
+  const dryYear = contrastWithheld ? null : (window?.shortcuts.dry ?? null);
 
   const tiles: TileVM[] = (window?.years ?? []).map((y) => ({
     year: y.year,
     status: y.status,
-    percentile: y.percentile,
-    isDry: y.is_dry,
-    marker: y.year === window?.shortcuts.typical ? "typical" : y.year === window?.shortcuts.dry ? "dry" : undefined,
+    percentile: labelsWithheld ? null : y.percentile,
+    isDry: labelsWithheld ? null : y.is_dry,
+    marker: y.year === typicalYear ? "typical" : y.year === dryYear ? "dry" : undefined,
     selected: y.year === year,
     description:
       y.status === "complete"
-        ? `${y.total_mm?.toFixed(1)} mm${y.is_dry ? ", among the driest 20%" : ""}`
-        : "no complete record",
+        ? `${y.total_mm === 0 ? "0.0 mm, no rain" : `${y.total_mm?.toFixed(1)} mm`}${!labelsWithheld && y.is_dry ? ", among the driest 20%" : ""}`
+        : y.status === "partial"
+          ? "incomplete record, not compared"
+          : "no weather record",
   }));
+
+  const totals = complete.map((y) => y.total_mm ?? 0);
+  const peak = Math.max(0, ...totals, window?.median_mm ?? 0);
+  const axisStep = peak <= 60 ? 10 : peak <= 150 ? 25 : peak <= 300 ? 50 : 100;
+  const chart: ChartVM = {
+    bars: (window?.years ?? []).map((y) => ({
+      year: y.year,
+      mm: y.status === "complete" ? y.total_mm : null,
+      status: y.status,
+      isDry: labelsWithheld ? null : y.is_dry,
+      selected: y.year === year,
+    })),
+    medianMm: labelsWithheld ? null : (window?.median_mm ?? null),
+    cutoffMm: labelsWithheld ? null : (window?.threshold.value ?? null),
+    axisMax: Math.max(axisStep, Math.ceil(peak / axisStep) * axisStep),
+    axisStep,
+    excluded: (window?.years ?? []).filter((y) => y.status !== "complete").map((y) => y.year),
+  };
+
+  const wetness: WetnessVM = {
+    points: complete
+      .filter((y) => y.gwetroot_window_mean !== null)
+      .map((y) => ({ year: y.year, value: y.gwetroot_window_mean!, selected: y.year === year })),
+    selected: complete.find((y) => y.year === year)?.gwetroot_window_mean ?? null,
+    missingYears: complete.filter((y) => y.gwetroot_window_mean === null).map((y) => y.year),
+  };
 
   const row = window?.years.find((y) => y.year === year) ?? null;
   const selectedYear: YearVM | null = row
@@ -139,9 +221,9 @@ export function buildView(
         status: row.status,
         totalMm: row.total_mm,
         window: [row.start, row.end],
-        rank: row.rank,
-        of: row.of,
-        isDry: row.is_dry,
+        rank: labelsWithheld ? null : row.rank,
+        of: labelsWithheld ? null : row.of,
+        isDry: labelsWithheld ? null : row.is_dry,
         wetnessRoot: row.gwetroot_window_mean,
       }
     : null;
@@ -166,7 +248,7 @@ export function buildView(
     const check = plan.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture");
     const ruleApplies = Boolean(check && check.status !== "inapplicable" && check.count !== null);
 
-    const eraSource = ruleApplies ? plan.eras["rye_soy_short_gap_moisture"] : w?.eras.dry_spring;
+    const eraSource = ruleApplies ? plan.eras["rye_soy_short_gap_moisture"] : withheld(w) ? undefined : w?.eras.dry_spring;
     const eraBase = eraVM(eraSource, spans);
     const era = eraBase
       ? { ...eraBase, measure: ruleApplies ? "Springs with a field-moisture check" : "Dry planting windows" }
@@ -190,7 +272,7 @@ export function buildView(
       status = { kind: "unavailable", text: "Weather unavailable for this year" };
     } else if (ruleApplies && check!.qualifying_years.includes(year ?? -1)) {
       status = { kind: "check", text: "Check field moisture" };
-    } else if (!ruleApplies && yr.is_dry) {
+    } else if (!ruleApplies && yr.is_dry && !withheld(w)) {
       status = { kind: "dry", text: "A dry planting window this year" };
     }
 
@@ -215,10 +297,14 @@ export function buildView(
     requestId: compare.meta.request_id,
     window,
     windowLabel: window ? window.label : "Planting window",
-    windowEra: eraVM(window?.eras.dry_spring, spans),
+    windowEra: labelsWithheld ? null : eraVM(window?.eras.dry_spring, spans),
     tiles,
     selectedYear,
-    shortcuts: { typical: window?.shortcuts.typical ?? null, dry: window?.shortcuts.dry ?? null },
+    shortcuts: { typical: typicalYear, dry: dryYear },
+    labelsWithheld,
+    contrastWithheld,
+    chart,
+    wetness,
     cards,
     thresholds: compare.thresholds,
     eraSpans: spans,

@@ -301,7 +301,70 @@ mkdirSync(OUT, { recursive: true });
 for (const [name, body] of Object.entries({ years, compare, sensitivity })) {
   writeFileSync(join(OUT, `${name}.json`), JSON.stringify(body, null, 1) + "\n");
 }
+// ---------------------------------------------------------------- replay (GET /v1/seasons/{year}/replay?plan=)
+// Same shape as the draft replay.json. To keep the static sample small, `daily` is
+// trimmed to the 30-day spring window (the real endpoint returns every day from the
+// previous harvest to the day before planting); `daily_scope` says so.
+const REPLAY_PLANS = ["no_cover", "rye_12d", "wheat_double_crop"];
+let replayFiles = 0;
+for (const planId of REPLAY_PLANS) {
+  const p = PLANS.find((x) => x.plan_id === planId);
+  const built = plans.find((x) => x.plan_id === planId);
+  const w = WINDOWS[p.window];
+  const check = built.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture");
+  mkdirSync(join(OUT, "replay", planId), { recursive: true });
+  for (const y of w.years) {
+    const plant = `${y.year}-${p.plant}`;
+    const cov = coverInterval(p, y.year);
+    const days = [];
+    for (let d = y.start; d <= y.end; d = add(d, 1)) {
+      const rec = daily.get(d);
+      const covered = cov && d >= cov[0] && d < cov[1];
+      days.push({
+        date: d,
+        precip_mm: rec ? rec.mm : null,
+        status: rec ? "complete" : "unavailable",
+        gwettop: rec ? rec.top : null,
+        gwetroot: rec ? rec.root : null,
+        cover_status: p.winter.type === "none" ? "no_planned_cover" : covered ? "planned_living_cover" : "terminated",
+        segment: p.winter.type === "none" ? "no_planned_cover" : covered ? "living_cover" : "after_termination",
+      });
+    }
+    const triggered = check && check.qualifying_years.includes(y.year)
+      ? [{ check_id: check.check_id, rule_ids: check.rule_ids, reason: `Gap ${built.calendar.termination_gap_days} days < 14 and spring window ranked dry (${y.total_mm} mm <= ${w.threshold.value} mm cutoff)` }]
+      : [];
+    const body = {
+      meta: { ...meta(`req_rep_${planId}_${y.year}`) },
+      year: y.year,
+      plan_id: planId,
+      dates: {
+        prev_harvest: `${y.year - 1}-${p.prev}`,
+        ...(p.winter.type === "cover" ? { seed: `${y.year - 1}-${p.winter.seed}`, terminate: `${y.year}-${p.winter.terminate}` } : {}),
+        ...(p.winter.type === "winter_grain" ? { wheat_plant: `${y.year - 1}-${p.winter.plant}`, wheat_harvest: `${y.year}-${p.winter.harvest}` } : {}),
+        next_plant: plant,
+        spring_window: { start: y.start, end: y.end },
+      },
+      coverage: { winter: y.year === 1981 ? "unavailable" : "complete", spring: y.status },
+      spring: { total_mm: y.total_mm, rank: y.rank, of: y.of, percentile: y.percentile, is_dry: y.is_dry, status: y.status },
+      wetness: {
+        gwettop_window_mean: y.gwettop_window_mean,
+        gwetroot_window_mean: y.gwetroot_window_mean,
+        unit: "fraction (0-1)",
+        label: "modeled",
+        status: y.gwetroot_window_mean === null ? "unavailable" : "complete",
+      },
+      checks_triggered: triggered,
+      key_rain_days: days.filter((d) => (d.precip_mm ?? 0) >= 20).map((d) => ({ date: d.date, precip_mm: d.precip_mm, segment: d.segment, heavy: null })),
+      daily_scope: "spring_window",
+      daily: days,
+    };
+    writeFileSync(join(OUT, "replay", planId, `${y.year}.json`), JSON.stringify(body) + "\n");
+    replayFiles++;
+  }
+}
+
 const p12 = plans.find((p) => p.plan_id === "rye_12d");
+console.log(`replay files: ${replayFiles}`);
 console.log(
   `sample written to ${OUT}\n` +
     `soy window: ${sw.denominator} years, cutoff ${sw.threshold.value} mm, dry ${sw.dry_count}, typical ${sw.shortcuts.typical}, dry replay ${sw.shortcuts.dry}\n` +

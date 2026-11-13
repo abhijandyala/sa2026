@@ -252,6 +252,56 @@ export const SensitivityResponse = z
   .passthrough();
 export type SensitivityResponse = z.infer<typeof SensitivityResponse>;
 
+export const ReplayDay = z
+  .object({
+    date: isoDate,
+    precip_mm: z.number().min(0).nullable(),
+    status: Status.optional(),
+    tmax_c: z.number().nullable().optional(),
+    tmin_c: z.number().nullable().optional(),
+    gwettop: z.number().nullable().optional(),
+    gwetroot: z.number().nullable().optional(),
+    cover_status: z.string(),
+    segment: z.string(),
+  })
+  .passthrough();
+export type ReplayDay = z.infer<typeof ReplayDay>;
+
+/** GET /v1/seasons/{year}/replay?plan=… (draft replay.json). */
+export const ReplayResponse = z
+  .object({
+    meta: Meta,
+    year: z.number().int(),
+    plan_id: z.string(),
+    dates: z.object({ next_plant: isoDate, spring_window: z.object({ start: isoDate, end: isoDate }) }).passthrough(),
+    coverage: z.object({ winter: Status, spring: Status }).passthrough(),
+    spring: z
+      .object({
+        total_mm: z.number().nullable(),
+        rank: z.number().int().nullable(),
+        of: z.number().int().nullable(),
+        percentile: z.number().nullable(),
+        is_dry: z.boolean().nullable(),
+        status: Status,
+      })
+      .passthrough(),
+    wetness: z
+      .object({
+        gwettop_window_mean: z.number().nullable(),
+        gwetroot_window_mean: z.number().nullable(),
+        unit: z.string(),
+        label: z.string(),
+        status: Status,
+      })
+      .passthrough(),
+    checks_triggered: z.array(z.object({ check_id: z.string(), rule_ids: z.array(z.string()), reason: z.string() }).passthrough()),
+    key_rain_days: z.array(z.object({ date: isoDate, precip_mm: z.number().nullable(), segment: z.string() }).passthrough()),
+    daily_scope: z.string().optional(),
+    daily: z.array(ReplayDay),
+  })
+  .passthrough();
+export type ReplayResponse = z.infer<typeof ReplayResponse>;
+
 /** Plan input the farm form sends to POST /v1/plans/compare when the live API is available. */
 export interface PlanInput {
   plan_id: string;

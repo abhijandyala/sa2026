@@ -100,20 +100,34 @@ export function YearStrip({ view, onSelect }: { view: ViewModel; onSelect: (year
           {y ? (
             y.status === "complete" ? (
               <>
-                <strong>Spring {y.year}</strong> · {mm(y.totalMm)} in the 30 days before {plant} ({historicalWindow(y.window)})
-                {y.isDry ? " · one of the driest 20% on record here" : ""} · rank {y.rank} of {y.of} (1 = driest) · modeled
-                soil wetness {wetness(y.wetnessRoot)}
+                <strong>Spring {y.year}</strong> · {y.totalMm === 0 ? "0.0 mm (no rain)" : mm(y.totalMm)} in the 30 days before {plant} (
+                {historicalWindow(y.window)}) · regional estimate
+                {view.labelsWithheld ? null : (
+                  <>
+                    {y.isDry ? " · one of the driest 20% on record here" : ""} · rank {y.rank} of {y.of} (1 = driest)
+                  </>
+                )}{" "}
+                · modeled soil wetness {y.wetnessRoot === null ? "not available" : wetness(y.wetnessRoot)}
+              </>
+            ) : y.status === "partial" ? (
+              <>
+                <strong>Spring {y.year}</strong> · Incomplete weather record for this window, so it is not compared.
               </>
             ) : (
               <>
-                <strong>Spring {y.year}</strong> · Weather incomplete for this window, so it is left out of the comparison.
+                <strong>Spring {y.year}</strong> · No weather record for this window. Plan dates can still be compared.
               </>
             )
           ) : (
             "Not enough complete years to compare."
           )}
         </p>
-        {view.window && view.window.dry_count !== null ? (
+        {view.labelsWithheld && view.tiles.length ? (
+          <p className="strip-dry">Fewer than 15 springs have complete records, so typical, dry and rank labels are withheld.</p>
+        ) : view.contrastWithheld && view.tiles.length ? (
+          <p className="strip-dry">These springs offer no meaningful dry contrast, so no dry replay year is marked.</p>
+        ) : null}
+        {view.window && view.window.dry_count !== null && !view.labelsWithheld ? (
           <p className="strip-dry tabular">
             Dry windows (driest 20%): {view.window.dry_count} of {view.window.denominator} springs
             {view.windowEra ? (

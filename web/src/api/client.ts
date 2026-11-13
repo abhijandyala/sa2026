@@ -1,5 +1,5 @@
 import type { ZodType } from "zod";
-import { CompareResponse, SensitivityResponse, YearsResponse, type PlanInput } from "./schema";
+import { CompareResponse, ReplayResponse, SensitivityResponse, YearsResponse, type PlanInput } from "./schema";
 
 /*
   Two ways to get data, one interface:
@@ -100,6 +100,19 @@ export function createClient(opts: ClientOptions) {
         saved("sensitivity", SensitivityResponse),
       ]);
       return { years, compare, sensitivity };
+    },
+
+    /**
+     * Daily detail for one season. Saved sample by default; the live service when the
+     * results on screen came from it (edited dates), so the detail matches the cards.
+     */
+    replay: async (year: number, planId: string, origin: Origin): Promise<Result<ReplayResponse>> => {
+      const url = origin === "live" ? api(`/v1/seasons/${year}/replay?plan=${encodeURIComponent(planId)}`) : null;
+      if (url) {
+        const r = await getJson(url, ReplayResponse, base);
+        return r.ok ? { ok: true, data: r.data, origin: "live" } : r;
+      }
+      return saved(`replay/${encodeURIComponent(planId)}/${year}`, ReplayResponse);
     },
 
     /** Recompute for edited dates. Needs the live API; a failure keeps the saved sample on screen. */

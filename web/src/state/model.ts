@@ -37,6 +37,7 @@ export type Action =
   | { type: "setEmphasis"; emphasis: Emphasis }
   | { type: "openEvidence" }
   | { type: "closeEvidence" }
+  | { type: "applyLink"; view: { card?: CardKey; year?: number; priorities?: Priority[]; emphasis?: Emphasis } }
   | { type: "reset" };
 
 export const MAX_PRIORITIES = 2;
@@ -84,6 +85,17 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, evidenceOpen: true };
     case "closeEvidence":
       return { ...state, evidenceOpen: false };
+    case "applyLink": {
+      // A shared link or Back/Forward: view choices only, never dates. A missing part means the default.
+      const v = action.view;
+      return {
+        ...state,
+        card: v.card ?? "cover",
+        year: v.year ?? null,
+        priorities: v.priorities ?? [],
+        emphasis: v.emphasis ?? "buffer",
+      };
+    }
     case "reset":
       return initialState(state.sample);
   }

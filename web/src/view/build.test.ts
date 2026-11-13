@@ -88,3 +88,72 @@ describe("view model", () => {
     expect(v.thresholds.heavy_rain.status).toBe("unknown");
   });
 });
+
+// Weather states (card 3.5). Each is built from the sample by changing only what the
+// backend would send in that situation.
+describe("weather states", () => {
+  const withWindow = (patch: (w: typeof soy) => typeof soy) => ({
+    ...data,
+    compare: { ...compare, spring_windows: { ...compare.spring_windows!, soy_full_season: patch(structuredClone(soy)) } },
+  });
+
+  it("keeps a valid zero as 0.0 mm, not missing", () => {
+    const d = withWindow((w) => ({ ...w, years: w.years.map((y) => (y.year === 1990 ? { ...y, total_mm: 0 } : y)) }));
+    const v = buildView(d, { card: "cover", year: 1990 });
+    expect(v.selectedYear).toMatchObject({ status: "complete", totalMm: 0 });
+    expect(v.tiles.find((t) => t.year === 1990)!.description).toBe("0.0 mm, no rain");
+    expect(v.chart.bars.find((b) => b.year === 1990)!.mm).toBe(0);
+  });
+
+  it("shows an incomplete year as not compared, never as dry or zero", () => {
+    const d = withWindow((w) => ({
+      ...w,
+      years: w.years.map((y) => (y.year === 1994 ? { ...y, status: "partial", total_mm: null, rank: null, percentile: null, is_dry: null } : y)),
+    }));
+    const v = buildView(d, { card: "cover", year: 1994 });
+    expect(v.tiles.find((t) => t.year === 1994)!.description).toBe("incomplete record, not compared");
+    expect(v.chart.bars.find((b) => b.year === 1994)!.mm).toBeNull();
+    expect(v.chart.excluded).toEqual([1994]);
+    expect(v.cards.find((c) => c.key === "cover")!.status).toEqual({ kind: "unavailable", text: "Weather unavailable for this year" });
+  });
+
+  it("withholds every relative label with fewer than 15 complete years", () => {
+    const d = withWindow((w) => ({
+      ...w,
+      years: w.years.map((y, i) => (i < 31 ? { ...y, status: "unavailable", total_mm: null } : y)),
+    }));
+    const v = buildView(d, { card: "cover", year: 2020 });
+    expect(v.labelsWithheld).toBe(true);
+    expect(v.shortcuts).toEqual({ typical: null, dry: null });
+    expect(v.tiles.every((t) => t.marker === undefined && t.isDry === null && t.percentile === null)).toBe(true);
+    expect(v.chart.medianMm).toBeNull();
+    expect(v.chart.cutoffMm).toBeNull();
+    expect(v.windowEra).toBeNull();
+    expect(v.selectedYear).toMatchObject({ rank: null, isDry: null });
+  });
+
+  it("withholds the dry contrast when the backend sends no dry replay year", () => {
+    const d = withWindow((w) => ({ ...w, shortcuts: { ...w.shortcuts, dry: null } }));
+    const v = buildView(d, { card: "cover", year: null });
+    expect(v.contrastWithheld).toBe(true);
+    expect(v.shortcuts.dry).toBeNull();
+    expect(v.labelsWithheld).toBe(false);
+  });
+
+  it("keeps rain when modeled wetness is missing (case K)", () => {
+    const d = withWindow((w) => ({ ...w, years: w.years.map((y) => (y.year === 2008 ? { ...y, gwetroot_window_mean: null } : y)) }));
+    const v = buildView(d, { card: "cover", year: 2008 });
+    expect(v.selectedYear?.totalMm).not.toBeNull();
+    expect(v.selectedYear?.wetnessRoot).toBeNull();
+    expect(v.wetness.selected).toBeNull();
+    expect(v.wetness.missingYears).toEqual([2008]);
+  });
+
+  it("gives the chart a fixed, clean axis per planting window", () => {
+    const a = buildView(data, { card: "cover", year: 1990 }).chart;
+    const b = buildView(data, { card: "cover", year: 2014 }).chart;
+    expect(a.axisMax).toBe(b.axisMax);
+    expect(a.axisMax % a.axisStep).toBe(0);
+    expect(Math.max(...a.bars.map((x) => x.mm ?? 0))).toBeLessThanOrEqual(a.axisMax);
+  });
+});

@@ -11,7 +11,7 @@ export function App() {
 }
 
 function PlannerRoute() {
-  const { state, retry, apply, applying, hasLiveApi } = useData();
+  const { state, retry, apply, applying, hasLiveApi, client } = useData();
 
   if (state.status === "loading") {
     return (
@@ -38,5 +38,5 @@ function PlannerRoute() {
     );
   }
 
-  return <Planner data={state.data} apply={apply} applying={applying} hasLiveApi={hasLiveApi} />;
+  return <Planner data={state.data} apply={apply} applying={applying} hasLiveApi={hasLiveApi} client={client} />;
 }
