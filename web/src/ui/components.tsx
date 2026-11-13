@@ -9,7 +9,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { IconAlert, IconCheck, IconClose, IconDash, IconFlask, IconInfo } from "./icons";
+import { IconAlert, IconCheck, IconClose, IconDash, IconFlask, IconInfo, IconRain } from "./icons";
 
 /* ---------------------------------------------------------------- Button */
 
@@ -81,7 +81,7 @@ export function Segmented<T extends string>({
 /* ---------------------------------------------------------------- Status pill
    Meaning carried by text and icon, never color alone (playbook p.37). */
 
-export type StatusKind = "ok" | "check" | "unavailable" | "inapplicable" | "synthetic" | "saved";
+export type StatusKind = "ok" | "check" | "unavailable" | "inapplicable" | "synthetic" | "saved" | "dry" | "live";
 
 const STATUS_ICON: Record<StatusKind, ReactNode> = {
   ok: <IconCheck />,
@@ -90,6 +90,8 @@ const STATUS_ICON: Record<StatusKind, ReactNode> = {
   inapplicable: <IconDash />,
   synthetic: <IconFlask />,
   saved: <IconCheck />,
+  dry: <IconRain />,
+  live: <IconCheck />,
 };
 
 export function StatusPill({ kind, children }: { kind: StatusKind; children: ReactNode }) {
@@ -397,11 +399,15 @@ export function Drawer({
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const headingId = useId();
+  // Latest handler in a ref, so re-renders (typing in a field) never re-run the focus
+  // effect below. Focus moves only when the drawer opens or closes.
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => {
     if (!open) return;
     panel.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") closeRef.current();
     };
     document.addEventListener("keydown", onKey);
     const opener = returnFocusRef?.current;
@@ -409,7 +415,8 @@ export function Drawer({
       document.removeEventListener("keydown", onKey);
       opener?.focus();
     };
-  }, [open, onClose, returnFocusRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
   if (!open) return null;
   return (
     <div className="drawer-layer">

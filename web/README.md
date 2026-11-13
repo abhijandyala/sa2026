@@ -23,14 +23,17 @@ npm run test:e2e   # browser check of the judge path (first run: npx playwright 
 
 ## Data
 
-The planner reads `public/data/bundle.json`, written by the backend pipeline. Until that file exists it loads `public/data/fixture-synthetic.json` and shows a "Synthetic test data" banner on every screen. Regenerate the fixture with `npm run fixture`.
+The planner always loads the saved Union County sample from `public/data/sample/` (`years.json`, `compare.json`, `sensitivity.json`), shaped exactly like the backend API. Today it is synthetic draft data (`npm run sample` regenerates it) and the UI shows a "Draft sample data" banner; the backend's generated output replaces these files later. Date edits call the live API when `VITE_API_BASE` is set at build time; if it is missing or slow, the saved sample stays on screen with a notice. What the frontend still needs from the API is in `docs/api-requests.md`.
 
-The agreed shape is `src/data/schema.ts`. The frontend never recomputes a total, rank, flag or count; it only formats them.
+The API types are in `src/api/schema.ts`, matching the backend's draft examples. The frontend never recomputes a total, rank, flag or count; it only formats them.
 
 ## Layout of the code
 
-- `src/data`: schema, loader, display formatting
-- `src/state`: what the user selected, shareable links, data loading
+- `src/api`: API types and client (saved sample + live service, bounded waits, newest answer wins)
+- `src/view`: turns API responses into what each screen shows; selection only, no calculation
+- `src/content`: card names and the sourced five headings for each plan
+- `src/data`: display formatting
+- `src/state`: what the user selected, the farm form, shareable links, data loading
 - `src/ui`: shared components (mirrored in the Fieldback Design System)
 - `src/screens`: Planner and Gallery
 - `src/styles`: tokens (checked for WCAG AA contrast by `tokens.test.ts`), base, components, layout

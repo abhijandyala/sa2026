@@ -1,43 +1,41 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { Bundle } from "../data/schema";
+import { CompareResponse } from "../api/schema";
+import { validYears } from "../view/build";
+import { sampleForm, toPlanInputs, validateForm } from "./form";
 import { hasPendingEdits, initialState, reducer, type AppState } from "./model";
 import { applyUrlView, fromHash, toHash } from "./url";
 
-const bundle = Bundle.parse(
-  JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/data/fixture-synthetic.json"), "utf8")),
+const compare = CompareResponse.parse(
+  JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../public/data/sample/compare.json"), "utf8")),
 );
-const base = initialState(bundle);
-const planOf = (s: AppState) => JSON.stringify(s.applied);
+const sample = sampleForm(compare);
+const base = initialState(sample);
+const plan = (s: AppState) => JSON.stringify(s.applied);
 
 describe("state model", () => {
-  it("opens on the sample with the rye card selected", () => {
-    expect(base.applied).toEqual(bundle.plan);
-    expect(base.selectedStrategy).toBe("protect-soil");
-    expect(base.ryeEnd).toBe("2027-04-30");
+  it("opens on the sample with the cover card selected", () => {
+    expect(base.applied).toEqual(sample);
+    expect(base.card).toBe("cover");
+    expect(base.year).toBeNull();
   });
 
-  it("opening and closing evidence keeps dates, year and rye date", () => {
+  it("opening and closing evidence keeps the year and the plan", () => {
     let s = reducer(base, { type: "selectYear", year: 2012 });
-    s = reducer(s, { type: "setRyeEnd", date: "2027-04-23" });
-    const open = reducer(s, { type: "openEvidence" });
-    const closed = reducer(open, { type: "closeEvidence" });
-    expect(closed.selectedYear).toBe(2012);
-    expect(closed.ryeEnd).toBe("2027-04-23");
-    expect(planOf(closed)).toBe(planOf(base));
+    s = reducer(reducer(s, { type: "openEvidence" }), { type: "closeEvidence" });
+    expect(s.year).toBe(2012);
+    expect(plan(s)).toBe(plan(base));
   });
 
   it("picking a year never changes the plan (case E)", () => {
     const s = reducer(base, { type: "selectYear", year: 1986 });
-    expect(planOf(s)).toBe(planOf(base));
-    expect(s.ryeEnd).toBe(base.ryeEnd);
+    expect(plan(s)).toBe(plan(base));
   });
 
   it("changing priorities changes nothing else (case J)", () => {
     const s = reducer(base, { type: "togglePriority", priority: "soil" });
-    expect(s.priorities).toEqual(["soil"]);
-    expect({ ...s, priorities: [] }).toEqual({ ...base, priorities: [] });
+    expect({ ...s, priorities: [] }).toEqual(base);
   });
 
   it("allows at most two priorities", () => {
@@ -47,53 +45,91 @@ describe("state model", () => {
     expect(s.priorities).toEqual(["soil", "income"]);
   });
 
-  it("date edits stay in a draft until applied", () => {
-    const edited = reducer(base, { type: "editDraft", patch: { soyPlant: "2027-05-15" } });
-    expect(edited.applied.soyPlant).toBe("2027-05-12");
-    expect(hasPendingEdits(edited)).toBe(true);
-    const applied = reducer(edited, { type: "applyDraft" });
-    expect(applied.applied.soyPlant).toBe("2027-05-15");
-    expect(hasPendingEdits(applied)).toBe(false);
+  it("form edits stay in a draft until applied", () => {
+    let s = reducer(base, { type: "openForm" });
+    s = reducer(s, { type: "editDraft", patch: { soyPlant: "2027-05-18" } });
+    expect(s.applied.soyPlant).toBe("2027-05-12");
+    expect(hasPendingEdits(s)).toBe(true);
+    s = reducer(s, { type: "applied", form: s.draft! });
+    expect(s.applied.soyPlant).toBe("2027-05-18");
+    expect(s.formOpen).toBe(false);
+    expect(hasPendingEdits(s)).toBe(false);
   });
 
-  it("clamps the rye end date to the supported range", () => {
-    const early = reducer(base, { type: "setRyeEnd", date: "2026-01-01" });
-    const late = reducer(base, { type: "setRyeEnd", date: "2027-06-01" });
-    expect(early.ryeEnd).toBe(base.ryeEndRange[0]);
-    expect(late.ryeEnd).toBe(base.ryeEndRange[1]);
+  it("switching cards resets the year to that window's typical year", () => {
+    let s = reducer(base, { type: "selectYear", year: 2012 });
+    s = reducer(s, { type: "selectCard", card: "grain" });
+    expect(s.year).toBeNull();
   });
 
-  it("reset restores everything including observation, priority and year", () => {
-    let s = reducer(base, { type: "editDraft", patch: { moistureConcern: "yes" } });
-    s = reducer(s, { type: "applyDraft" });
+  it("reset restores everything, including the field observation", () => {
+    let s = reducer(base, { type: "openForm" });
+    s = reducer(s, { type: "editDraft", patch: { moistureConcern: "yes" } });
+    s = reducer(s, { type: "applied", form: s.draft! });
     s = reducer(s, { type: "selectYear", year: 2012 });
     s = reducer(s, { type: "togglePriority", priority: "income" });
-    s = reducer(s, { type: "setRyeEnd", date: "2027-04-01" });
     s = reducer(s, { type: "openEvidence" });
     expect(reducer(s, { type: "reset" })).toEqual(base);
   });
 });
 
+describe("farm form", () => {
+  it("reads the sample dates from the backend plans", () => {
+    expect(sample).toMatchObject({
+      cornHarvest: "2026-09-20",
+      ryeSeed: "2026-10-01",
+      ryeEnd: "2027-04-30",
+      ryeEndEarlier: "2027-04-23",
+      soyPlant: "2027-05-12",
+      moistureConcern: "unknown",
+    });
+    expect(validateForm(sample)).toEqual({});
+  });
+
+  it("puts the rye-order error on the rye field", () => {
+    const e = validateForm({ ...sample, ryeEnd: "2027-05-20" });
+    expect(e.ryeEnd).toBe("Choose a rye end date after seeding and before soybean planting for this comparison.");
+    expect(Object.keys(e)).toEqual(["ryeEnd"]);
+  });
+
+  it("requires every date and keeps them inside the season", () => {
+    expect(validateForm({ ...sample, wheatHarvest: "" }).wheatHarvest).toBe("Enter a date.");
+    expect(validateForm({ ...sample, soyPlant: "2028-05-12" }).soyPlant).toMatch(/^Choose a date between/);
+  });
+
+  it("checks the wheat sequence", () => {
+    expect(validateForm({ ...sample, soyDoubleCropPlant: "2027-06-01" }).soyDoubleCropPlant).toBe(
+      "Plant double-crop soybeans after the wheat harvest.",
+    );
+  });
+
+  it("sends MM-DD and the grower's concern to the backend, never a guessed value", () => {
+    const inputs = toPlanInputs({ ...sample, moistureConcern: "unknown" });
+    const rye = inputs.find((p) => p.plan_id === "rye_12d")!;
+    expect(rye).toMatchObject({ prev_harvest: "09-20", next_plant: "05-12", low_moisture_concern: "unknown" });
+    expect(rye.winter).toEqual({ type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-30" });
+  });
+});
+
 describe("shareable links", () => {
-  const years = new Set(bundle.strategies[1]!.events[0]!.years.map((y) => y.year));
+  const years = validYears(compare);
 
   it("round-trips the view", () => {
     let s = reducer(base, { type: "selectYear", year: 2012 });
-    s = reducer(s, { type: "setRyeEnd", date: "2027-04-23" });
     s = reducer(s, { type: "togglePriority", priority: "soil" });
+    s = reducer(s, { type: "selectCard", card: "current" });
+    s = reducer(s, { type: "selectYear", year: 1999 });
     const restored = applyUrlView(base, fromHash(toHash(s), years));
-    expect(restored.selectedYear).toBe(2012);
-    expect(restored.ryeEnd).toBe("2027-04-23");
-    expect(restored.priorities).toEqual(["soil"]);
+    expect(restored).toMatchObject({ card: "current", year: 1999, priorities: ["soil"] });
   });
 
   it("ignores a broken or old link and opens the sample", () => {
-    const view = fromHash("#s=nope&y=1850&r=yesterday&p=fast,cheap&e=loud", years);
+    const view = fromHash("#s=protect-soil&y=1850&p=fast&e=loud", years);
     expect(view).toEqual({});
     expect(applyUrlView(base, view)).toEqual(base);
   });
 
   it("never puts farm details in the link", () => {
-    expect(toHash(base)).not.toMatch(/union|soil=|irrigation|moisture/i);
+    expect(toHash(base)).not.toMatch(/union|harvest|moisture|irrigation|soil=/i);
   });
 });

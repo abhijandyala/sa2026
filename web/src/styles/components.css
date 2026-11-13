@@ -100,6 +100,14 @@
   background: var(--check-soft);
   color: var(--check);
 }
+.pill-dry {
+  background: var(--rain-soft);
+  color: var(--rain);
+}
+.pill-live {
+  background: var(--cover-soft);
+  color: var(--cover);
+}
 
 .chip {
   display: inline-flex;

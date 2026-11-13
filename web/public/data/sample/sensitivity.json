@@ -1,0 +1,523 @@
+{
+ "meta": {
+  "plan_version": "pv_sample",
+  "catalog_version": "v1",
+  "snapshot_hash": "sha256:SYNTHETIC",
+  "request_id": "req_sens_sample",
+  "draft": true
+ },
+ "base_plan_id": "rye_12d",
+ "varied": "terminate",
+ "fixed": {
+  "next_plant": "05-12",
+  "seed": "10-01"
+ },
+ "check_id": "rye_soy_short_gap_moisture",
+ "denominator": 45,
+ "points": [
+  {
+   "terminate": "03-01",
+   "gap_days": 72,
+   "living_cover_days_planned": 151,
+   "rain_mm_without_cover_median": 184.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-02",
+   "gap_days": 71,
+   "living_cover_days_planned": 152,
+   "rain_mm_without_cover_median": 184.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-03",
+   "gap_days": 70,
+   "living_cover_days_planned": 153,
+   "rain_mm_without_cover_median": 184.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-04",
+   "gap_days": 69,
+   "living_cover_days_planned": 154,
+   "rain_mm_without_cover_median": 180.8,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-05",
+   "gap_days": 68,
+   "living_cover_days_planned": 155,
+   "rain_mm_without_cover_median": 180.8,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-06",
+   "gap_days": 67,
+   "living_cover_days_planned": 156,
+   "rain_mm_without_cover_median": 163.5,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-07",
+   "gap_days": 66,
+   "living_cover_days_planned": 157,
+   "rain_mm_without_cover_median": 163.5,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-08",
+   "gap_days": 65,
+   "living_cover_days_planned": 158,
+   "rain_mm_without_cover_median": 161,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-09",
+   "gap_days": 64,
+   "living_cover_days_planned": 159,
+   "rain_mm_without_cover_median": 161,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-10",
+   "gap_days": 63,
+   "living_cover_days_planned": 160,
+   "rain_mm_without_cover_median": 160.2,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-11",
+   "gap_days": 62,
+   "living_cover_days_planned": 161,
+   "rain_mm_without_cover_median": 160.2,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-12",
+   "gap_days": 61,
+   "living_cover_days_planned": 162,
+   "rain_mm_without_cover_median": 160.2,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-13",
+   "gap_days": 60,
+   "living_cover_days_planned": 163,
+   "rain_mm_without_cover_median": 160.2,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-14",
+   "gap_days": 59,
+   "living_cover_days_planned": 164,
+   "rain_mm_without_cover_median": 159.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-15",
+   "gap_days": 58,
+   "living_cover_days_planned": 165,
+   "rain_mm_without_cover_median": 159.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-16",
+   "gap_days": 57,
+   "living_cover_days_planned": 166,
+   "rain_mm_without_cover_median": 151.2,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-17",
+   "gap_days": 56,
+   "living_cover_days_planned": 167,
+   "rain_mm_without_cover_median": 150.4,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-18",
+   "gap_days": 55,
+   "living_cover_days_planned": 168,
+   "rain_mm_without_cover_median": 150.4,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-19",
+   "gap_days": 54,
+   "living_cover_days_planned": 169,
+   "rain_mm_without_cover_median": 150,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-20",
+   "gap_days": 53,
+   "living_cover_days_planned": 170,
+   "rain_mm_without_cover_median": 149.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-21",
+   "gap_days": 52,
+   "living_cover_days_planned": 171,
+   "rain_mm_without_cover_median": 145,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-22",
+   "gap_days": 51,
+   "living_cover_days_planned": 172,
+   "rain_mm_without_cover_median": 145,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-23",
+   "gap_days": 50,
+   "living_cover_days_planned": 173,
+   "rain_mm_without_cover_median": 145,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-24",
+   "gap_days": 49,
+   "living_cover_days_planned": 174,
+   "rain_mm_without_cover_median": 145,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-25",
+   "gap_days": 48,
+   "living_cover_days_planned": 175,
+   "rain_mm_without_cover_median": 139.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-26",
+   "gap_days": 47,
+   "living_cover_days_planned": 176,
+   "rain_mm_without_cover_median": 139.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-27",
+   "gap_days": 46,
+   "living_cover_days_planned": 177,
+   "rain_mm_without_cover_median": 136.2,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-28",
+   "gap_days": 45,
+   "living_cover_days_planned": 178,
+   "rain_mm_without_cover_median": 131.8,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-29",
+   "gap_days": 44,
+   "living_cover_days_planned": 179,
+   "rain_mm_without_cover_median": 129.7,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-30",
+   "gap_days": 43,
+   "living_cover_days_planned": 180,
+   "rain_mm_without_cover_median": 128.4,
+   "checks_count": 0
+  },
+  {
+   "terminate": "03-31",
+   "gap_days": 42,
+   "living_cover_days_planned": 181,
+   "rain_mm_without_cover_median": 126.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-01",
+   "gap_days": 41,
+   "living_cover_days_planned": 182,
+   "rain_mm_without_cover_median": 126.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-02",
+   "gap_days": 40,
+   "living_cover_days_planned": 183,
+   "rain_mm_without_cover_median": 126.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-03",
+   "gap_days": 39,
+   "living_cover_days_planned": 184,
+   "rain_mm_without_cover_median": 124.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-04",
+   "gap_days": 38,
+   "living_cover_days_planned": 185,
+   "rain_mm_without_cover_median": 112.4,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-05",
+   "gap_days": 37,
+   "living_cover_days_planned": 186,
+   "rain_mm_without_cover_median": 110.1,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-06",
+   "gap_days": 36,
+   "living_cover_days_planned": 187,
+   "rain_mm_without_cover_median": 109.3,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-07",
+   "gap_days": 35,
+   "living_cover_days_planned": 188,
+   "rain_mm_without_cover_median": 109.3,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-08",
+   "gap_days": 34,
+   "living_cover_days_planned": 189,
+   "rain_mm_without_cover_median": 107.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-09",
+   "gap_days": 33,
+   "living_cover_days_planned": 190,
+   "rain_mm_without_cover_median": 104,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-10",
+   "gap_days": 32,
+   "living_cover_days_planned": 191,
+   "rain_mm_without_cover_median": 104,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-11",
+   "gap_days": 31,
+   "living_cover_days_planned": 192,
+   "rain_mm_without_cover_median": 97.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-12",
+   "gap_days": 30,
+   "living_cover_days_planned": 193,
+   "rain_mm_without_cover_median": 97.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-13",
+   "gap_days": 29,
+   "living_cover_days_planned": 194,
+   "rain_mm_without_cover_median": 91.9,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-14",
+   "gap_days": 28,
+   "living_cover_days_planned": 195,
+   "rain_mm_without_cover_median": 84.7,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-15",
+   "gap_days": 27,
+   "living_cover_days_planned": 196,
+   "rain_mm_without_cover_median": 77.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-16",
+   "gap_days": 26,
+   "living_cover_days_planned": 197,
+   "rain_mm_without_cover_median": 75.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-17",
+   "gap_days": 25,
+   "living_cover_days_planned": 198,
+   "rain_mm_without_cover_median": 75.3,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-18",
+   "gap_days": 24,
+   "living_cover_days_planned": 199,
+   "rain_mm_without_cover_median": 75.3,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-19",
+   "gap_days": 23,
+   "living_cover_days_planned": 200,
+   "rain_mm_without_cover_median": 74.9,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-20",
+   "gap_days": 22,
+   "living_cover_days_planned": 201,
+   "rain_mm_without_cover_median": 74.7,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-21",
+   "gap_days": 21,
+   "living_cover_days_planned": 202,
+   "rain_mm_without_cover_median": 74.7,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-22",
+   "gap_days": 20,
+   "living_cover_days_planned": 203,
+   "rain_mm_without_cover_median": 71.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-23",
+   "gap_days": 19,
+   "living_cover_days_planned": 204,
+   "rain_mm_without_cover_median": 68.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-24",
+   "gap_days": 18,
+   "living_cover_days_planned": 205,
+   "rain_mm_without_cover_median": 68.3,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-25",
+   "gap_days": 17,
+   "living_cover_days_planned": 206,
+   "rain_mm_without_cover_median": 63.6,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-26",
+   "gap_days": 16,
+   "living_cover_days_planned": 207,
+   "rain_mm_without_cover_median": 57.5,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-27",
+   "gap_days": 15,
+   "living_cover_days_planned": 208,
+   "rain_mm_without_cover_median": 57.5,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-28",
+   "gap_days": 14,
+   "living_cover_days_planned": 209,
+   "rain_mm_without_cover_median": 51.4,
+   "checks_count": 0
+  },
+  {
+   "terminate": "04-29",
+   "gap_days": 13,
+   "living_cover_days_planned": 210,
+   "rain_mm_without_cover_median": 50.7,
+   "checks_count": 9
+  },
+  {
+   "terminate": "04-30",
+   "gap_days": 12,
+   "living_cover_days_planned": 211,
+   "rain_mm_without_cover_median": 46.3,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-01",
+   "gap_days": 11,
+   "living_cover_days_planned": 212,
+   "rain_mm_without_cover_median": 46.3,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-02",
+   "gap_days": 10,
+   "living_cover_days_planned": 213,
+   "rain_mm_without_cover_median": 43.1,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-03",
+   "gap_days": 9,
+   "living_cover_days_planned": 214,
+   "rain_mm_without_cover_median": 40.3,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-04",
+   "gap_days": 8,
+   "living_cover_days_planned": 215,
+   "rain_mm_without_cover_median": 38,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-05",
+   "gap_days": 7,
+   "living_cover_days_planned": 216,
+   "rain_mm_without_cover_median": 33.2,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-06",
+   "gap_days": 6,
+   "living_cover_days_planned": 217,
+   "rain_mm_without_cover_median": 29.8,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-07",
+   "gap_days": 5,
+   "living_cover_days_planned": 218,
+   "rain_mm_without_cover_median": 26.3,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-08",
+   "gap_days": 4,
+   "living_cover_days_planned": 219,
+   "rain_mm_without_cover_median": 26.1,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-09",
+   "gap_days": 3,
+   "living_cover_days_planned": 220,
+   "rain_mm_without_cover_median": 19.2,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-10",
+   "gap_days": 2,
+   "living_cover_days_planned": 221,
+   "rain_mm_without_cover_median": 17.5,
+   "checks_count": 9
+  },
+  {
+   "terminate": "05-11",
+   "gap_days": 1,
+   "living_cover_days_planned": 222,
+   "rain_mm_without_cover_median": 15.6,
+   "checks_count": 9
+  }
+ ]
+}

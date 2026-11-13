@@ -18,6 +18,13 @@ export function plannedDate(iso: string): string {
   return `${MONTHS[m - 1]} ${d}`;
 }
 
+/** A plan date in the backend's MM-DD form, e.g. "05-12" → "May 12". */
+export function monthDay(md: string): string {
+  const match = /^(\d{2})-(\d{2})$/.exec(md);
+  if (!match) throw new Error(`Not an MM-DD date: ${md}`);
+  return `${MONTHS[Number(match[1]) - 1]} ${Number(match[2])}`;
+}
+
 /** Historical weather date, always with its year (playbook p.36). */
 export function historicalDate(iso: string): string {
   const { y, m, d } = parts(iso);
