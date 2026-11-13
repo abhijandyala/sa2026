@@ -1,4 +1,4 @@
-import type { CardKey, Leg } from "../content/strategies";
+import type { CardKey, Leg, Priority } from "../content/strategies";
 import type { FarmForm } from "./form";
 
 /*
@@ -10,7 +10,7 @@ import type { FarmForm } from "./form";
   - reset restores everything, including field observation, priority and year.
 */
 
-export type Priority = "soil" | "income" | "water";
+export type { Priority };
 export type Emphasis = "cover" | "buffer";
 
 export interface AppState {

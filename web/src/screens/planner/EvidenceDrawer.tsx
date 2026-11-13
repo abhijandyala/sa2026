@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { SOURCES } from "../../content/strategies";
+import { PRIORITY_INFO, SOURCES } from "../../content/strategies";
 import { historicalDate, historicalWindow, mm, monthDay, plannedDate, wetness } from "../../data/format";
 import type { FarmForm } from "../../state/form";
 import type { Emphasis, Priority } from "../../state/model";
@@ -16,7 +16,9 @@ import { Button, Drawer, SourceChip } from "../../ui/components";
   Opening it never changes the selection; closing returns focus to its button.
 */
 
-const PRIORITY_LABEL: Record<Priority, string> = { soil: "Protect the soil", income: "Extra income", water: "Save water" };
+const PRIORITY_LABEL: Record<Priority, string> = Object.fromEntries(
+  Object.entries(PRIORITY_INFO).map(([k, v]) => [k, v.label]),
+) as Record<Priority, string>;
 
 function soilLabel(form: FarmForm): string {
   if (form.soilSource === "farmer") return "Reported by you";

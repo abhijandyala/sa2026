@@ -28,6 +28,12 @@ const VERDICT: Record<OtherCheck["verdict"], { kind: "ok" | "check" | "unavailab
   inapplicable: { kind: "inapplicable", label: "Does not apply" },
 };
 
+const FIT_TEXT: Record<CardVM["priorityFits"][number]["fit"], string> = { matches: "Matches", partly: "Partly", tradeoff: "Trade-off" };
+const FIT_PILL = { matches: "ok", partly: "unavailable", tradeoff: "check" } as const;
+
+/** Checks the grower can act on come first; ones that fit come last (display order only). */
+const VERDICT_ORDER: OtherCheck["verdict"][] = ["avoid", "caution", "manual_check", "unknown", "acceptable", "preferred", "inapplicable"];
+
 const CROP: Record<string, string> = { field_corn: "Corn", soybean: "Soybeans" };
 
 function sequenceText(plan: Plan | null): string {
@@ -43,19 +49,18 @@ function sequenceText(plan: Plan | null): string {
   return `${prev} (harvest ${harvest}) → no planted cover → ${next} ${plant}`;
 }
 
+function ClaimSource({ claim }: { claim: Claim }) {
+  if (!claim.source) return null;
+  const src = SOURCES[claim.source];
+  return <SourceChip kind={src.kind === "nasa" ? "nasa" : src.kind === "ncstate" ? "ncstate" : "calculated"} href={src.url} title={src.title} />;
+}
+
 function ClaimList({ claims }: { claims: Claim[] }) {
   return (
     <ul className="claims">
       {claims.map((c) => (
         <li key={c.text}>
-          {c.text}{" "}
-          {c.source ? (
-            <SourceChip
-              kind={SOURCES[c.source].kind === "nasa" ? "nasa" : SOURCES[c.source].kind === "ncstate" ? "ncstate" : "calculated"}
-              href={SOURCES[c.source].url}
-              title={SOURCES[c.source].title}
-            />
-          ) : null}
+          {c.text} <ClaimSource claim={c} />
         </li>
       ))}
     </ul>
@@ -97,6 +102,16 @@ export function StrategyCard({
             {content.name}
           </h3>
           <p className="sc-sub">{content.subtitle}</p>
+          {card.priorityFits.length ? (
+            <p className="sc-badges">
+              {card.priorityFits.map((f) => (
+                <StatusPill key={f.priority} kind={FIT_PILL[f.fit]}>
+                  <span className="visually-hidden">{FIT_TEXT[f.fit]}: </span>
+                  {f.label}
+                </StatusPill>
+              ))}
+            </p>
+          ) : null}
         </div>
       </header>
 
@@ -154,6 +169,32 @@ export function StrategyCard({
         </p>
       </div>
 
+      <div className="sc-fit">
+        {card.priorityFits.length ? (
+          <ul aria-label="How this plan fits your priorities">
+            {card.priorityFits.map((f) => (
+              <li key={f.priority} className={`sc-fit-${f.fit}`}>
+                <strong>
+                  {FIT_TEXT[f.fit]}: {f.label}.
+                </strong>{" "}
+                {f.reason.text} <ClaimSource claim={f.reason} />
+                {f.detail ? <span className="sc-fit-detail"> {f.detail}</span> : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {card.observations.length ? (
+          <ul aria-label="From what you reported about the field">
+            {card.observations.map((o) => (
+              <li key={o.text} className={`sc-obs-${o.kind}`}>
+                {o.text} {o.source ? <ClaimSource claim={{ text: o.text, source: o.source }} /> : null}
+                {o.kind === "reported" ? <Src k="farmer" /> : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+
       {era ? (
         <div className="sc-era" aria-label={`${era.measure}, earlier and recent periods`}>
           <span className="sc-era-measure">
@@ -206,14 +247,16 @@ export function StrategyCard({
 
       <div className="sc-checks">
         {card.checks.length ? (
-          <ul aria-label="Timing and rule checks">
-            {card.checks.map((c) => (
+          <ul aria-label={`Timing and rule checks, ${card.legs.find((l) => l.selected)?.title ?? ""} winter`}>
+            {[...card.checks]
+              .sort((a, b) => VERDICT_ORDER.indexOf(a.verdict) - VERDICT_ORDER.indexOf(b.verdict))
+              .map((c) => (
               <li key={c.rule_id}>
                 <StatusPill kind={VERDICT[c.verdict].kind}>{VERDICT[c.verdict].label}</StatusPill>
                 {/* Backend reasons may start with a machine code ("catalog_missing: …"); show the words only. */}
                 <span>{c.reason.replace(/^[a-z_]+:\s*/, "").replace(/^./, (ch) => ch.toUpperCase())}</span>
               </li>
-            ))}
+              ))}
           </ul>
         ) : null}
       </div>

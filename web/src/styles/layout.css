@@ -337,11 +337,11 @@
 
 /* Strategy cards: rows line up across cards with subgrid (playbook p.40) */
 .cards {
-  grid-template-rows: repeat(10, auto);
+  grid-template-rows: repeat(11, auto);
   row-gap: 0;
 }
 .strategy-card {
-  grid-row: span 10;
+  grid-row: span 11;
   grid-template-rows: subgrid;
   row-gap: var(--sp-2);
 }
@@ -1596,9 +1596,10 @@
 }
 .header-actions {
   justify-content: flex-start;
+  column-gap: var(--sp-2);
 }
 .header-actions-gap {
-  flex: 1 1 var(--sp-2);
+  flex: 1 1 0;
 }
 .hero {
   display: grid;
@@ -1853,4 +1854,89 @@
   width: 14px;
   margin-left: var(--sp-2);
   border-top: 2px dashed var(--ink-muted);
+}
+
+/* ===================================================================== Phase 7: priorities and field observations */
+.priority-picker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.pp-hint {
+  font-weight: 400;
+}
+.pp-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 600 13px var(--font-body);
+  cursor: pointer;
+}
+.pp-option:hover:not(:disabled) {
+  border-color: var(--action);
+}
+.pp-option:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.pp-option.is-on {
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--action-ink);
+}
+.pp-option:disabled {
+  cursor: not-allowed;
+  color: var(--ink-muted);
+  background: var(--surface-2);
+}
+.pp-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1.5px solid currentColor;
+}
+.sc-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.sc-badges .pill {
+  font-size: 12px;
+  padding: 1px 8px 1px 6px;
+}
+.sc-fit ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  font-size: var(--fs-small);
+}
+.sc-fit ul + ul {
+  margin-top: 6px;
+}
+.sc-fit li {
+  padding-left: 10px;
+  border-left: 3px solid var(--line-strong);
+}
+.sc-fit li.sc-fit-matches {
+  border-left-color: var(--cover);
+}
+.sc-fit li.sc-fit-partly {
+  border-left-color: var(--fallow);
+}
+.sc-fit li.sc-fit-tradeoff,
+.sc-fit li.sc-obs-reported {
+  border-left-color: var(--check);
+}
+.sc-fit-detail {
+  color: var(--ink-muted);
 }

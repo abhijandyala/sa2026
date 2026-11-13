@@ -143,3 +143,40 @@ export const CARDS: CardContent[] = [
 ];
 
 export const cardByKey = (k: CardKey) => CARDS.find((c) => c.key === k)!;
+
+/*
+  Priorities (Phase 7.1). The grower picks up to two; the card order and every number
+  stay the same. A badge says how a plan relates to the priority, with a sourced reason:
+  "matches", "partly" (one winter only) or "trade-off". Plans with nothing sourced to say
+  get no badge.
+  "Keep spring moisture" replaces "Save water": the tool measures no water saving.
+*/
+export type Priority = "soil" | "income" | "water";
+
+export const PRIORITY_INFO: Record<Priority, { label: string; short: string }> = {
+  soil: { label: "Protect the soil", short: "Protect soil" },
+  income: { label: "Add a grain harvest", short: "Grain harvest" },
+  water: { label: "Keep spring soil moisture", short: "Spring moisture" },
+};
+
+export const PRIORITY_ORDER: Priority[] = ["soil", "water", "income"];
+
+export type PriorityFit = "matches" | "partly" | "tradeoff";
+
+export const PRIORITY_FIT: Record<CardKey, Partial<Record<Priority, { fit: PriorityFit; reason: Claim }>>> = {
+  current: {
+    soil: { fit: "tradeoff", reason: c("Without living cover, soil has less protection through fall and winter.", "ncs-cover") },
+    water: { fit: "matches", reason: c("No cover crop is using soil moisture before planting.", "ncs-soy-4") },
+  },
+  cover: {
+    soil: { fit: "matches", reason: c("Rye gives some of the strongest erosion protection through fall and winter.", "ncs-cover") },
+    water: { fit: "tradeoff", reason: c("A living cover uses soil moisture before planting.", "ncs-soy-4") },
+  },
+  grain: {
+    soil: {
+      fit: "partly",
+      reason: c("Wheat keeps the soil covered through the first winter; the second winter has no planted cover.", "ncs-cover"),
+    },
+    income: { fit: "matches", reason: c("Adds a wheat harvest to the same land over two years.") },
+  },
+};

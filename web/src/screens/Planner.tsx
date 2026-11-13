@@ -17,6 +17,7 @@ import { Almanac } from "./planner/Almanac";
 import { WeatherDetail } from "./planner/WeatherDetail";
 import { FarmView } from "./planner/FarmView";
 import { RyeDeepDive } from "./planner/RyeDeepDive";
+import { PriorityPicker } from "./planner/PriorityPicker";
 
 /*
   Layout B (decided Nov 12): header, weather control (years strip), 3D band capped near
@@ -78,8 +79,10 @@ export function Planner({
         leg: state.leg,
         ryeEnd: state.ryeEnd,
         earlierRyeEnd: state.applied.ryeEndEarlier.slice(5),
+        priorities: state.priorities,
+        observation: { moisture: state.applied.moistureConcern, irrigation: state.applied.irrigation },
       }),
-    [data, state.card, state.year, state.leg, state.ryeEnd, state.applied.ryeEndEarlier],
+    [data, state.card, state.year, state.leg, state.ryeEnd, state.applied, state.priorities],
   );
   const selectedCard = view.cards.find((c) => c.key === state.card) ?? view.cards[0]!;
   // The grower's earlier rye date, read from the backend's sweep (same plan, edited date).
@@ -123,11 +126,18 @@ export function Planner({
             {view.locationLabel.replace(/\s*\(sample\)$/i, "")} · {sameForm(state.applied, state.sample) ? "Sample field" : "Your dates"}
           </span>
           {status}
+          <Button
+            variant="quiet"
+            className="btn btn-quiet header-link-small"
+            onClick={() => {
+              dispatch({ type: "reset" });
+              setNotice(null);
+            }}
+          >
+            Reset example
+          </Button>
           <a className="header-link header-link-small" href="?view=methods">
             How it works
-          </a>
-          <a className="header-link header-link-small" href="?view=credits">
-            Credits
           </a>
         </div>
         <nav className="header-actions" aria-label="Plan actions">
@@ -136,29 +146,21 @@ export function Planner({
             value={String(view.leg) as "1" | "2"}
             onChange={(v) => dispatch({ type: "selectLeg", leg: Number(v) as Leg })}
             options={[
-              { value: "1", label: `Winter 1: ${view.legTitles[1]}` },
-              { value: "2", label: `Winter 2: ${view.legTitles[2]}` },
+              { value: "1", label: "Winter 1: corn → soy" },
+              { value: "2", label: "Winter 2: soy → corn" },
             ]}
           />
+          <PriorityPicker priorities={state.priorities} onToggle={(priority) => dispatch({ type: "togglePriority", priority })} />
           <span className="header-actions-gap" aria-hidden="true" />
+          <Button variant="quiet" className="btn btn-quiet btn-small" aria-pressed={audit} onClick={() => setAudit((a) => !a)}>
+            {audit ? "Hide sources" : "Show sources"}
+          </Button>
           <Button ref={formBtn} variant="primary" onClick={() => dispatch({ type: "openForm" })}>
             Edit farm dates
           </Button>
           {pending ? <span className="pending-note">Edited, not applied</span> : null}
           <Button ref={evidenceBtn} onClick={() => dispatch({ type: "openEvidence" })}>
             Show evidence
-          </Button>
-          <Button
-            variant="quiet"
-            onClick={() => {
-              dispatch({ type: "reset" });
-              setNotice(null);
-            }}
-          >
-            Reset example
-          </Button>
-          <Button variant="quiet" aria-pressed={audit} onClick={() => setAudit((a) => !a)}>
-            {audit ? "Hide sources" : "Show sources"}
           </Button>
         </nav>
       </header>
@@ -231,7 +233,7 @@ export function Planner({
       <footer className="planner-foot">
         <p>
           {APP_NAME} supports a conversation with your <G id="extension">Extension agent</G>. It replays past weather; it does not
-          forecast next spring or measure your field.
+          forecast next spring or measure your field. <a href="?view=credits">Data and credits</a>
         </p>
       </footer>
 

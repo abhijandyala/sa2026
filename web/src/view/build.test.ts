@@ -248,3 +248,56 @@ describe("rye slider", () => {
     expect(cover.era).toBeNull();
   });
 });
+
+describe("priorities and field observations (Phase 7)", () => {
+  const numbers = (v: ReturnType<typeof buildView>) =>
+    v.cards.map((c) => [c.key, c.legs.map((l) => [l.soilMm, l.check.count, l.check.denominator]), c.era?.earlier.count, c.era?.recent.count]);
+
+  it("never changes a number or the card order (case J)", () => {
+    const plain = buildView(data, { card: "cover", year: 2014 });
+    const picked = buildView(data, { card: "cover", year: 2014, priorities: ["soil", "water"] });
+    expect(numbers(picked)).toEqual(numbers(plain));
+    expect(picked.cards.map((c) => c.key)).toEqual(["current", "cover", "grain"]);
+  });
+
+  it("badges each plan with a sourced reason, warnings included", () => {
+    const v = buildView(data, { card: "cover", year: 2014, priorities: ["water", "soil"] });
+    const fits = Object.fromEntries(v.cards.map((c) => [c.key, c.priorityFits.map((f) => [f.priority, f.fit])]));
+    expect(fits).toEqual({
+      current: [["soil", "tradeoff"], ["water", "matches"]],
+      cover: [["soil", "matches"], ["water", "tradeoff"]],
+      grain: [["soil", "partly"]],
+    });
+    const coverWater = v.cards[1]!.priorityFits.find((f) => f.priority === "water")!;
+    expect(coverWater.detail).toBe("Check field moisture in 9 of 45 springs (corn → soy).");
+    expect(coverWater.reason.source).toBe("ncs-soy-4");
+    expect(v.cards[2]!.priorityFits[0]!.detail).toMatch(/not evaluated yet/);
+  });
+
+  it("shows no badges until a priority is chosen", () => {
+    expect(buildView(data, { card: "cover", year: 2014 }).cards.every((c) => c.priorityFits.length === 0)).toBe(true);
+  });
+
+  it("a reported moisture concern shows the 14-day guidance with the plan's own gap", () => {
+    const v = buildView(data, { card: "cover", year: 1981, observation: { moisture: "yes", irrigation: "unknown" } });
+    const cover = v.cards.find((c) => c.key === "cover")!;
+    expect(cover.observations).toEqual([
+      expect.objectContaining({ kind: "reported", text: expect.stringContaining("this plan ends it 12 days before") }),
+    ]);
+    // Only where the NC State moisture check applies.
+    expect(v.cards.find((c) => c.key === "current")!.observations).toEqual([]);
+  });
+
+  it("unknown invites a field check; removing the observation returns the prior notes (case 3)", () => {
+    const unknown = buildView(data, { card: "cover", year: 1981, observation: { moisture: "unknown", irrigation: "no" } });
+    expect(unknown.cards[1]!.observations.map((o) => o.kind)).toEqual(["unknown"]);
+    const no = buildView(data, { card: "cover", year: 1981, observation: { moisture: "no", irrigation: "no" } });
+    expect(no.cards[1]!.observations).toEqual([]);
+    expect(numbers(no)).toEqual(numbers(unknown));
+  });
+
+  it("irrigation is context only", () => {
+    const v = buildView(data, { card: "cover", year: 1981, observation: { moisture: "no", irrigation: "yes" } });
+    expect(v.cards[1]!.observations).toEqual([expect.objectContaining({ kind: "context", text: expect.stringMatching(/does not change/) })]);
+  });
+});

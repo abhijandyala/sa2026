@@ -1,6 +1,17 @@
 import type { CompareResponse, Era, OtherCheck, Plan, SensitivityResponse, SpringWindow, SpringYear, YearsResponse } from "../api/schema";
 import type { Origin } from "../api/client";
-import { CARDS, type CardContent, type CardKey, type Leg } from "../content/strategies";
+import {
+  CARDS,
+  PRIORITY_FIT,
+  PRIORITY_INFO,
+  PRIORITY_ORDER,
+  type CardContent,
+  type CardKey,
+  type Claim,
+  type Leg,
+  type Priority,
+  type PriorityFit,
+} from "../content/strategies";
 
 /*
   Turns backend responses into exactly what the screen shows. Selection only: it never
@@ -12,6 +23,10 @@ export type DataKind = "draft" | "saved" | "live";
 
 export interface Selection {
   card: CardKey;
+  /** Up to two grower priorities (Phase 7.1). They add badges; they never change a number. */
+  priorities?: Priority[];
+  /** What the grower reported about the field (Phase 7.3). Unknown is a real answer. */
+  observation?: { moisture: Tri; irrigation: Tri };
   year: number | null;
   /** Which winter the strip, charts, 3D and card details show. Default 1 (corn → soybeans). */
   leg?: Leg;
@@ -77,6 +92,25 @@ export type CardStatus =
   | null;
 
 /** Headline numbers for one leg, shown side by side on the card and never added together. */
+type Tri = "yes" | "no" | "unknown";
+
+/** How one plan relates to one chosen priority, with its sourced reason. */
+export interface PriorityFitVM {
+  priority: Priority;
+  label: string;
+  fit: PriorityFit;
+  reason: Claim;
+  /** A backend value or an availability note that belongs next to the reason. */
+  detail: string | null;
+}
+
+/** A note from what the grower reported about the field. */
+export interface ObservationVM {
+  kind: "reported" | "unknown" | "context";
+  text: string;
+  source: Claim["source"];
+}
+
 export interface LegSummaryVM {
   leg: Leg;
   title: string;
@@ -87,6 +121,8 @@ export interface LegSummaryVM {
   reason: string | null;
   soilMm: number | null;
   check: { applies: boolean; count: number | null; denominator: number | null };
+  /** Days between ending the cover and planting, from the backend's calendar. */
+  gapDays: number | null;
   selected: boolean;
 }
 
@@ -109,6 +145,8 @@ export interface CardVM {
   metrics: string[];
   status: CardStatus;
   checks: OtherCheck[];
+  priorityFits: PriorityFitVM[];
+  observations: ObservationVM[];
 }
 
 /** One bar in the rainfall chart (card 3.3). Values straight from the backend. */
@@ -307,7 +345,7 @@ export function buildView(
     : null;
 
   // ---------------------------------------------------------------- one leg's details
-  type LegDetail = Omit<CardVM, "key" | "content" | "leg" | "legs">;
+  type LegDetail = Omit<CardVM, "key" | "content" | "leg" | "legs" | "priorityFits" | "observations">;
 
   function legDetail(plan: Plan | null): LegDetail {
     if (!plan) {
@@ -383,6 +421,7 @@ export function buildView(
       reason: d.unavailableReason,
       soilMm: d.soil.mm,
       check: d.check,
+      gapDays: d.plan?.calendar?.termination_gap_days ?? null,
       selected: l === leg,
     };
   }
@@ -398,6 +437,8 @@ export function buildView(
       leg,
       legs: ([1, 2] as Leg[]).map((l) => summary(l, content.legs[l], details[l])),
       ...details[leg],
+      priorityFits: [],
+      observations: [],
     };
   });
 
@@ -448,7 +489,12 @@ export function buildView(
       };
       const legs = card.legs.map((l) =>
         l.leg === 1
-          ? { ...l, soilMm: chosen.rain_mm_without_cover_median, check: { applies: true, count: chosen.checks_count, denominator: sens.denominator } }
+          ? {
+              ...l,
+              soilMm: chosen.rain_mm_without_cover_median,
+              check: { applies: true, count: chosen.checks_count, denominator: sens.denominator },
+              gapDays: chosen.gap_days,
+            }
           : l,
       );
       if (leg === 1) {
@@ -473,6 +519,51 @@ export function buildView(
         cards[ci] = { ...card, legs };
       }
     }
+  }
+
+  // ---------------------------------------------------------------- priorities and field observations (Phase 7)
+  // Badges and notes only: the card order and every number stay as the backend sent them.
+  const chosenPriorities = PRIORITY_ORDER.filter((p) => sel.priorities?.includes(p));
+  const observation = sel.observation ?? { moisture: "unknown", irrigation: "unknown" };
+  for (let i = 0; i < cards.length; i++) {
+    const card = cards[i]!;
+    const notEvaluated = card.legs.filter((l) => !l.available).map((l) => `The ${l.short.toLowerCase()} winter is not evaluated yet.`);
+    const priorityFits: PriorityFitVM[] = chosenPriorities.flatMap((p) => {
+      const f = PRIORITY_FIT[card.key][p];
+      if (!f) return [];
+      const moistureCheck = card.legs.find((l) => l.check.applies && l.check.count !== null);
+      const detail =
+        p === "water" && f.fit === "tradeoff" && moistureCheck
+          ? `Check field moisture in ${moistureCheck.check.count} of ${moistureCheck.check.denominator} springs (${moistureCheck.short.toLowerCase()}).`
+          : notEvaluated.length && f.fit !== "tradeoff"
+            ? notEvaluated.join(" ")
+            : null;
+      return [{ priority: p, label: PRIORITY_INFO[p].short, fit: f.fit, reason: f.reason, detail }];
+    });
+    // Field observations matter only where the NC State moisture check applies (rye before soybeans).
+    const checked = card.legs.find((l) => l.check.applies);
+    const observations: ObservationVM[] = [];
+    if (checked) {
+      if (observation.moisture === "yes") {
+        observations.push({
+          kind: "reported",
+          text:
+            "You reported a field moisture concern. NC State suggests ending rye at least 14 days before soybean planting" +
+            (checked.gapDays !== null ? `; this plan ends it ${checked.gapDays} days before.` : "."),
+          source: "ncs-soy-4",
+        });
+      } else if (observation.moisture === "unknown") {
+        observations.push({
+          kind: "unknown",
+          text: "Field moisture concern: unknown. Check the field before deciding when to end the rye.",
+          source: null,
+        });
+      }
+      if (observation.irrigation === "yes") {
+        observations.push({ kind: "context", text: "Irrigation noted as context. It does not change the moisture check.", source: null });
+      }
+    }
+    cards[i] = { ...card, priorityFits, observations };
   }
 
   return {
