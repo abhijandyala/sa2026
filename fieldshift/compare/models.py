@@ -117,7 +117,8 @@ class PlanComparison(_M):
     label: str | None
     status: Status
     reason: str | None = None
-    rotation_id: str | None = None
+    rotation_id: str | None = None  # first requested rotation containing this plan
+    rotation_ids: list[str] = Field(default_factory=list)  # every requested rotation containing it
     leg: int | None = None
     dates_assumed: bool | None = None
     editable: list[str] = Field(default_factory=list)
@@ -151,8 +152,19 @@ class CompareResponse(_M):
     shared_eligible_years: SharedYears
     plans: list[PlanComparison]
     soil: dict[str, Any] | None = None
+    location: dict[str, Any] | None = None  # resolve result when a point was requested
     eras: dict[str, Any]  # window definitions: earlier/recent/excluded
     coverage_note: str | None = None
+
+
+class UnsupportedResponse(_M):
+    """A plan the catalog/weather cannot evaluate. A result, not an HTTP error."""
+
+    meta: Meta
+    status: Status
+    plan_id: str
+    reason: str
+    unsupported: list[str] = Field(default_factory=list)
 
 
 # --------------------------------------------------------------------------- replay
@@ -219,7 +231,7 @@ class SensitivityPoint(_M):
 
 class SensitivityResponse(_M):
     meta: Meta
-    status: Status  # complete | inapplicable (the rule never applies to this plan)
+    status: Status  # complete | inapplicable | manual_check | unknown
     base_plan_id: str
     varied: Literal["terminate"]
     fixed: dict[str, Any]

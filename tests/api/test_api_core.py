@@ -411,3 +411,55 @@ def test_sensitivity_flags_gaps_that_cross_feb_29(client):
                                    for x in before_leap_day)
     after_leap_day = [x for x in pts if "03-01" <= x["terminate"] <= "03-10"]
     assert after_leap_day and all(x["gap_days_in_leap_years"] is None for x in after_leap_day)
+
+
+# --- review r2 fixes ----------------------------------------------------------------------------------------
+
+
+def test_a_point_outside_the_union_cell_is_unsupported_not_union_county_data(client):
+    for lat, lon in [(0.0, 0.0), (35.78, -78.64), (40.7, -74.0)]:  # null island, Raleigh, NYC
+        body = post(client, "/v1/plans/compare", {
+            "plan_ids": ["corn_soy__rye"], "location": {"latitude": lat, "longitude": lon}}).json()
+        plan = body["plans"][0]
+        assert plan["status"] == "unsupported" and "unsupported_location" in plan["reason"]
+        assert plan["spring"] is None and plan["eras"] == {}
+        assert body["location"] is not None
+
+
+def test_a_point_inside_the_union_cell_resolves_to_the_snapshot(client):
+    body = post(client, "/v1/plans/compare", {
+        "plan_ids": ["corn_soy__rye"], "location": {"latitude": 34.99, "longitude": -80.54}}).json()
+    assert body["plans"][0]["status"] == "complete"
+    assert body["location"]["weather"]["source"] == "snapshot"
+
+
+def test_replay_and_sensitivity_report_unsupported_crops_like_compare(client):
+    p = sample_plan("corn_soy__rye")
+    p["next_crop_id"] = "dragon_fruit"
+    cmp_status = post(client, "/v1/plans/compare", {"plans": [p]}).json()["plans"][0]["status"]
+    rep = post(client, "/v1/seasons/2008/replay", {"plan": p})
+    sens = post(client, "/v1/plans/sensitivity", {"plan": p})
+    assert cmp_status == "unsupported"
+    for r in (rep, sens):
+        assert r.status_code == 200 and r.json()["status"] == "unsupported"
+        assert any("dragon_fruit" in u for u in r.json()["unsupported"]) and "daily" not in r.json()
+
+
+def test_sensitivity_keeps_manual_check_status_for_applicable_rules(client):
+    r = post(client, "/v1/plans/sensitivity",
+             {"plan_id": "corn_soy__clover", "rule_id": "cc_soil_02"}).json()
+    assert r["status"] == "manual_check"
+    assert post(client, "/v1/plans/sensitivity",
+                {"plan_id": "corn_soy__rye", "rule_id": "cc_pw_01"}).json()["status"] == "inapplicable"
+
+
+def test_rotation_membership_comes_from_the_requested_rotations(client):
+    body = post(client, "/v1/plans/compare", {"rotation_ids": ["add_grain_crop"]}).json()
+    wheat, shared_leg = body["plans"]
+    assert wheat["rotation_ids"] == ["add_grain_crop"]
+    assert shared_leg["plan_id"] == "soy_corn__no_cover" and shared_leg["rotation_ids"] == ["add_grain_crop"]
+    both = post(client, "/v1/plans/compare", {"rotation_ids": ["current_practice", "add_grain_crop"]}).json()
+    leg = next(p for p in both["plans"] if p["plan_id"] == "soy_corn__no_cover")
+    assert leg["rotation_ids"] == ["current_practice", "add_grain_crop"]
+    alone = post(client, "/v1/plans/compare", {"plan_ids": ["soy_corn__no_cover"]}).json()["plans"][0]
+    assert alone["rotation_ids"] == ["current_practice", "add_grain_crop"]

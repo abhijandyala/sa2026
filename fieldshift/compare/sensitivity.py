@@ -69,6 +69,7 @@ def sweep_termination(
         per_year.append((y, base, cov, spring, winter_ok, cum, hv))
 
     seed_ref = ref_cal.cover.seed
+    seen: set[Status] = set()
     points: list[SensitivityPoint] = []
     d = seed_ref + timedelta(days=1)
     while d <= ref_cal.plant:
@@ -91,6 +92,8 @@ def sweep_termination(
                     heavies.append(float(hv[i_seed] + (hv[-1] - hv[i_term])))
             facts = build_season_facts(p2, cal, spring, cov)
             chk = evaluate_season(facts, ctx.index, rule_ids=[rule_id]).check(rule_id)
+            if chk is not None:
+                seen.add(Status(chk.status))
             if chk is not None and chk.status == Status.COMPLETE:
                 denom += 1
                 count += bool(chk.flagged)
@@ -109,9 +112,16 @@ def sweep_termination(
         d += timedelta(days=1)
 
     dry_years = [y for y, _, _, s, _, _, _ in per_year if s.is_dry]
-    applicable = any(p.denominator > 0 for p in points)
+    if any(p.denominator > 0 for p in points):
+        status = Status.COMPLETE
+    elif seen and seen <= {Status.INAPPLICABLE}:
+        status = Status.INAPPLICABLE
+    elif Status.MANUAL_CHECK in seen:
+        status = Status.MANUAL_CHECK
+    else:
+        status = Status.UNKNOWN
     return {
-        "status": Status.COMPLETE if applicable else Status.INAPPLICABLE,
+        "status": status,
         "base_plan_id": plan.plan_id,
         "varied": "terminate",
         "fixed": {"seed": plan.winter.seed, "next_plant": plan.next_plant,
