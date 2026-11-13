@@ -11,7 +11,8 @@ def test_every_v1_region_text_is_in_the_mapping_table():
 
 @pytest.mark.parametrize(
     ("text", "tag"),
-    [("NC Piedmont", "piedmont"), ("Union County", "piedmont"), ("Coastal Plain", "coastal_plain"),
+    [("NC Piedmont", "piedmont"), ("Union County", "piedmont"), ("Coastal Plain", "coastal_plain"), ("Hertford County", "northeast"),
+     ("Virginia Piedmont", None), ("Pennsylvania mountains", None), ("Washington County, NC", None),
      ("Tidewater NC", "tidewater"), ("western NC", "mountains"), ("North Carolina", None), (None, None)],
 )  # fmt: skip
 def test_normalize_field_region(text, tag):
@@ -25,6 +26,12 @@ def test_normalize_field_region(text, tag):
         ("NC Piedmont", "coastal_plain", "no_match"),
         ("NC Piedmont and mountains", "mountains", "match"),
         ("NC Coastal Plain", "tidewater", "match"),
+        ("NC Coastal Plain", "northeast", "match"),
+        ("Hertford County NC (northeastern)", "northeast", "match"),
+        ("Hertford County NC (northeastern)", "tidewater", "unknown"),
+        ("Hertford County NC (northeastern)", "coastal_plain", "unknown"),
+        ("Hertford County NC (northeastern)", "piedmont", "no_match"),
+        ("NC outside Tidewater", "northeast", "no_match"),
         ("NC outside Tidewater", "tidewater", "no_match"),
         ("NC outside Tidewater", "piedmont", "match"),
         ("NC outside Tidewater", None, "unknown"),
@@ -38,3 +45,16 @@ def test_normalize_field_region(text, tag):
 )
 def test_region_match(rule_region, field, expected):
     assert region_match(rule_region, field)[0] == expected
+
+
+@pytest.mark.parametrize(
+    ("text", "scope"),
+    [(None, "unspecified"), ("", "unspecified"), ("NC Piedmont", "nc"), ("North Carolina", "nc"),
+     ("Washington County, NC", "nc"), ("Virginia Piedmont", "outside"), ("West Virginia", "outside"),
+     ("South Carolina coastal", "outside"), ("Pennsylvania mountains", "outside"),
+     ("the moon", "unrecognized")],
+)  # fmt: skip
+def test_region_scope(text, scope):
+    from fieldshift.field.regions import region_scope
+
+    assert region_scope(text) == scope

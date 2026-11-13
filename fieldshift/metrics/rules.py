@@ -279,6 +279,8 @@ def build_view(
     elif isinstance(obs, Iterable) and not isinstance(obs, str):
         pest = True if any(k in obs for k in _PEST_KEYS) else None
     gap = _get(facts, "termination_gap_days")
+    if isinstance(gap, int | float) and not isinstance(gap, bool) and not math.isfinite(gap):
+        return "termination_gap_days must be a finite number of days"
     view = SeasonView(
         year=_get(facts, "year"),
         plan_id=_get(facts, "plan_id"),
@@ -454,6 +456,8 @@ def _eval_numeric(rule: CropRule, view: SeasonView) -> _Outcome:
     )  # fmt: skip
 
 
+#: Stages whose window the plant/seed dates in the facts can answer.
+_WINDOW_DATE_STAGES = frozenset({None, "planting", "seeding", "preplant"})
 _DATE_KEY_FOR_ACTION = {"plant": "plant", "seed": "seed", "seed_after_harvest": "seed"}
 
 
@@ -462,6 +466,12 @@ def _eval_window(rule: CropRule, view: SeasonView) -> _Outcome:
     key = _DATE_KEY_FOR_ACTION.get(action)
     if key is None:
         return _Outcome("manual_check", f"no date input maps to action '{action}'")
+    if rule.growth_stage not in _WINDOW_DATE_STAGES:
+        # e.g. fc_wt_03 is about the silking date; the facts hold seed/plant dates only.
+        return _Outcome(
+            "manual_check",
+            f"window applies to the '{rule.growth_stage}' stage; no {rule.growth_stage} date is available",
+        )
     d = view.dates.get(key)
     window = f"{rule.window_start_mm_dd} to {rule.window_end_mm_dd}"
     if d is None:
@@ -644,6 +654,14 @@ def evaluate_rule(
         )
         return _check(rule, "manual_check", why, verdict="manual_check")
     out = evaluator(rule, view)
+    if out.status == "unknown" and (gate_name := GATES.get(rule.rule_id)) is not None:
+        gate_state, gate_reason, gate_inputs = _gate_state(gate_name, view)
+        if gate_state is False:
+            # The gate is off, so the prompt cannot fire whatever the missing input would say.
+            return _check(
+                rule, "complete", f"{out.reason}; applies_when {gate_reason}", verdict=None,
+                condition_met=None, gate_active=False, inputs_used={**out.inputs, **gate_inputs},
+            )  # fmt: skip
     if out.status != "complete":
         verdict: Verdict | None = {"unknown": "unknown", "manual_check": "manual_check"}.get(
             out.status

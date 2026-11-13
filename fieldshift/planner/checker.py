@@ -30,7 +30,7 @@ from fieldshift.contracts import (
     SpringFacts,
     Status,
 )
-from fieldshift.field.regions import normalize_field_region
+from fieldshift.field.regions import region_scope
 from fieldshift.metrics.rules import RuleCheck, SeasonEvaluation, evaluate_season
 from fieldshift.seasons.align import build_calendar
 
@@ -46,13 +46,8 @@ def default_planting_year(today: date | None = None) -> int:
 
 
 def region_supported(region: str | None) -> bool:
-    """A region is supported when it is unspecified, a known NC region, or plain North Carolina."""
-    if not region:
-        return True
-    if normalize_field_region(region) is not None:
-        return True
-    t = region.strip().lower()
-    return t in {"nc", "north carolina", "north carolina statewide"} or t.startswith("nc ")
+    """Supported unless the region text puts the field outside North Carolina."""
+    return region_scope(region) != "outside"
 
 
 class PathNote(BaseModel):

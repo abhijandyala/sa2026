@@ -11,13 +11,17 @@ guessed. The tags are deliberately coarse (the catalog does not support finer ma
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Literal
 
-NC_REGION_TAGS = ("mountains", "piedmont", "coastal_plain", "tidewater")
+NC_REGION_TAGS = ("mountains", "piedmont", "coastal_plain", "tidewater", "northeast")
 
 # Which tags a plan region also satisfies (tidewater is part of the Coastal Plain).
-_IMPLIES = {"tidewater": {"tidewater", "coastal_plain"}}
+_IMPLIES = {
+    "northeast": {"northeast", "tidewater", "coastal_plain"},
+    "tidewater": {"tidewater", "coastal_plain"},
+}
 
 RegionMatch = Literal["match", "no_match", "unknown"]
 
@@ -56,11 +60,13 @@ REGION_MAP: dict[str, RegionRule] = {
     "NC Piedmont and western NC": RegionRule("nc_tags", _tags("piedmont", "mountains")),
     "NC Coastal Plain": RegionRule("nc_tags", _tags("coastal_plain", "tidewater")),
     # Northeastern NC is the eastern edge of the Coastal Plain: only a "tidewater" field matches.
+    # Only a field known to be in northeastern NC (for example Hertford County) matches; a generic
+    # Coastal Plain or Tidewater field may or may not be there, so it is ``unknown``.
     "Hertford County NC (northeastern)": RegionRule(
-        "nc_tags", _tags("tidewater"), ambiguous=_tags("coastal_plain")
+        "nc_tags", _tags("northeast"), ambiguous=_tags("coastal_plain", "tidewater")
     ),
     "Northeastern NC (Hertford County article)": RegionRule(
-        "nc_tags", _tags("tidewater"), ambiguous=_tags("coastal_plain")
+        "nc_tags", _tags("northeast"), ambiguous=_tags("coastal_plain", "tidewater")
     ),
     "NC outside Tidewater": RegionRule(
         "nc_all", exclude=_tags("tidewater"), ambiguous=_tags("coastal_plain")
@@ -80,11 +86,49 @@ REGION_MAP: dict[str, RegionRule] = {
 }
 
 
+OTHER_STATES = frozenset(
+    """alabama alaska arizona arkansas california colorado connecticut delaware florida georgia
+    hawaii idaho illinois indiana iowa kansas kentucky louisiana maine maryland massachusetts
+    michigan minnesota mississippi missouri montana nebraska nevada ohio oklahoma oregon
+    pennsylvania tennessee texas utah vermont virginia washington wisconsin wyoming""".split()
+) | {"new hampshire", "new jersey", "new mexico", "new york", "north dakota", "rhode island",
+     "south carolina", "south dakota", "west virginia"}  # fmt: skip
+_NC_MARKER_RE = re.compile(r"\bnc\b|north carolina")
+
+
+def _mentions_other_state(t: str) -> bool:
+    if _NC_MARKER_RE.search(t):  # "Washington County, NC" is North Carolina
+        return False
+    words = set(re.split(r"[^a-z]+", t))
+    if any(state in words for state in OTHER_STATES if " " not in state):
+        return True
+    return any(state in t for state in OTHER_STATES if " " in state)
+
+
+def region_scope(text: str | None) -> Literal["unspecified", "nc", "outside", "unrecognized"]:
+    """Is a free-text field region in NC? Another state's name anywhere means ``outside``."""
+    if not text or not text.strip():
+        return "unspecified"
+    t = text.strip().lower().replace("_", " ")
+    if _mentions_other_state(t):
+        return "outside"
+    if normalize_field_region(t) is not None or _NC_MARKER_RE.search(t):
+        return "nc"
+    return "unrecognized"
+
+
 def normalize_field_region(text: str | None) -> str | None:
-    """Turn a free-text field region ("NC Piedmont", "Union County") into a region tag, or ``None``."""
+    """Turn a free-text field region ("NC Piedmont", "Union County") into a region tag, or ``None``.
+
+    Text that names another state ("Virginia Piedmont") never maps to an NC tag.
+    """
     if not text:
         return None
     t = text.strip().lower().replace("_", " ")
+    if _mentions_other_state(t):
+        return None
+    if "hertford" in t or "northeast" in t:
+        return "northeast"
     if "tidewater" in t:
         return "tidewater"
     if "coastal" in t:

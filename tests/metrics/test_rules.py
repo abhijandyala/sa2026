@@ -152,7 +152,7 @@ def test_sb_pw_conflict_only_when_both_regions_apply(index):
         season_facts(
             sequence=("field_corn", "soybean"),
             gap_days=None,
-            region="Tidewater",
+            region="Hertford County",
             plant=date(2010, 5, 25),
         ),
         index,
@@ -376,7 +376,7 @@ def test_gap_at_or_above_14_clears_even_when_dryness_is_missing(index):
     assert ck(evaluate_season(short, index), "cr_tt_03").status == "unknown"
 
 
-def test_northeast_rules_need_a_tidewater_field(index):
+def test_northeast_rules_need_a_northeastern_field(index):
     def run(region):
         facts = season_facts(
             sequence=("field_corn", "soybean"),
@@ -390,7 +390,8 @@ def test_northeast_rules_need_a_tidewater_field(index):
     unsure = ck(run("Coastal Plain"), "sb_pw_04")
     assert unsure.status == "unknown" and "sub-region" in unsure.reason
     assert not ck(run("Coastal Plain"), "sb_pw_01").conflict  # undecided rules are not conflicts
-    assert ck(run("Tidewater"), "sb_pw_04").status == "complete"
+    assert ck(run("Tidewater"), "sb_pw_04").status == "unknown"  # Tidewater is not Hertford
+    assert ck(run("Hertford County, NC"), "sb_pw_04").status == "complete"
     # "NC outside Tidewater" cannot be decided for a generic Coastal Plain field either
     assert ck(run("Coastal Plain"), "sb_pw_02").status in ("manual_check", "unknown")
     assert ck(run("Piedmont"), "sb_pw_02").status == "manual_check"
@@ -431,3 +432,31 @@ def test_combined_count_needs_every_requested_component(index):
     both = combine_checks(only03, ["cr_tt_03", "cr_tt_04"])
     assert both.denominator == 0  # cr_tt_04 was never evaluated for the season
     assert combine_checks(evs, ["cr_tt_03", "cr_tt_04"]).denominator == 1
+
+
+# ---------------------------------------------------------------- review fixes (phase-4b-B r2)
+
+
+def test_false_gate_clears_even_when_the_gap_is_missing(index):
+    facts = season_facts(gap_days=None, is_dry=False, concern=None)
+    c = ck(evaluate_season(facts, index), "cr_tt_03")
+    assert (c.status, c.flagged, c.gate_active, c.condition_met) == ("complete", False, False, None)
+    dry = season_facts(gap_days=None, is_dry=True)
+    assert ck(evaluate_season(dry, index), "cr_tt_03").status == "unknown"  # gate on: gap needed
+
+
+def test_silking_window_is_not_answered_with_the_planting_date(index):
+    facts = season_facts(sequence=("soybean", "cereal_rye", "field_corn"), plant=date(2010, 7, 5))
+    c = ck(evaluate_season(facts, index, stages="all"), "fc_wt_03")
+    assert c.status == "manual_check" and "silking" in c.reason
+
+
+@pytest.mark.parametrize("gap", [float("nan"), float("inf"), float("-inf")])
+def test_non_finite_gap_is_invalid_input(index, gap):
+    ev = evaluate_season({**season_facts(), "termination_gap_days": gap}, index)
+    assert ev.status == "invalid_input" and "finite" in ev.errors[0]
+
+
+def test_real_zero_gap_stays_zero(index):
+    c = ck(evaluate_season(season_facts(gap_days=0, is_dry=True), index), "cr_tt_03")
+    assert c.flagged and c.inputs_used["termination_gap_days"] == 0

@@ -87,9 +87,13 @@ def test_wrong_role_and_out_of_state_location_are_unsupported(index):
         year=YEAR,
     )
     assert res.status == "unsupported" and "cover_crop" in res.unsupported[0]
+    for region in ("Virginia Piedmont", "Pennsylvania mountains"):
+        res_out = check_plan(plan(region=region), index, year=YEAR)
+        assert res_out.status == "unsupported", region
     iowa = check_plan(plan(region="Iowa"), index, year=YEAR)
     assert iowa.status == "unsupported" and "outside North Carolina" in iowa.unsupported[0]
     assert check_plan(plan(region=None), index, year=YEAR).status == "complete"
+    assert check_plan(plan(region="Washington County, NC"), index, year=YEAR).status == "complete"
     assert check_plan(plan(region="North Carolina"), index, year=YEAR).status == "complete"
 
 
@@ -230,7 +234,7 @@ def test_http_invalid_plan_is_a_400_with_field_issues(client):
     r = client.post("/v1/plans/check", json=bad)
     assert r.status_code == 400
     j = r.json()
-    assert j["status"] == "invalid_input" and j["issues"][0]["field"] == "next_plant"
+    assert j["status"] == "invalid_input" and j["issues"][0]["field"] == "plan.next_plant"
     assert "request_id" in j
 
 
@@ -239,7 +243,7 @@ def test_http_chronology_error_is_a_400(client):
         winter=WinterManagement(kind="cover", crop_id="cereal_rye", seed="09-01", terminate="04-28")
     )
     r = client.post("/v1/plans/check", json=b)
-    assert r.status_code == 400 and r.json()["issues"][0]["field"] == "winter.seed"
+    assert r.status_code == 400 and r.json()["issues"][0]["field"] == "plan.winter.seed"
 
 
 def test_http_unsupported_is_200_with_status(client):
@@ -254,3 +258,54 @@ def test_http_crops_and_find(client):
     assert r.status_code == 200 and r.json()["result"]["options"][0]["rank"] == 1
     bad = client.post("/v1/plans/find", json={**body(), "priorities": ["vibes"]})
     assert bad.status_code == 400 and bad.json()["issues"][0]["field"] == "priorities"
+
+
+def test_http_malformed_bodies_are_400_with_metadata(client):
+    for content in (b"{not json", b"[1, 2]", b'"text"'):
+        r = client.post(
+            "/v1/plans/check", content=content, headers={"content-type": "application/json"}
+        )
+        assert r.status_code == 400 and r.json()["status"] == "invalid_input"
+        assert set(r.json()) >= {"issues", "plan_version", "catalog_version", "request_id"}
+    missing = client.post("/v1/plans/check", json={})
+    assert missing.status_code == 400 and missing.json()["issues"][0]["field"].startswith("plan")
+
+
+@pytest.mark.parametrize("year", [0, -5, 1800, 3000, "2025", 2025.5, True])
+def test_http_bad_year_is_400_not_a_default(client, year):
+    for path in ("/v1/plans/check", "/v1/plans/find"):
+        r = client.post(path, json={**body(), "year": year})
+        assert r.status_code == 400 and r.json()["issues"][0]["field"] == "year"
+
+
+def test_http_bad_inputs_and_priorities_are_400(client):
+    r = client.post("/v1/plans/check", json={**body(), "inputs": [1]})
+    assert r.status_code == 400 and r.json()["issues"][0]["field"] == "inputs"
+    r = client.post("/v1/plans/check", json={**body(), "inputs": {"soil_temp_f": {"x": 1}}})
+    assert r.status_code == 400 and r.json()["issues"][0]["field"] == "inputs.soil_temp_f"
+    for bad in (5, "limited_water", {"a": 1}, ["vibes"]):
+        r = client.post("/v1/plans/find", json={**body(), "priorities": bad})
+        assert r.status_code == 400 and r.json()["issues"][0]["field"] == "priorities"
+
+
+def test_http_plan_version_hashes_the_resolved_year(client, monkeypatch):
+    from fieldshift.planner import routes
+
+    no_year = {"plan": body()["plan"]}
+    monkeypatch.setattr(routes, "default_planting_year", lambda: 2031)
+    a = client.post("/v1/plans/check", json=no_year).json()
+    assert a["result"]["year"] == 2031
+    monkeypatch.setattr(routes, "default_planting_year", lambda: 2032)
+    b = client.post("/v1/plans/check", json=no_year).json()
+    assert a["meta"]["plan_version"] != b["meta"]["plan_version"]
+    explicit = client.post("/v1/plans/check", json={**no_year, "year": 2032}).json()
+    assert explicit["meta"]["plan_version"] == b["meta"]["plan_version"]
+    f1 = client.post("/v1/plans/find", json={**no_year, "priorities": ["soil_protection"]}).json()
+    f2 = client.post("/v1/plans/find", json={**no_year, "priorities": ["limited_water"]}).json()
+    assert f1["meta"]["plan_version"] == f2["meta"]["plan_version"]  # priorities only reorder
+
+
+def test_http_finder_invalid_base_pair_is_400(client):
+    b = body(prev_harvest="05-12")  # harvest on the planting day: empty winter window
+    r = client.post("/v1/plans/find", json=b)
+    assert r.status_code == 400 and r.json()["status"] == "invalid_input"
