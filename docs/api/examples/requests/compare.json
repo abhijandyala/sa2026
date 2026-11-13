@@ -1,0 +1,12 @@
+{
+  "body": {
+    "rotation_ids": [
+      "current_practice",
+      "winter_cover",
+      "add_grain_crop"
+    ]
+  },
+  "method": "POST",
+  "status": 200,
+  "url": "/v1/plans/compare"
+}

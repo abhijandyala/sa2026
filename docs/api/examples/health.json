@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "catalog_version": "v1:3168a34a7a5d",
+    "plan_version": null,
+    "request_id": "req_example",
+    "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+  },
+  "offline": true,
+  "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
+  "status": "complete",
+  "weather": {
+    "first_date": "1981-01-01",
+    "last_date": "2025-06-30",
+    "reference_point": "union_county_nc",
+    "source": "NASA POWER Daily (snapshot)"
+  }
+}

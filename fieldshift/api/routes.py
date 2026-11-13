@@ -187,6 +187,7 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
         meta=meta, result_id=result_id, input_hash=input_hash, request_echo=echo,
         thresholds=engine.thresholds_view(ts), shared_eligible_years=shared, plans=results,
         soil=soil, location=location_block, eras=engine.eras_block(),
+        data_sources=_data_sources(ctx, soil),
     )
 
 
@@ -206,6 +207,30 @@ def _resolve_point(
         return block, None
     reason = res.reason or "weather_history_not_available_for_location"
     return block, f"unsupported_location: {reason}"
+
+
+def _data_sources(ctx: Context, soil: dict[str, Any] | None) -> dict[str, Any]:
+    """Where each input came from and how fresh it is. Weather history is always the snapshot."""
+    cov = ctx.manifest["coverage"]
+    soil_fresh = None
+    if soil is not None:
+        soil_fresh = (soil.get("provenance") or {}).get("freshness") or (
+            "unavailable" if soil.get("status") == "unavailable" else None
+        )
+    return {
+        "weather": {
+            "source": "NASA POWER daily (offline snapshot)",
+            "freshness": "snapshot",
+            "snapshot_hash": ctx.snapshot_hash,
+            "first_date": cov["first_date"],
+            "last_date": cov["last_date"],
+            "retrieved_at": ctx.manifest["retrieval"]["retrieved_at"],
+        },
+        "soil": None if soil is None else {
+            "source": "USDA NRCS Soil Data Access", "freshness": soil_fresh or "unavailable",
+        },
+        "catalog": {"source": "Perplexity catalogs v1 (verbatim)", "freshness": "snapshot"},
+    }
 
 
 def _soil(lat: float, lon: float) -> dict[str, Any]:

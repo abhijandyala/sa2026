@@ -1,0 +1,8 @@
+{
+  "body": {
+    "plan_id": "corn_soy__rye"
+  },
+  "method": "POST",
+  "status": 200,
+  "url": "/v1/plans/sensitivity"
+}

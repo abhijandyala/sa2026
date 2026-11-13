@@ -153,6 +153,7 @@ class CompareResponse(_M):
     plans: list[PlanComparison]
     soil: dict[str, Any] | None = None
     location: dict[str, Any] | None = None  # resolve result when a point was requested
+    data_sources: dict[str, Any]  # per-source freshness: fresh | cached(<at>) | snapshot | unavailable
     eras: dict[str, Any]  # window definitions: earlier/recent/excluded
     coverage_note: str | None = None
 

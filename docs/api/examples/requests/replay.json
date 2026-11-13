@@ -1,0 +1,6 @@
+{
+  "body": null,
+  "method": "GET",
+  "status": 200,
+  "url": "/v1/seasons/2008/replay?plan=corn_soy__rye"
+}

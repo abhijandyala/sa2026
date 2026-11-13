@@ -1,0 +1,2708 @@
+{
+  "components": {
+    "schemas": {
+      "CalendarSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "days_without_planned_cover": {
+            "title": "Days Without Planned Cover",
+            "type": "integer"
+          },
+          "establishment": {
+            "enum": [
+              "uncertain",
+              "inapplicable"
+            ],
+            "title": "Establishment",
+            "type": "string"
+          },
+          "living_cover_days_planned": {
+            "title": "Living Cover Days Planned",
+            "type": "integer"
+          },
+          "reference_year": {
+            "title": "Reference Year",
+            "type": "integer"
+          },
+          "spring_window": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Spring Window",
+            "type": "object"
+          },
+          "termination_gap_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Termination Gap Days"
+          },
+          "winter_days": {
+            "title": "Winter Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reference_year",
+          "winter_days",
+          "living_cover_days_planned",
+          "days_without_planned_cover",
+          "termination_gap_days",
+          "establishment",
+          "spring_window"
+        ],
+        "title": "CalendarSummary",
+        "type": "object"
+      },
+      "CheckSummaryOut": {
+        "additionalProperties": false,
+        "properties": {
+          "check_id": {
+            "title": "Check Id",
+            "type": "string"
+          },
+          "clear_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Clear Years",
+            "type": "array"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "denominator": {
+            "title": "Denominator",
+            "type": "integer"
+          },
+          "fires_when": {
+            "title": "Fires When",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "optional": {
+            "title": "Optional",
+            "type": "boolean"
+          },
+          "pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pct"
+          },
+          "qualifying_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Qualifying Years",
+            "type": "array"
+          },
+          "rule_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rule Ids",
+            "type": "array"
+          },
+          "skipped_years": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Skipped Years",
+            "type": "array"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "required": [
+          "check_id",
+          "rule_ids",
+          "label",
+          "fires_when",
+          "optional",
+          "count",
+          "denominator",
+          "pct",
+          "qualifying_years",
+          "clear_years",
+          "skipped_years",
+          "source"
+        ],
+        "title": "CheckSummaryOut",
+        "type": "object"
+      },
+      "CompareRequest": {
+        "additionalProperties": false,
+        "description": "Plans to compare: edited ``plans``, sample ``plan_ids`` and/or ``rotation_ids``.",
+        "properties": {
+          "include_soil": {
+            "default": true,
+            "title": "Include Soil",
+            "type": "boolean"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LocationIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plan_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Plan Ids",
+            "type": "array"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/Plan"
+            },
+            "title": "Plans",
+            "type": "array"
+          },
+          "rotation_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rotation Ids",
+            "type": "array"
+          }
+        },
+        "title": "CompareRequest",
+        "type": "object"
+      },
+      "CompareResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "coverage_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coverage Note"
+          },
+          "data_sources": {
+            "additionalProperties": true,
+            "title": "Data Sources",
+            "type": "object"
+          },
+          "eras": {
+            "additionalProperties": true,
+            "title": "Eras",
+            "type": "object"
+          },
+          "input_hash": {
+            "title": "Input Hash",
+            "type": "string"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "plans": {
+            "items": {
+              "$ref": "#/components/schemas/PlanComparison"
+            },
+            "title": "Plans",
+            "type": "array"
+          },
+          "request_echo": {
+            "additionalProperties": true,
+            "title": "Request Echo",
+            "type": "object"
+          },
+          "result_id": {
+            "title": "Result Id",
+            "type": "string"
+          },
+          "shared_eligible_years": {
+            "$ref": "#/components/schemas/SharedYears"
+          },
+          "soil": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Soil"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ThresholdsView"
+          }
+        },
+        "required": [
+          "meta",
+          "result_id",
+          "input_hash",
+          "request_echo",
+          "thresholds",
+          "shared_eligible_years",
+          "plans",
+          "data_sources",
+          "eras"
+        ],
+        "title": "CompareResponse",
+        "type": "object"
+      },
+      "EraComparison": {
+        "additionalProperties": false,
+        "properties": {
+          "basis": {
+            "default": "own_evaluable_seasons",
+            "title": "Basis",
+            "type": "string"
+          },
+          "caveat": {
+            "title": "Caveat",
+            "type": "string"
+          },
+          "diff_pp": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diff Pp"
+          },
+          "earlier": {
+            "$ref": "#/components/schemas/EraStats"
+          },
+          "excluded_from_eras": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Excluded From Eras",
+            "type": "array"
+          },
+          "indicator": {
+            "title": "Indicator",
+            "type": "string"
+          },
+          "min_evaluable_per_era": {
+            "default": 15,
+            "title": "Min Evaluable Per Era",
+            "type": "integer"
+          },
+          "recent": {
+            "$ref": "#/components/schemas/EraStats"
+          },
+          "result": {
+            "title": "Result",
+            "type": "string"
+          },
+          "similarity_band_pp": {
+            "default": 10.0,
+            "title": "Similarity Band Pp",
+            "type": "number"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "threshold_set_id": {
+            "title": "Threshold Set Id",
+            "type": "string"
+          },
+          "thresholds": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Thresholds",
+            "type": "object"
+          }
+        },
+        "required": [
+          "indicator",
+          "status",
+          "result",
+          "earlier",
+          "recent",
+          "diff_pp",
+          "threshold_set_id",
+          "thresholds",
+          "caveat"
+        ],
+        "title": "EraComparison",
+        "type": "object"
+      },
+      "EraStats": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "title": "End",
+            "type": "integer"
+          },
+          "evaluable": {
+            "title": "Evaluable",
+            "type": "integer"
+          },
+          "events": {
+            "title": "Events",
+            "type": "integer"
+          },
+          "not_evaluable": {
+            "items": {
+              "$ref": "#/components/schemas/MissingYear"
+            },
+            "title": "Not Evaluable",
+            "type": "array"
+          },
+          "pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pct"
+          },
+          "seasons": {
+            "title": "Seasons",
+            "type": "integer"
+          },
+          "start": {
+            "title": "Start",
+            "type": "integer"
+          },
+          "threshold_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Value"
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "seasons",
+          "evaluable",
+          "events",
+          "pct",
+          "not_evaluable"
+        ],
+        "title": "EraStats",
+        "type": "object"
+      },
+      "GrowerInputs": {
+        "additionalProperties": false,
+        "description": "Grower-reported context. Kept separate from weather evidence and never logged.",
+        "properties": {
+          "low_moisture_concern": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low Moisture Concern"
+          },
+          "observations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Observations",
+            "type": "array"
+          },
+          "residue_report": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Residue Report"
+          }
+        },
+        "title": "GrowerInputs",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "KeyRainDay": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "heavy": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heavy"
+          },
+          "precip_mm": {
+            "title": "Precip Mm",
+            "type": "number"
+          },
+          "segment": {
+            "title": "Segment",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "precip_mm",
+          "segment",
+          "heavy"
+        ],
+        "title": "KeyRainDay",
+        "type": "object"
+      },
+      "LocationIn": {
+        "additionalProperties": false,
+        "properties": {
+          "latitude": {
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude",
+            "type": "number"
+          },
+          "longitude": {
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude",
+            "type": "number"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "title": "LocationIn",
+        "type": "object"
+      },
+      "Meta": {
+        "additionalProperties": false,
+        "properties": {
+          "catalog_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Version"
+          },
+          "plan_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Version"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "snapshot_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Hash"
+          }
+        },
+        "required": [
+          "plan_version",
+          "catalog_version",
+          "snapshot_hash",
+          "request_id"
+        ],
+        "title": "Meta",
+        "type": "object"
+      },
+      "MissingYear": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "year",
+          "reason"
+        ],
+        "title": "MissingYear",
+        "type": "object"
+      },
+      "Plan": {
+        "additionalProperties": false,
+        "description": "One crop sequence: previous crop -> winter management -> next crop.",
+        "properties": {
+          "grower": {
+            "$ref": "#/components/schemas/GrowerInputs"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "next_crop_id": {
+            "minLength": 1,
+            "title": "Next Crop Id",
+            "type": "string"
+          },
+          "next_plant": {
+            "title": "Next Plant",
+            "type": "string"
+          },
+          "plan_id": {
+            "minLength": 1,
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "prev_harvest": {
+            "title": "Prev Harvest",
+            "type": "string"
+          },
+          "previous_crop_id": {
+            "minLength": 1,
+            "title": "Previous Crop Id",
+            "type": "string"
+          },
+          "production_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Production System"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "winter": {
+            "$ref": "#/components/schemas/WinterManagement"
+          }
+        },
+        "required": [
+          "plan_id",
+          "previous_crop_id",
+          "prev_harvest",
+          "next_crop_id",
+          "next_plant"
+        ],
+        "title": "Plan",
+        "type": "object"
+      },
+      "PlanComparison": {
+        "additionalProperties": false,
+        "properties": {
+          "calendar": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CalendarSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "conflicts": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Conflicts",
+            "type": "array"
+          },
+          "dates_assumed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dates Assumed"
+          },
+          "editable": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Editable",
+            "type": "array"
+          },
+          "eras": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/EraComparison"
+            },
+            "title": "Eras",
+            "type": "object"
+          },
+          "eras_shared_years": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/EraComparison"
+            },
+            "title": "Eras Shared Years",
+            "type": "object"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "leg": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leg"
+          },
+          "other_checks": {
+            "items": {
+              "$ref": "#/components/schemas/RuleLine"
+            },
+            "title": "Other Checks",
+            "type": "array"
+          },
+          "path_notes": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Path Notes",
+            "type": "array"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Plan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plan_id": {
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "residue_context": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Residue Context",
+            "type": "array"
+          },
+          "rotation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rotation Id"
+          },
+          "rotation_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rotation Ids",
+            "type": "array"
+          },
+          "seasons": {
+            "items": {
+              "$ref": "#/components/schemas/SeasonRow"
+            },
+            "title": "Seasons",
+            "type": "array"
+          },
+          "spring": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpringSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "spring_checks": {
+            "items": {
+              "$ref": "#/components/schemas/CheckSummaryOut"
+            },
+            "title": "Spring Checks",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "winter": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WinterSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "plan_id",
+          "label",
+          "status"
+        ],
+        "title": "PlanComparison",
+        "type": "object"
+      },
+      "ReplayDay": {
+        "additionalProperties": false,
+        "properties": {
+          "cover_status": {
+            "enum": [
+              "planned_living_cover",
+              "terminated",
+              "no_planned_cover"
+            ],
+            "title": "Cover Status",
+            "type": "string"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "gwetroot": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gwetroot"
+          },
+          "gwettop": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gwettop"
+          },
+          "heavy_rain": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heavy Rain"
+          },
+          "in_spring_window": {
+            "title": "In Spring Window",
+            "type": "boolean"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing",
+            "type": "array"
+          },
+          "missing_reasons": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Missing Reasons",
+            "type": "object"
+          },
+          "precip_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Precip Mm"
+          },
+          "segment": {
+            "title": "Segment",
+            "type": "string"
+          },
+          "tmax_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tmax C"
+          },
+          "tmin_c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tmin C"
+          }
+        },
+        "required": [
+          "date",
+          "precip_mm",
+          "tmax_c",
+          "tmin_c",
+          "gwettop",
+          "gwetroot",
+          "cover_status",
+          "segment",
+          "in_spring_window",
+          "heavy_rain"
+        ],
+        "title": "ReplayDay",
+        "type": "object"
+      },
+      "ReplayRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/Plan"
+          }
+        },
+        "required": [
+          "plan"
+        ],
+        "title": "ReplayRequest",
+        "type": "object"
+      },
+      "ReplayResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "checks_triggered": {
+            "items": {
+              "$ref": "#/components/schemas/TriggeredCheck"
+            },
+            "title": "Checks Triggered",
+            "type": "array"
+          },
+          "coverage": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Status"
+            },
+            "title": "Coverage",
+            "type": "object"
+          },
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/ReplayDay"
+            },
+            "title": "Daily",
+            "type": "array"
+          },
+          "dates": {
+            "additionalProperties": true,
+            "title": "Dates",
+            "type": "object"
+          },
+          "key_rain_days": {
+            "items": {
+              "$ref": "#/components/schemas/KeyRainDay"
+            },
+            "title": "Key Rain Days",
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "plan_id": {
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "spring": {
+            "additionalProperties": true,
+            "title": "Spring",
+            "type": "object"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ThresholdsView"
+          },
+          "wetness": {
+            "additionalProperties": true,
+            "title": "Wetness",
+            "type": "object"
+          },
+          "winter": {
+            "additionalProperties": true,
+            "title": "Winter",
+            "type": "object"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "meta",
+          "year",
+          "plan_id",
+          "dates",
+          "coverage",
+          "spring",
+          "wetness",
+          "winter",
+          "thresholds",
+          "checks_triggered",
+          "key_rain_days",
+          "daily"
+        ],
+        "title": "ReplayResponse",
+        "type": "object"
+      },
+      "Rotation": {
+        "additionalProperties": false,
+        "description": "A preset: two plan legs (corn->soybean winter, soybean->corn winter). Never summed.",
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "legs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Legs",
+            "type": "array"
+          },
+          "rotation_id": {
+            "title": "Rotation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rotation_id",
+          "label",
+          "legs"
+        ],
+        "title": "Rotation",
+        "type": "object"
+      },
+      "RotationsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "rotations": {
+            "items": {
+              "$ref": "#/components/schemas/Rotation"
+            },
+            "title": "Rotations",
+            "type": "array"
+          }
+        },
+        "required": [
+          "meta",
+          "rotations"
+        ],
+        "title": "RotationsResponse",
+        "type": "object"
+      },
+      "RuleLine": {
+        "additionalProperties": false,
+        "properties": {
+          "conflict": {
+            "default": false,
+            "title": "Conflict",
+            "type": "boolean"
+          },
+          "conflicts_with": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Conflicts With",
+            "type": "array"
+          },
+          "flagged": {
+            "title": "Flagged",
+            "type": "boolean"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verdict"
+          }
+        },
+        "required": [
+          "rule_id",
+          "status",
+          "verdict",
+          "flagged",
+          "reason"
+        ],
+        "title": "RuleLine",
+        "type": "object"
+      },
+      "SeasonRow": {
+        "additionalProperties": false,
+        "properties": {
+          "flagged_rule_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Flagged Rule Ids",
+            "type": "array"
+          },
+          "full_season_status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "heavy_rain_days_outside_cover": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heavy Rain Days Outside Cover"
+          },
+          "rain_outside_cover_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rain Outside Cover Mm"
+          },
+          "spring_is_dry": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spring Is Dry"
+          },
+          "spring_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spring Rank"
+          },
+          "spring_status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "spring_total_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spring Total Mm"
+          },
+          "termination_gap_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Termination Gap Days"
+          },
+          "winter_status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "year",
+          "winter_status",
+          "spring_status",
+          "full_season_status",
+          "spring_total_mm",
+          "spring_rank",
+          "spring_is_dry",
+          "rain_outside_cover_mm",
+          "heavy_rain_days_outside_cover",
+          "termination_gap_days",
+          "flagged_rule_ids"
+        ],
+        "title": "SeasonRow",
+        "type": "object"
+      },
+      "SensitivityPoint": {
+        "additionalProperties": false,
+        "properties": {
+          "checks_count": {
+            "title": "Checks Count",
+            "type": "integer"
+          },
+          "denominator": {
+            "title": "Denominator",
+            "type": "integer"
+          },
+          "gap_days": {
+            "title": "Gap Days",
+            "type": "integer"
+          },
+          "gap_days_in_leap_years": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gap Days In Leap Years"
+          },
+          "heavy_rain_days_outside_cover_median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Heavy Rain Days Outside Cover Median"
+          },
+          "living_cover_days_planned": {
+            "title": "Living Cover Days Planned",
+            "type": "integer"
+          },
+          "rain_outside_cover_mm_median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rain Outside Cover Mm Median"
+          },
+          "terminate": {
+            "title": "Terminate",
+            "type": "string"
+          }
+        },
+        "required": [
+          "terminate",
+          "gap_days",
+          "living_cover_days_planned",
+          "rain_outside_cover_mm_median",
+          "heavy_rain_days_outside_cover_median",
+          "checks_count",
+          "denominator"
+        ],
+        "title": "SensitivityPoint",
+        "type": "object"
+      },
+      "SensitivityRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Plan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "plan_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Id"
+          },
+          "rule_id": {
+            "default": "cr_tt_03",
+            "title": "Rule Id",
+            "type": "string"
+          }
+        },
+        "title": "SensitivityRequest",
+        "type": "object"
+      },
+      "SensitivityResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "base_plan_id": {
+            "title": "Base Plan Id",
+            "type": "string"
+          },
+          "check_id": {
+            "title": "Check Id",
+            "type": "string"
+          },
+          "denominator": {
+            "title": "Denominator",
+            "type": "integer"
+          },
+          "dry_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Dry Years",
+            "type": "array"
+          },
+          "fixed": {
+            "additionalProperties": true,
+            "title": "Fixed",
+            "type": "object"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/SensitivityPoint"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "reference_year": {
+            "title": "Reference Year",
+            "type": "integer"
+          },
+          "rule_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rule Ids",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "thresholds": {
+            "$ref": "#/components/schemas/ThresholdsView"
+          },
+          "varied": {
+            "const": "terminate",
+            "title": "Varied",
+            "type": "string"
+          }
+        },
+        "required": [
+          "meta",
+          "status",
+          "base_plan_id",
+          "varied",
+          "fixed",
+          "check_id",
+          "rule_ids",
+          "denominator",
+          "dry_years",
+          "reference_year",
+          "points",
+          "thresholds",
+          "note"
+        ],
+        "title": "SensitivityResponse",
+        "type": "object"
+      },
+      "SharedYears": {
+        "additionalProperties": false,
+        "properties": {
+          "full_season": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Full Season",
+            "type": "array"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "spring": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Spring",
+            "type": "array"
+          },
+          "winter": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Winter",
+            "type": "array"
+          }
+        },
+        "required": [
+          "spring",
+          "winter",
+          "full_season",
+          "note"
+        ],
+        "title": "SharedYears",
+        "type": "object"
+      },
+      "SpringSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "cutoff_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cutoff Mm"
+          },
+          "dry_seasons": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dry Seasons"
+          },
+          "dry_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Dry Years",
+            "type": "array"
+          },
+          "eligible_seasons": {
+            "title": "Eligible Seasons",
+            "type": "integer"
+          },
+          "excluded_years": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Excluded Years",
+            "type": "array"
+          },
+          "median_total_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median Total Mm"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "window_days": {
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status",
+          "window_days",
+          "cutoff_mm",
+          "eligible_seasons",
+          "dry_seasons",
+          "dry_years",
+          "excluded_years",
+          "median_total_mm"
+        ],
+        "title": "SpringSummary",
+        "type": "object"
+      },
+      "Status": {
+        "description": "The only status vocabulary. Use these exact strings.",
+        "enum": [
+          "complete",
+          "partial",
+          "unavailable",
+          "unknown",
+          "inapplicable",
+          "unsupported",
+          "invalid_input",
+          "manual_check",
+          "insufficient_data"
+        ],
+        "title": "Status",
+        "type": "string"
+      },
+      "Threshold": {
+        "additionalProperties": false,
+        "description": "One frozen threshold with the method and reference span that produced it.",
+        "properties": {
+          "method": {
+            "title": "Method",
+            "type": "string"
+          },
+          "n_reference": {
+            "title": "N Reference",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "parameters": {
+            "additionalProperties": true,
+            "title": "Parameters",
+            "type": "object"
+          },
+          "reference_span": {
+            "title": "Reference Span",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status",
+            "default": "complete"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "name",
+          "method",
+          "value",
+          "unit",
+          "reference_span",
+          "n_reference"
+        ],
+        "title": "Threshold",
+        "type": "object"
+      },
+      "ThresholdsView": {
+        "additionalProperties": false,
+        "description": "Every frozen threshold used. Never hard-code these in a client.",
+        "properties": {
+          "dry_spring": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Threshold"
+            },
+            "title": "Dry Spring",
+            "type": "object"
+          },
+          "heavy_rain": {
+            "$ref": "#/components/schemas/Threshold"
+          },
+          "threshold_set_id": {
+            "title": "Threshold Set Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "threshold_set_id",
+          "heavy_rain",
+          "dry_spring"
+        ],
+        "title": "ThresholdsView",
+        "type": "object"
+      },
+      "TriggeredCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "check_id": {
+            "title": "Check Id",
+            "type": "string"
+          },
+          "inputs_used": {
+            "additionalProperties": true,
+            "title": "Inputs Used",
+            "type": "object"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "rule_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Rule Ids",
+            "type": "array"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "required": [
+          "check_id",
+          "rule_ids",
+          "reason",
+          "inputs_used",
+          "source"
+        ],
+        "title": "TriggeredCheck",
+        "type": "object"
+      },
+      "UnsupportedResponse": {
+        "additionalProperties": false,
+        "description": "A plan the catalog/weather cannot evaluate. A result, not an HTTP error.",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "plan_id": {
+            "title": "Plan Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "unsupported": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unsupported",
+            "type": "array"
+          }
+        },
+        "required": [
+          "meta",
+          "status",
+          "plan_id",
+          "reason"
+        ],
+        "title": "UnsupportedResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "WinterManagement": {
+        "additionalProperties": false,
+        "description": "What occupies the field between the previous harvest and the next planting.\n\n* ``none``: bare/fallow (any crop residue is context only, never living cover);\n* ``cover``: a cover crop seeded then terminated;\n* ``winter_grain``: a harvested winter grain (Phase 12; double-crop path).",
+        "properties": {
+          "crop_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crop Id"
+          },
+          "harvest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Harvest"
+          },
+          "kind": {
+            "default": "none",
+            "enum": [
+              "none",
+              "cover",
+              "winter_grain"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "plant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plant"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "terminate": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terminate"
+          }
+        },
+        "title": "WinterManagement",
+        "type": "object"
+      },
+      "WinterSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "eligible_seasons": {
+            "title": "Eligible Seasons",
+            "type": "integer"
+          },
+          "per_season_median": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Per Season Median",
+            "type": "object"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "seasons": {
+            "title": "Seasons",
+            "type": "integer"
+          },
+          "seasons_with_heavy_rain_outside_cover": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seasons With Heavy Rain Outside Cover"
+          },
+          "segments": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Segments",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          }
+        },
+        "required": [
+          "status",
+          "seasons",
+          "eligible_seasons",
+          "per_season_median",
+          "seasons_with_heavy_rain_outside_cover",
+          "segments"
+        ],
+        "title": "WinterSummary",
+        "type": "object"
+      },
+      "YearRow": {
+        "additionalProperties": false,
+        "properties": {
+          "full_season": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "spring": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "winter": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "year": {
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "year",
+          "spring",
+          "winter",
+          "full_season",
+          "reason"
+        ],
+        "title": "YearRow",
+        "type": "object"
+      },
+      "YearsResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "eras": {
+            "additionalProperties": true,
+            "title": "Eras",
+            "type": "object"
+          },
+          "location": {
+            "additionalProperties": true,
+            "title": "Location",
+            "type": "object"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          },
+          "plan_basis": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Plan Basis",
+            "type": "object"
+          },
+          "shortcuts": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "title": "Shortcuts",
+            "type": "object"
+          },
+          "years": {
+            "items": {
+              "$ref": "#/components/schemas/YearRow"
+            },
+            "title": "Years",
+            "type": "array"
+          }
+        },
+        "required": [
+          "meta",
+          "location",
+          "plan_basis",
+          "years",
+          "shortcuts",
+          "eras"
+        ],
+        "title": "YearsResponse",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Field Shift backend. Labels and values ship together; every response carries meta {plan_version, catalog_version, snapshot_hash, request_id}. Partial results keep per-metric statuses in the body; HTTP 400 is only for invalid input.",
+    "title": "Field Shift backend",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/v1/crops": {
+      "get": {
+        "operationId": "get_crops_v1_crops_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Crops V1 Crops Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Crops",
+        "tags": [
+          "planner"
+        ]
+      }
+    },
+    "/v1/fertilizer/calc": {
+      "post": {
+        "description": "Body: ``{targets: {n_lb_per_acre, p2o5_lb_per_acre, k2o_lb_per_acre}, product: {fertilizer_id | grade},\narea_acres?, basis?, crop_id?}``. No nutrient target is ever invented.",
+        "operationId": "post_fertilizer_v1_fertilizer_calc_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Fertilizer V1 Fertilizer Calc Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Post Fertilizer",
+        "tags": [
+          "tools"
+        ]
+      }
+    },
+    "/v1/irrigation/check": {
+      "post": {
+        "description": "Body: ``{crop_id, stage?, awc_in?, start_storage_in?, weather?: [{date, precip_mm|precip_in}],\nirrigation?: [{date, amount_in}], water_table_depth_in?}``. A numeric balance is returned only\nwhen every input is present; otherwise ``insufficient_data`` lists what is missing.",
+        "operationId": "post_irrigation_v1_irrigation_check_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Irrigation V1 Irrigation Check Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Post Irrigation",
+        "tags": [
+          "tools"
+        ]
+      }
+    },
+    "/v1/live": {
+      "get": {
+        "description": "Live NWS forecast/alerts and U.S. Drought Monitor in their own block (never used in history).\n\nA source that is down is ``unavailable`` inside the block; the response is still a 200.",
+        "operationId": "get_live_route_v1_live_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lat",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lat"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lon",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lon"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Live Route V1 Live Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Live Route",
+        "tags": [
+          "field"
+        ]
+      }
+    },
+    "/v1/locations/resolve": {
+      "post": {
+        "description": "Body: ``{\"lat\": float, \"lon\": float, \"region\": str?, \"fetch_history\": bool?}``.",
+        "operationId": "post_resolve_v1_locations_resolve_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Resolve V1 Locations Resolve Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Post Resolve",
+        "tags": [
+          "field"
+        ]
+      }
+    },
+    "/v1/plans/check": {
+      "post": {
+        "description": "Body: ``{\"plan\": Plan, \"year\": int?, \"inputs\": {soil_temp_f: ..., ...}?}``.",
+        "operationId": "post_check_v1_plans_check_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Check V1 Plans Check Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Post Check",
+        "tags": [
+          "planner"
+        ]
+      }
+    },
+    "/v1/plans/compare": {
+      "post": {
+        "operationId": "compare_v1_plans_compare_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Compare",
+        "tags": [
+          "core"
+        ]
+      }
+    },
+    "/v1/plans/find": {
+      "post": {
+        "description": "Body: ``{\"plan\": Plan (winter ignored), \"priorities\": [...]?, \"year\": int?}``.",
+        "operationId": "post_find_v1_plans_find_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Find V1 Plans Find Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Post Find",
+        "tags": [
+          "planner"
+        ]
+      }
+    },
+    "/v1/plans/sensitivity": {
+      "post": {
+        "operationId": "sensitivity_v1_plans_sensitivity_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SensitivityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SensitivityResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedResponse"
+                    }
+                  ],
+                  "title": "Response Sensitivity V1 Plans Sensitivity Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sensitivity",
+        "tags": [
+          "core"
+        ]
+      }
+    },
+    "/v1/rotations": {
+      "get": {
+        "description": "The presets: each rotation is two plan legs.",
+        "operationId": "rotations_v1_rotations_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RotationsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Rotations",
+        "tags": [
+          "core"
+        ]
+      }
+    },
+    "/v1/seasons/{year}/replay": {
+      "get": {
+        "operationId": "replay_get_v1_seasons__year__replay_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "title": "Year",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "sample plan id",
+            "in": "query",
+            "name": "plan",
+            "required": false,
+            "schema": {
+              "default": "corn_soy__rye",
+              "description": "sample plan id",
+              "title": "Plan",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ReplayResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedResponse"
+                    }
+                  ],
+                  "title": "Response Replay Get V1 Seasons  Year  Replay Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Replay Get",
+        "tags": [
+          "core"
+        ]
+      },
+      "post": {
+        "description": "Replay an edited plan (same payload as the GET).",
+        "operationId": "replay_post_v1_seasons__year__replay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "title": "Year",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ReplayResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedResponse"
+                    }
+                  ],
+                  "title": "Response Replay Post V1 Seasons  Year  Replay Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Replay Post",
+        "tags": [
+          "core"
+        ]
+      }
+    },
+    "/v1/soil": {
+      "get": {
+        "description": "Soil map unit at a point. Query values are parsed here so bad ones are typed 400s.",
+        "operationId": "get_soil_route_v1_soil_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "lat",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lat"
+            }
+          },
+          {
+            "in": "query",
+            "name": "lon",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Lon"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Soil Route V1 Soil Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Soil Route",
+        "tags": [
+          "field"
+        ]
+      }
+    },
+    "/v1/years": {
+      "get": {
+        "operationId": "years_v1_years_get",
+        "parameters": [
+          {
+            "description": "sample plan id that sets the windows",
+            "in": "query",
+            "name": "plan",
+            "required": false,
+            "schema": {
+              "default": "corn_soy__rye",
+              "description": "sample plan id that sets the windows",
+              "title": "Plan",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YearsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Years",
+        "tags": [
+          "core"
+        ]
+      }
+    },
+    "/v1/zones": {
+      "get": {
+        "operationId": "get_zones_v1_zones_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Zones V1 Zones Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Zones",
+        "tags": [
+          "field"
+        ]
+      }
+    },
+    "/v1/zones/analyze": {
+      "post": {
+        "description": "Body: ``{ponding?: [{zone_id, reported_on}], heavy_rain_days?: [date], changes?: [{kind, reported_on, zone_id?}]}``.",
+        "operationId": "post_zones_analyze_v1_zones_analyze_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Zones Analyze V1 Zones Analyze Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Post Zones Analyze",
+        "tags": [
+          "field"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "catalog_version": "v1:3168a34a7a5d",
+    "plan_version": null,
+    "request_id": "req_example",
+    "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+  },
+  "rotations": [
+    {
+      "label": "Current practice",
+      "legs": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover"
+      ],
+      "rotation_id": "current_practice"
+    },
+    {
+      "label": "Winter cover",
+      "legs": [
+        "corn_soy__rye",
+        "soy_corn__rye"
+      ],
+      "rotation_id": "winter_cover"
+    },
+    {
+      "label": "Add a grain crop",
+      "legs": [
+        "corn_soy__wheat_dc",
+        "soy_corn__no_cover"
+      ],
+      "rotation_id": "add_grain_crop"
+    }
+  ]
+}

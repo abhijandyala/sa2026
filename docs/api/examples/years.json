@@ -1,13 +1,364 @@
 {
-  "meta": {"plan_version": null, "catalog_version": "v1", "snapshot_hash": "sha256:DRAFT", "request_id": "req_years_001", "draft": true},
-  "location": {"id": "union_county_sample", "label": "Union County, NC (sample)", "grid": {"lat": 35.0, "lon": -80.5, "source": "NASA POWER daily", "note": "Historical NASA estimates for the regional grid near the field"}},
+  "eras": {
+    "earlier": {
+      "end": 2000,
+      "start": 1981
+    },
+    "excluded_from_eras": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "recent": {
+      "end": 2025,
+      "start": 2006
+    }
+  },
+  "location": {
+    "grid": {
+      "cell_center_lat": 35.0,
+      "cell_center_lon": -80.625,
+      "lat": 34.98,
+      "lon": -80.55,
+      "note": "Historical NASA estimates for the regional grid near the field",
+      "source": "NASA POWER daily"
+    },
+    "id": "union_county_sample",
+    "label": "Union County, NC (sample)"
+  },
+  "meta": {
+    "catalog_version": "v1:3168a34a7a5d",
+    "plan_version": "c2f87c68c48a97e6",
+    "request_id": "req_example",
+    "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+  },
+  "plan_basis": {
+    "next_plant": "05-12",
+    "plan_id": "corn_soy__rye",
+    "prev_harvest": "09-20"
+  },
+  "shortcuts": {
+    "dry": 1986,
+    "typical": 2007,
+    "wet": 2020
+  },
   "years": [
-    {"year": 1981, "spring": "complete", "winter": "unavailable", "full_season": "partial", "reason": "Series starts 1981-01-01; prior fall not covered"},
-    {"year": 1982, "spring": "complete", "winter": "complete", "full_season": "complete", "reason": null},
-    {"year": 2007, "spring": "complete", "winter": "complete", "full_season": "complete", "reason": null},
-    {"year": 2025, "spring": "complete", "winter": "complete", "full_season": "complete", "reason": null}
-  ],
-  "_note": "Real response lists all 45 years 1981-2025; trimmed here.",
-  "shortcuts": {"typical": 1996, "dry": 2007, "wet": 2003},
-  "eras": {"earlier": {"start": 1981, "end": 2000}, "recent": {"start": 2006, "end": 2025}, "excluded_from_eras": [2001, 2002, 2003, 2004, 2005]}
+    {
+      "full_season": "partial",
+      "reason": "Series starts 1981-01-01; the prior fall is not covered",
+      "spring": "complete",
+      "winter": "partial",
+      "year": 1981
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1982
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1983
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1984
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1985
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1986
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1987
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1988
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1989
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1990
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1991
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1992
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1993
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1994
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1995
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1996
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1997
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1998
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 1999
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2000
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2001
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2002
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2003
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2004
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2005
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2006
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2007
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2008
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2009
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2010
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2011
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2012
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2013
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2014
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2015
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2016
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2017
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2018
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2019
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2020
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2021
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2022
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2023
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2024
+    },
+    {
+      "full_season": "complete",
+      "reason": null,
+      "spring": "complete",
+      "winter": "complete",
+      "year": 2025
+    }
+  ]
 }

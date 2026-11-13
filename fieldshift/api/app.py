@@ -13,6 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from fieldshift.api.logs import AccessLogMiddleware, install_scrub_filter
 from fieldshift.api.routes import router as core_router
 from fieldshift.field.routes import router as field_router
 from fieldshift.planner.routes import router as planner_router
@@ -39,7 +40,9 @@ def cors_origins() -> list[str]:
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="Field Shift backend", version="0.1.0")
+    app = FastAPI(title="Field Shift backend", version="1.0.0")
+    install_scrub_filter()
+    app.add_middleware(AccessLogMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins(),

@@ -1,0 +1,30 @@
+{
+  "body": {
+    "plans": [
+      {
+        "grower": {
+          "low_moisture_concern": null,
+          "observations": [],
+          "residue_report": null
+        },
+        "label": "Cereal rye before soybean",
+        "next_crop_id": "soybean",
+        "next_plant": "05-12",
+        "plan_id": "corn_soy__rye",
+        "prev_harvest": "09-20",
+        "previous_crop_id": "field_corn",
+        "production_system": null,
+        "region": "NC Piedmont",
+        "winter": {
+          "crop_id": "cereal_rye",
+          "kind": "cover",
+          "seed": "10-01",
+          "terminate": "05-20"
+        }
+      }
+    ]
+  },
+  "method": "POST",
+  "status": 400,
+  "url": "/v1/plans/compare"
+}
