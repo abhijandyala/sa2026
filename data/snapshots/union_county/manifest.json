@@ -1,0 +1,181 @@
+{
+  "coverage": {
+    "days_with_any_missing": 0,
+    "first_date": "1981-01-01",
+    "last_date": "2025-06-30",
+    "missing_dates": {
+      "gwetroot": [],
+      "gwettop": [],
+      "precip_mm": [],
+      "tmax_c": [],
+      "tmean_c": [],
+      "tmin_c": []
+    },
+    "n_days": 16252,
+    "per_variable": {
+      "gwetroot": {
+        "first_valid": "1981-01-01",
+        "last_valid": "2025-06-30",
+        "missing_days": 0,
+        "valid_days": 16252
+      },
+      "gwettop": {
+        "first_valid": "1981-01-01",
+        "last_valid": "2025-06-30",
+        "missing_days": 0,
+        "valid_days": 16252
+      },
+      "precip_mm": {
+        "first_valid": "1981-01-01",
+        "last_valid": "2025-06-30",
+        "missing_days": 0,
+        "valid_days": 16252
+      },
+      "tmax_c": {
+        "first_valid": "1981-01-01",
+        "last_valid": "2025-06-30",
+        "missing_days": 0,
+        "valid_days": 16252
+      },
+      "tmean_c": {
+        "first_valid": "1981-01-01",
+        "last_valid": "2025-06-30",
+        "missing_days": 0,
+        "valid_days": 16252
+      },
+      "tmin_c": {
+        "first_valid": "1981-01-01",
+        "last_valid": "2025-06-30",
+        "missing_days": 0,
+        "valid_days": 16252
+      }
+    },
+    "requested_end": "2025-06-30",
+    "requested_start": "1981-01-01"
+  },
+  "environment": {
+    "pandas_version": "3.1.1",
+    "pyarrow_version": "26.0.1"
+  },
+  "grid": {
+    "derived_cell": {
+      "basis": "derived from the MERRA-2 native grid; POWER does not return the cell",
+      "center_latitude": 35.0,
+      "center_longitude": -80.625,
+      "lat_step_deg": 0.5,
+      "lon_step_deg": 0.625
+    },
+    "returned_coordinates": {
+      "elevation_m": 179.61,
+      "latitude": 34.98,
+      "longitude": -80.55,
+      "note": "POWER echoes the requested point; it does not return the cell centre"
+    }
+  },
+  "hashes": {
+    "daily_canonical_csv_sha256": "9bab8453a321c0dd5991cb758d3125e92b283df717eec6c51c345dddfcc8ff1a",
+    "daily_parquet_sha256": "d81fadcf0b903a9f94a1ce43f21d8ff8997c3f5c14f78c39f3117115642daea8",
+    "raw_sha256": "966f7f4f4b7cb573049ecda474f2d59ee3dc274259e308fa8f7acac2265b0989",
+    "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+  },
+  "normalization": {
+    "duplicates": [],
+    "invalid_dates": [],
+    "missing_by_reason": {
+      "gwetroot": {},
+      "gwettop": {},
+      "precip_mm": {},
+      "tmax_c": {},
+      "tmean_c": {},
+      "tmin_c": {}
+    }
+  },
+  "notes": [
+    "Series starts 1981-01-01 (POWER's earliest date). The winter that begins in fall 1980 is incomplete, so the 1981 planting year's winter must be marked incomplete."
+  ],
+  "query": {
+    "params": {
+      "community": "AG",
+      "end": "20250630",
+      "format": "JSON",
+      "latitude": "34.98",
+      "longitude": "-80.55",
+      "parameters": "PRECTOTCORR,T2M_MAX,T2M_MIN,T2M,GWETTOP,GWETROOT",
+      "start": "19810101",
+      "time-standard": "LST"
+    },
+    "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=PRECTOTCORR%2CT2M_MAX%2CT2M_MIN%2CT2M%2CGWETTOP%2CGWETROOT&community=AG&longitude=-80.55&latitude=34.98&start=19810101&end=20250630&format=JSON&time-standard=LST"
+  },
+  "reference_point": {
+    "basis": "assumed: county seat of Union County, NC; replace with the handbook point when it lands",
+    "id": "union_county_nc",
+    "name": "Union County, North Carolina (Monroe)",
+    "requested_latitude": 34.98,
+    "requested_longitude": -80.55
+  },
+  "retrieval": {
+    "retrieved_at": "2026-11-13T03:24:40Z",
+    "status_code": 200
+  },
+  "schema_version": 1,
+  "source": {
+    "api": {
+      "name": "POWER Daily API",
+      "version": "v2.10.3"
+    },
+    "community": "AG",
+    "daily_boundary": "Local standard time day (time_standard=LST), as reported by the API header.",
+    "fill_value": -999.0,
+    "name": "NASA/POWER Source Native Resolution Daily Data",
+    "parameter_notes": {
+      "GWETROOT": {
+        "definition": "Root-zone soil wetness, 0 = dry, 1 = saturated (MERRA-2).",
+        "provenance": "modeled, not observed",
+        "units": "1"
+      },
+      "GWETTOP": {
+        "definition": "Surface soil wetness, upper ~5 cm, 0 = dry, 1 = saturated (MERRA-2).",
+        "provenance": "modeled, not observed",
+        "units": "1"
+      },
+      "PRECTOTCORR": {
+        "definition": "MERRA-2 bias-corrected total precipitation at the surface (POWER).",
+        "provenance": "modeled reanalysis product, not a gauge",
+        "units": "mm/day"
+      },
+      "T2M": {
+        "definition": "Daily mean 2 m air temperature (MERRA-2).",
+        "units": "C"
+      },
+      "T2M_MAX": {
+        "definition": "Daily maximum 2 m air temperature (MERRA-2).",
+        "units": "C"
+      },
+      "T2M_MIN": {
+        "definition": "Daily minimum 2 m air temperature (MERRA-2).",
+        "units": "C"
+      }
+    },
+    "parameter_units_reported": {
+      "GWETROOT": "1",
+      "GWETTOP": "1",
+      "PRECTOTCORR": "mm/day",
+      "T2M": "C",
+      "T2M_MAX": "C",
+      "T2M_MIN": "C"
+    },
+    "parameters": [
+      "PRECTOTCORR",
+      "T2M_MAX",
+      "T2M_MIN",
+      "T2M",
+      "GWETTOP",
+      "GWETROOT"
+    ],
+    "sources_reported": [
+      "MERRA2",
+      "POWER"
+    ],
+    "time_standard": "LST"
+  }
+}
