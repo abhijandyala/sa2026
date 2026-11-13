@@ -533,3 +533,17 @@ def test_double_crop_rows_do_not_apply_to_full_season_soybean(index):
     ev = evaluate_season(season_facts(sequence=("field_corn", "soybean"), gap_days=None), index)
     for rid in ("sb_v2_mg_mid_june", "sb_v2_pw_after_wheat_context", "sb_v2_pw_delay_yield"):
         assert ck(ev, rid).status == "inapplicable"
+
+
+def test_residual_stubble_rule_is_manual_check_not_a_sequence_flag(index):
+    soy_wheat = season_facts(
+        sequence=("soybean", "winter_wheat", "field_corn"),
+        gap_days=None,
+        production_system="organic",
+    )
+    c = ck(evaluate_season(soy_wheat, index), "ww_v2_rc_residual_wheat_stubble")
+    assert c.status == "manual_check" and not c.flagged
+    assert "residual_wheat_stubble" in c.reason
+    # the plain sequence rows still fire from the sequence
+    assert ck(evaluate_season(soy_wheat, index), "ww_v2_rc_after_soybean").verdict == "preferred"
+    assert ck(evaluate_season(season_facts(), index), "sb_rc_01").verdict == "preferred"

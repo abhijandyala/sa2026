@@ -81,6 +81,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 
 
 **Status (B, 2026-11-13): done.** v1 catalogs load (5 crops, 85 rules, 5 fertilizers; only the two blank-`verified_date` warnings). Codex review r1 (3 medium) and r2 (1 medium: parse-error crops orphaning rules) all fixed with tests; no r3 run.
+
+**Catalog v2 (B, 2026-11-13): done.** Units `seeds/ft2` and `seeds/acre` added; `data/catalogs/v2` loads with 0 errors and 0 warnings (98 rules); `DEFAULT_CATALOG_DIR` is v2 and the v1 regression tests stay on v1. `fc_nut_01` (120-160 lb N/ac) is shown in the checker, calendar and fertilizer tool as a sourced reference (`is_grower_target: false`), never used as the grower's target; `sb_nut_01 = 0` is kept as a real zero. Also: `organic_grain` requirement mapped (organic + grain), mid-June/mid-July maturity-group rows honor a planting-date context, and the residual-stubble rule is `manual_check`. Codex r1 (2 medium) and r2 (1 medium) fixed with tests; no r3. `docs/api/*` was regenerated (catalog_version and rule text changed).
 ---
 
 ## Phase 1 — NASA weather ingestion and offline snapshot (Union County)

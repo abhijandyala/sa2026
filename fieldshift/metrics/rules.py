@@ -574,9 +574,16 @@ def _gate_state(gate: str, view: SeasonView) -> tuple[bool | None, str, dict[str
     raise KeyError(gate)
 
 
+#: condition_keys a sequence rule may carry: the sequence itself is the whole condition. Anything
+#: else (e.g. ``residual_wheat_stubble``) names an extra field condition that must be verified, so
+#: the rule is ``manual_check`` instead of firing from the crop sequence alone.
+SEQUENCE_ONLY_CONDITIONS = frozenset({None, "yield_gain_vs_continuous", "previous_crop_nonhost"})
+
+
 def _sequence_rule(rule: CropRule) -> bool:
     return (
         rule.rule_type == "rotation_compatibility"
+        and rule.condition_key in SEQUENCE_ONLY_CONDITIONS
         and rule.window_start_mm_dd is None
         and (rule.previous_crop_id is not None or rule.next_crop_id is not None)
         and rule.management_action not in ("reseed", "aerial_overseed")
