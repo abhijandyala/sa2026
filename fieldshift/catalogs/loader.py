@@ -18,9 +18,12 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from pathlib import Path
+from typing import TypeVar
 
 from fieldshift.catalogs import validate
 from fieldshift.catalogs.models import Crop, CropRule, Fertilizer, ValidationIssue
+
+T = TypeVar("T")  # no PEP 695 syntax: the shared checkout also runs on Python 3.11
 
 DEFAULT_CATALOG_DIR = Path(__file__).resolve().parents[2] / "data" / "catalogs" / "v1"
 
@@ -232,7 +235,7 @@ def _parse_fertilizer(p: _RowParser) -> Fertilizer | None:
 # --------------------------------------------------------------------------- file reading
 
 
-def _read_file[T](
+def _read_file(
     path: Path, file: str, parse: Callable[[_RowParser], T | None], issues: list[ValidationIssue]
 ) -> tuple[list[tuple[int, T]], int, str]:
     """Return ``(parsed rows, raw row count, sha256)``."""
@@ -276,7 +279,7 @@ def _read_file[T](
     return out, count, digest
 
 
-def _usable[T](
+def _usable(
     rows: list[tuple[int, T]], issues: list[ValidationIssue], file: str
 ) -> list[tuple[int, T]]:
     bad = {i.row for i in issues if i.file == file and i.severity == "error"}

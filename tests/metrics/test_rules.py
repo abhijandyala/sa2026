@@ -327,3 +327,17 @@ def test_combined_count_counts_each_season_once(index):
     assert both.components == {2001: ["cr_tt_03", "cr_tt_04"], 2002: ["cr_tt_03"]}
     assert (both.count, both.denominator) == (2, 3)
     assert both.qualifying_years == [2001, 2002]
+
+
+def test_accepts_the_real_season_facts_contract(index):
+    from fieldshift.contracts import SeasonFacts
+
+    d = season_facts(gap_days=12, is_dry=True, observations=["pest_spillover_concern"])
+    d["dates"] = {k: v for k, v in d["dates"].items() if k != "spring_window"} | {
+        "spring_start": date(2010, 4, 12),
+        "spring_end": date(2010, 5, 11),
+    }
+    facts = SeasonFacts.model_validate(d)
+    ev = evaluate_season(facts, index)
+    assert ck(ev, "cr_tt_03").flagged and ck(ev, "cr_tt_04").flagged
+    assert ev.model_dump() == evaluate_season(d, index).model_dump()
