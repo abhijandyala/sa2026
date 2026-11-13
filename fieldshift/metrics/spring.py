@@ -28,7 +28,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from fieldshift.contracts import Plan, SeasonCalendar, Status, Threshold, ThresholdSet
 from fieldshift.seasons.align import SPRING_WINDOW_DAYS
-from fieldshift.seasons.coverage import planting_years, season_coverage
+from fieldshift.seasons.coverage import season_coverage
 from fieldshift.seasons.dates import resolve_md
 from fieldshift.weather.series import DailySeries
 
@@ -53,6 +53,7 @@ class SpringReference(_M):
     """Complete-window totals for one planting MM-DD across the whole record."""
 
     plant_md: str
+    series_fingerprint: str  # identifies the weather data this reference was built from
     totals: dict[int, float]  # eligible years only
     excluded: list[ExcludedYear]
 
@@ -99,9 +100,7 @@ def spring_window_for(year: int, plant_md: str) -> tuple[date, date]:
 def spring_reference(series: DailySeries, plant_md: str) -> SpringReference:
     totals: dict[int, float] = {}
     excluded: list[ExcludedYear] = []
-    for year in planting_years(series):
-        if not BASELINE_FIRST_YEAR <= year <= BASELINE_LAST_YEAR:
-            continue
+    for year in range(BASELINE_FIRST_YEAR, BASELINE_LAST_YEAR + 1):
         start, end = spring_window_for(year, plant_md)
         end_excl = end + timedelta(days=1)
         stats = series.stats(["precip_mm"], start, end_excl)
@@ -121,7 +120,9 @@ def spring_reference(series: DailySeries, plant_md: str) -> SpringReference:
             status=Status.PARTIAL if stats.valid_days else Status.UNAVAILABLE,
             reasons=reasons,
         ))
-    return SpringReference(plant_md=plant_md, totals=totals, excluded=excluded)
+    return SpringReference(
+        plant_md=plant_md, series_fingerprint=series.fingerprint, totals=totals, excluded=excluded
+    )
 
 
 def dry_cutoff(totals: list[float]) -> float | None:
@@ -193,6 +194,8 @@ def compute_spring(
         raise ValueError(
             f"spring reference is for planting date {ref.plant_md}, plan uses {plan.next_plant}"
         )
+    if ref.series_fingerprint != series.fingerprint:
+        raise ValueError("spring reference was built from different weather data")
     cov = season_coverage(cal, series).metrics["spring"]
     threshold = thresholds.thresholds.get(f"{SPRING_DRY_PREFIX}{plan.next_plant}")
     if threshold is None:

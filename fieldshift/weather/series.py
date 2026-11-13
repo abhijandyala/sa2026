@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from datetime import date, timedelta
 
@@ -27,6 +28,19 @@ class DailySeries:
         self._frame = frame.set_index("date").sort_index()
         self.first_date: date = self._frame.index.min().date()
         self.last_date: date = self._frame.index.max().date()
+
+    @property
+    def fingerprint(self) -> str:
+        """Hash of the table's dates and values; identifies the data a derived result used."""
+        if not hasattr(self, "_fp"):
+            digest = hashlib.sha256()
+            digest.update(self._frame.index.values.astype("datetime64[D]").tobytes())
+            for col in sorted(self._frame.columns):
+                if not col.endswith("_reason"):
+                    digest.update(col.encode())
+                    digest.update(self._frame[col].to_numpy(dtype="float64").tobytes())
+            self._fp = digest.hexdigest()[:32]
+        return self._fp
 
     @property
     def frame(self) -> pd.DataFrame:

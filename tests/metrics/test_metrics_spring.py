@@ -322,3 +322,28 @@ def test_planting_date_edit_changes_rank_not_just_window():
     rb = compute_spring(b, build_calendar(b, 1981), series, ts, HASH)
     assert (ra.rank, rb.rank) == (1, 45)
     assert ra.total_mm == 10.0 and rb.total_mm == 510.0
+
+
+def test_reference_from_other_weather_data_is_rejected():
+    a, b = synthetic(LINEAR), synthetic({**LINEAR, 2000: 500.0})
+    ts = build_threshold_set(a, HASH, ["05-12"])
+    p = plan()
+    with pytest.raises(ValueError, match="different weather data"):
+        compute_spring(p, build_calendar(p, 2000), a, ts, HASH,
+                       reference=spring_reference(b, "05-12"))
+
+
+def test_january_window_for_next_planting_year_is_eligible_when_record_ends_in_december():
+    totals = {y: 10.0 + (y - 1981) for y in range(1981, 2025)}
+    days = pd.date_range("1981-01-01", "2024-12-31", freq="D")
+    series = DailySeries(pd.DataFrame({"date": days, "precip_mm": 1.0, "gwettop": 0.5,
+                                       "gwetroot": 0.5}))
+    p = Plan(plan_id="jan", previous_crop_id="soybean", prev_harvest="10-15", next_crop_id="field_corn",
+             next_plant="02-15")
+    ref = spring_reference(series, "02-15")
+    assert 2025 in {e.year for e in ref.excluded}  # window Jan 16 - Feb 14, 2025 is after the record
+    series2 = DailySeries(pd.DataFrame({"date": pd.date_range("1981-01-01", "2025-02-14"),
+                                        "precip_mm": 1.0, "gwettop": 0.5, "gwetroot": 0.5}))
+    ref2 = spring_reference(series2, "02-15")
+    assert 2025 in ref2.totals and ref2.n_eligible == 45 and totals
+    assert p.next_plant == "02-15"
