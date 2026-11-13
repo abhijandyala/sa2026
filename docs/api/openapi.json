@@ -1290,6 +1290,18 @@
             "title": "Reason",
             "type": "string"
           },
+          "reference": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
           "rule_id": {
             "title": "Rule Id",
             "type": "string"
@@ -2566,6 +2578,90 @@
         ]
       }
     },
+    "/v1/plans/backup": {
+      "post": {
+        "description": "Body: ``{plan | plan_id, fallback? | fallback_id?, year?, as_of?, inputs?}``.\n\nWithout a fallback the catalog-supported one is suggested (``fallback_source: \"suggested\"``).",
+        "operationId": "post_backup_v1_plans_backup_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Backup V1 Plans Backup Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Post Backup",
+        "tags": [
+          "decision-tools"
+        ]
+      }
+    },
+    "/v1/plans/calendar": {
+      "post": {
+        "description": "Body: ``{plan | plan_id, previous_plan?, year?, inputs?, scenarios?: bool}``.",
+        "operationId": "post_calendar_v1_plans_calendar_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Calendar V1 Plans Calendar Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Post Calendar",
+        "tags": [
+          "decision-tools"
+        ]
+      }
+    },
     "/v1/plans/check": {
       "post": {
         "description": "Body: ``{\"plan\": Plan, \"year\": int?, \"inputs\": {soil_temp_f: ..., ...}?}``.",
@@ -2701,6 +2797,48 @@
         ]
       }
     },
+    "/v1/plans/note": {
+      "post": {
+        "description": "Body: ``{plan | plan_id, alternative? | alternative_id?, year?, as_of?, inputs?}``.",
+        "operationId": "post_note_v1_plans_note_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Note V1 Plans Note Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Post Note",
+        "tags": [
+          "decision-tools"
+        ]
+      }
+    },
     "/v1/plans/sensitivity": {
       "post": {
         "operationId": "sensitivity_v1_plans_sensitivity_post",
@@ -2757,6 +2895,107 @@
         "summary": "Sensitivity",
         "tags": [
           "core"
+        ]
+      }
+    },
+    "/v1/plans/{plan_id}/note": {
+      "get": {
+        "description": "The field note for a sample plan; ``alternative`` is another sample plan id.",
+        "operationId": "get_note_v1_plans__plan_id__note_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "plan_id",
+            "required": true,
+            "schema": {
+              "title": "Plan Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alternative",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Alternative"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Year"
+            }
+          },
+          {
+            "in": "query",
+            "name": "as_of",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Get Note V1 Plans  Plan Id  Note Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Note",
+        "tags": [
+          "decision-tools"
         ]
       }
     },

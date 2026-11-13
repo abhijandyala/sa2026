@@ -13,6 +13,10 @@ python -m fieldshift.api.contract
 | `compare.json` | `requests/compare.json` | `POST /v1/plans/compare` (all three presets; includes the wheat path as `unavailable: catalog_missing`) |
 | `compare_unsupported_location.json` | `requests/compare_unsupported_location.json` | same endpoint, a point outside the Union County weather cell |
 | `error_invalid_input.json` | `requests/error_invalid_input.json` | HTTP 400 typed error naming the field |
+| `calendar.json` | `requests/calendar.json` | `POST /v1/plans/calendar` (with scenarios and a diff against a previous plan) |
+| `backup.json` | `requests/backup.json` | `POST /v1/plans/backup` |
+| `note.json` | `requests/note.json` | `POST /v1/plans/note` (JSON field note with audit trail) |
+| `note_get.json` | `requests/note_get.json` | `GET /v1/plans/{plan_id}/note` |
 | `replay.json` | `requests/replay.json` | `GET /v1/seasons/{year}/replay?plan=corn_soy__rye` |
 | `sensitivity.json` | `requests/sensitivity.json` | `POST /v1/plans/sensitivity` |
 | `years.json` | `requests/years.json` | `GET /v1/years` |

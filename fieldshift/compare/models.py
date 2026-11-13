@@ -96,6 +96,7 @@ class RuleLine(_M):
     conflict: bool = False
     conflicts_with: list[str] = Field(default_factory=list)
     source: dict[str, Any] | None = None
+    reference: dict[str, Any] | None = None  # sourced published number; never a grower target
 
 
 class SeasonRow(_M):

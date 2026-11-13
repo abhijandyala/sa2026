@@ -202,6 +202,7 @@ def _rule_lines(res: Any, exclude: set[str]) -> tuple[list[RuleLine], list, list
             rule_id=r.rule_id, status=r.status, verdict=str(r.verdict) if r.verdict else None,
             flagged=r.flagged, reason=r.reason, conflict=r.conflict,
             conflicts_with=list(r.conflicts_with), source=_source(r.source),
+            reference=r.reference,
         )
         for r in res.rules
         if r.status != Status.INAPPLICABLE and r.rule_id not in exclude

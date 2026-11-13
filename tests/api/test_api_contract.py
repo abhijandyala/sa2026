@@ -42,7 +42,7 @@ def test_a_corrupted_example_fails_validation():
 
 
 SPECS = {e.name: e for e in contract.example_specs()}
-SCHEMA_CHECKED = ["compare", "compare_unsupported_location", "error_invalid_input", "health",
+SCHEMA_CHECKED = ["calendar", "backup", "note", "note_get", "compare", "compare_unsupported_location", "error_invalid_input", "health",
                   "replay", "sensitivity", "years", "rotations"]
 
 
@@ -87,7 +87,8 @@ def test_committed_contract_files_are_current():
 
 def test_openapi_documents_the_core_endpoints_and_error_shape():
     paths = OPENAPI["paths"]
-    for p in ("/v1/plans/compare", "/v1/seasons/{year}/replay", "/v1/plans/sensitivity",
+    for p in ("/v1/plans/calendar", "/v1/plans/backup", "/v1/plans/note", "/v1/plans/{plan_id}/note",
+              "/v1/plans/compare", "/v1/seasons/{year}/replay", "/v1/plans/sensitivity",
               "/v1/years", "/v1/rotations", "/v1/plans/check", "/v1/crops", "/health"):
         assert p in paths, p
     assert OPENAPI["info"]["version"] == "1.0.0"

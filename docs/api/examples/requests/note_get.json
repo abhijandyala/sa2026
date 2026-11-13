@@ -1,0 +1,6 @@
+{
+  "body": null,
+  "method": "GET",
+  "status": 200,
+  "url": "/v1/plans/corn_soy__rye/note?alternative=corn_soy__no_cover&year=2025&as_of=2025-09-01"
+}

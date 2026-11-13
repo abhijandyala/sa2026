@@ -249,6 +249,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "sourced reference N rate 0 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
+          "reference": {
+            "condition_key": "n_rate",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "eq",
+            "source_url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+            "unit": "lb_N_per_acre",
+            "value_max": null,
+            "value_min": 0.0,
+            "value_text": null,
+            "verified_date": "2026-11-13"
+          },
           "rule_id": "sb_nut_01",
           "source": {
             "locator": "Table 2.3 p. 15: Soybean row and nitrogen-units footnote",
@@ -264,6 +276,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "plant date 2025-05-12 is inside 04-20 to 05-20",
+          "reference": null,
           "rule_id": "sb_pw_01",
           "source": {
             "locator": "Optimum Planting Period; Figure 5-5",
@@ -279,6 +292,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Before mid-April",
+          "reference": null,
           "rule_id": "sb_pw_02",
           "source": {
             "locator": "Planting before mid-April; Figure 2",
@@ -294,6 +308,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Past the third week of May",
+          "reference": null,
           "rule_id": "sb_pw_03",
           "source": {
             "locator": "Planting past mid-May; Figure 1",
@@ -309,6 +324,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'soil_moisture_status'",
+          "reference": null,
           "rule_id": "sb_pw_05",
           "source": {
             "locator": "Opening paragraphs",
@@ -324,6 +340,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "crop sequence matches the rule (yield_gain_vs_continuous 5 bu_per_acre is the source's published result, not a measurement on this field)",
+          "reference": null,
           "rule_id": "sb_rc_01",
           "source": {
             "locator": "Figure 4-1",
@@ -339,6 +356,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'slope_position'",
+          "reference": null,
           "rule_id": "sb_soil_01",
           "source": {
             "locator": "Soils and Topography",
@@ -354,6 +372,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'plant_available_water'",
+          "reference": null,
           "rule_id": "sb_soil_02",
           "source": {
             "locator": "Soils and Topography",
@@ -369,6 +388,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 6 pH; not measured on this field",
+          "reference": {
+            "condition_key": "soil_ph_target",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "eq",
+            "source_url": "https://content.ces.ncsu.edu/soil-acidity-and-liming-for-agricultural-soils",
+            "unit": "pH",
+            "value_max": null,
+            "value_min": 6.0,
+            "value_text": "Mineral soils",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "sb_soil_03",
           "source": {
             "locator": "Table 2 Field crops",
@@ -384,6 +415,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 25 in; not measured on this field",
+          "reference": {
+            "condition_key": "seasonal_crop_water_use",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "gt",
+            "source_url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/10-water-management-in-soybeans",
+            "unit": "in",
+            "value_max": null,
+            "value_min": 25.0,
+            "value_text": "Over 60% of use occurs R1-R6",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "sb_wd_01",
           "source": {
             "locator": "Opening paragraph",
@@ -399,6 +442,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'irrigated'; the plan's system was not given",
+          "reference": null,
           "rule_id": "sb_wd_07",
           "source": {
             "locator": "Water management; water table paragraph",
@@ -414,6 +458,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Frost damage; seedling disease; early insect pressure",
+          "reference": null,
           "rule_id": "sb_wt_01",
           "source": {
             "locator": "Soybean paragraph",
@@ -429,6 +474,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 85 degF; not measured on this field",
+          "reference": {
+            "condition_key": "air_temperature",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "gt",
+            "source_url": "https://soybeans.ces.ncsu.edu/news/how-do-high-temperatures-impact-my-soybeans/",
+            "unit": "degF",
+            "value_max": null,
+            "value_min": 85.0,
+            "value_text": null,
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "sb_wt_02",
           "source": {
             "locator": "Paragraphs 2-3",
@@ -1313,6 +1370,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "sourced reference N rate 120-160 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
+          "reference": {
+            "condition_key": "n_rate",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "between",
+            "source_url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+            "unit": "lb_N_per_acre",
+            "value_max": 160.0,
+            "value_min": 120.0,
+            "value_text": null,
+            "verified_date": "2026-11-13"
+          },
           "rule_id": "fc_nut_01",
           "source": {
             "locator": "Table 2.3 p. 14: Corn, grain; p. 15 nitrogen-units footnote",
@@ -1330,6 +1399,7 @@
           ],
           "flagged": false,
           "reason": "input 'soil_temp_f' is not available",
+          "reference": null,
           "rule_id": "fc_pw_01",
           "source": {
             "locator": "Page 1, paragraphs 1-2",
@@ -1347,6 +1417,7 @@
           ],
           "flagged": false,
           "reason": "input 'soil_temp_f' is not available",
+          "reference": null,
           "rule_id": "fc_pw_02",
           "source": {
             "locator": "Item 1 Soil Temperature",
@@ -1362,6 +1433,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'organic'; the plan's system was not given",
+          "reference": null,
           "rule_id": "fc_pw_03",
           "source": {
             "locator": "Planting date section",
@@ -1377,6 +1449,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'organic'; the plan's system was not given",
+          "reference": null,
           "rule_id": "fc_pw_04",
           "source": {
             "locator": "Planting date section",
@@ -1392,6 +1465,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "input 'gdd_after_planting_f' is not available",
+          "reference": null,
           "rule_id": "fc_pw_05",
           "source": {
             "locator": "GDU formula paragraph",
@@ -1407,6 +1481,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 1.5-2.5 in; not measured on this field",
+          "reference": {
+            "condition_key": "seeding_depth",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "between",
+            "source_url": "https://corn.ces.ncsu.edu/news/what-are-the-optimal-planting-conditions-for-corn/",
+            "unit": "in",
+            "value_max": 2.5,
+            "value_min": 1.5,
+            "value_text": null,
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "fc_pw_06",
           "source": {
             "locator": "Item 3 Planting Depth",
@@ -1422,6 +1508,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'late planting'; the plan's system was not given",
+          "reference": null,
           "rule_id": "fc_pw_07",
           "source": {
             "locator": "Paragraphs on Piedmont Research Station study",
@@ -1437,6 +1524,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 6 pH; not measured on this field",
+          "reference": {
+            "condition_key": "soil_ph_target",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "eq",
+            "source_url": "https://content.ces.ncsu.edu/soil-acidity-and-liming-for-agricultural-soils",
+            "unit": "pH",
+            "value_max": null,
+            "value_min": 6.0,
+            "value_text": "Mineral soils; 5.5 mineral-organic; 5.0 organic",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "fc_soil_01",
           "source": {
             "locator": "Table 2 Field crops",
@@ -1452,6 +1551,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "input 'forecast_precip_in' is not available",
+          "reference": null,
           "rule_id": "fc_wt_01",
           "source": {
             "locator": "Planting questions list item 2 paragraph",
@@ -1467,6 +1567,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'seedbed_moisture'",
+          "reference": null,
           "rule_id": "fc_wt_02",
           "source": {
             "locator": "Item 2 Soil Moisture",
@@ -2384,6 +2485,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "seed date 2024-10-01 is inside 09-15 to 10-15",
+          "reference": null,
           "rule_id": "cr_pw_01",
           "source": {
             "locator": "Table 4",
@@ -2399,6 +2501,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "seed date 2024-10-01 is inside 09-15 to 11-15",
+          "reference": null,
           "rule_id": "cr_pw_02",
           "source": {
             "locator": "Table 4; small grain paragraph",
@@ -2414,6 +2517,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "crop sequence matches the rule",
+          "reference": null,
           "rule_id": "cr_rc_02",
           "source": {
             "locator": "Fits many rotations",
@@ -2429,6 +2533,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'drainage_class'",
+          "reference": null,
           "rule_id": "cr_soil_01",
           "source": {
             "locator": "Establishment and Fieldwork",
@@ -2444,6 +2549,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 25-50 lb_N_per_acre; not measured on this field",
+          "reference": {
+            "condition_key": "n_scavenged",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "between",
+            "source_url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
+            "unit": "lb_N_per_acre",
+            "value_max": 50.0,
+            "value_min": 25.0,
+            "value_text": "Up to 100 lb N/A",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "cr_trait_01",
           "source": {
             "locator": "Nutrient catch crop",
@@ -2459,6 +2576,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Maximum fall-winter erosion protection; suppresses large-seeded broadleaf weeds",
+          "reference": null,
           "rule_id": "cr_trait_02",
           "source": {
             "locator": "Erosion paragraph; weed control paragraph",
@@ -2474,6 +2592,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "12-day termination-to-planting gap does not meet the rule (between 21 and 28 days); applies_when not active: no pest-spillover concern was reported",
+          "reference": null,
           "rule_id": "cr_tt_04",
           "source": {
             "locator": "Green Bridge Considerations",
@@ -2489,6 +2608,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Terminating at soybean planting may not be needed to maximize biomass",
+          "reference": null,
           "rule_id": "cr_tt_05",
           "source": {
             "locator": "Results summary",
@@ -2504,6 +2624,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 34 degF; not measured on this field",
+          "reference": {
+            "condition_key": "germination_temperature_unspecified",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "gte",
+            "source_url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
+            "unit": "degF",
+            "value_max": null,
+            "value_min": 34.0,
+            "value_text": "Source does not specify soil vs air",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "cr_wt_01",
           "source": {
             "locator": "Establishment and Fieldwork",
@@ -2519,6 +2651,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "sourced reference N rate 0 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
+          "reference": {
+            "condition_key": "n_rate",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "eq",
+            "source_url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+            "unit": "lb_N_per_acre",
+            "value_max": null,
+            "value_min": 0.0,
+            "value_text": null,
+            "verified_date": "2026-11-13"
+          },
           "rule_id": "sb_nut_01",
           "source": {
             "locator": "Table 2.3 p. 15: Soybean row and nitrogen-units footnote",
@@ -2534,6 +2678,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "plant date 2025-05-12 is inside 04-20 to 05-20",
+          "reference": null,
           "rule_id": "sb_pw_01",
           "source": {
             "locator": "Optimum Planting Period; Figure 5-5",
@@ -2549,6 +2694,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Before mid-April",
+          "reference": null,
           "rule_id": "sb_pw_02",
           "source": {
             "locator": "Planting before mid-April; Figure 2",
@@ -2564,6 +2710,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Past the third week of May",
+          "reference": null,
           "rule_id": "sb_pw_03",
           "source": {
             "locator": "Planting past mid-May; Figure 1",
@@ -2579,6 +2726,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'soil_moisture_status'",
+          "reference": null,
           "rule_id": "sb_pw_05",
           "source": {
             "locator": "Opening paragraphs",
@@ -2594,6 +2742,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "crop sequence matches the rule (yield_gain_vs_continuous 5 bu_per_acre is the source's published result, not a measurement on this field)",
+          "reference": null,
           "rule_id": "sb_rc_01",
           "source": {
             "locator": "Figure 4-1",
@@ -2609,6 +2758,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'slope_position'",
+          "reference": null,
           "rule_id": "sb_soil_01",
           "source": {
             "locator": "Soils and Topography",
@@ -2624,6 +2774,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'plant_available_water'",
+          "reference": null,
           "rule_id": "sb_soil_02",
           "source": {
             "locator": "Soils and Topography",
@@ -2639,6 +2790,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 6 pH; not measured on this field",
+          "reference": {
+            "condition_key": "soil_ph_target",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "eq",
+            "source_url": "https://content.ces.ncsu.edu/soil-acidity-and-liming-for-agricultural-soils",
+            "unit": "pH",
+            "value_max": null,
+            "value_min": 6.0,
+            "value_text": "Mineral soils",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "sb_soil_03",
           "source": {
             "locator": "Table 2 Field crops",
@@ -2654,6 +2817,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 25 in; not measured on this field",
+          "reference": {
+            "condition_key": "seasonal_crop_water_use",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "gt",
+            "source_url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/10-water-management-in-soybeans",
+            "unit": "in",
+            "value_max": null,
+            "value_min": 25.0,
+            "value_text": "Over 60% of use occurs R1-R6",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "sb_wd_01",
           "source": {
             "locator": "Opening paragraph",
@@ -2669,6 +2844,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'irrigated'; the plan's system was not given",
+          "reference": null,
           "rule_id": "sb_wd_07",
           "source": {
             "locator": "Water management; water table paragraph",
@@ -2684,6 +2860,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Frost damage; seedling disease; early insect pressure",
+          "reference": null,
           "rule_id": "sb_wt_01",
           "source": {
             "locator": "Soybean paragraph",
@@ -2699,6 +2876,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 85 degF; not measured on this field",
+          "reference": {
+            "condition_key": "air_temperature",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "gt",
+            "source_url": "https://soybeans.ces.ncsu.edu/news/how-do-high-temperatures-impact-my-soybeans/",
+            "unit": "degF",
+            "value_max": null,
+            "value_min": 85.0,
+            "value_text": null,
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "sb_wt_02",
           "source": {
             "locator": "Paragraphs 2-3",
@@ -3883,6 +4072,7 @@
           "conflicts_with": [],
           "flagged": true,
           "reason": "seed date 2024-10-20 is outside 09-15 to 10-15",
+          "reference": null,
           "rule_id": "cr_pw_01",
           "source": {
             "locator": "Table 4",
@@ -3898,6 +4088,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Corn 70 bu at 0 N vs 126 bu at 180 N after rye",
+          "reference": null,
           "rule_id": "cr_nut_01",
           "source": {
             "locator": "Figure 2; Table 6",
@@ -3913,6 +4104,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "seed date 2024-10-20 is inside 09-15 to 11-15",
+          "reference": null,
           "rule_id": "cr_pw_02",
           "source": {
             "locator": "Table 4; small grain paragraph",
@@ -3928,6 +4120,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "seed date 2024-10-20 is inside 09-15 to 11-15",
+          "reference": null,
           "rule_id": "cr_rc_01",
           "source": {
             "locator": "Small grains and Table 4",
@@ -3943,6 +4136,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'drainage_class'",
+          "reference": null,
           "rule_id": "cr_soil_01",
           "source": {
             "locator": "Establishment and Fieldwork",
@@ -3958,6 +4152,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 25-50 lb_N_per_acre; not measured on this field",
+          "reference": {
+            "condition_key": "n_scavenged",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "between",
+            "source_url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
+            "unit": "lb_N_per_acre",
+            "value_max": 50.0,
+            "value_min": 25.0,
+            "value_text": "Up to 100 lb N/A",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "cr_trait_01",
           "source": {
             "locator": "Nutrient catch crop",
@@ -3973,6 +4179,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "qualitative rule: Maximum fall-winter erosion protection; suppresses large-seeded broadleaf weeds",
+          "reference": null,
           "rule_id": "cr_trait_02",
           "source": {
             "locator": "Erosion paragraph; weed control paragraph",
@@ -3988,6 +4195,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 34 degF; not measured on this field",
+          "reference": {
+            "condition_key": "germination_temperature_unspecified",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "gte",
+            "source_url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
+            "unit": "degF",
+            "value_max": null,
+            "value_min": 34.0,
+            "value_text": "Source does not specify soil vs air",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "cr_wt_01",
           "source": {
             "locator": "Establishment and Fieldwork",
@@ -4003,6 +4222,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "sourced reference N rate 120-160 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
+          "reference": {
+            "condition_key": "n_rate",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "between",
+            "source_url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+            "unit": "lb_N_per_acre",
+            "value_max": 160.0,
+            "value_min": 120.0,
+            "value_text": null,
+            "verified_date": "2026-11-13"
+          },
           "rule_id": "fc_nut_01",
           "source": {
             "locator": "Table 2.3 p. 14: Corn, grain; p. 15 nitrogen-units footnote",
@@ -4018,6 +4249,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'no-till into cover crop'; the plan's system was not given",
+          "reference": null,
           "rule_id": "fc_nut_02",
           "source": {
             "locator": "No-till planting section",
@@ -4035,6 +4267,7 @@
           ],
           "flagged": false,
           "reason": "input 'soil_temp_f' is not available",
+          "reference": null,
           "rule_id": "fc_pw_01",
           "source": {
             "locator": "Page 1, paragraphs 1-2",
@@ -4052,6 +4285,7 @@
           ],
           "flagged": false,
           "reason": "input 'soil_temp_f' is not available",
+          "reference": null,
           "rule_id": "fc_pw_02",
           "source": {
             "locator": "Item 1 Soil Temperature",
@@ -4067,6 +4301,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'organic'; the plan's system was not given",
+          "reference": null,
           "rule_id": "fc_pw_03",
           "source": {
             "locator": "Planting date section",
@@ -4082,6 +4317,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'organic'; the plan's system was not given",
+          "reference": null,
           "rule_id": "fc_pw_04",
           "source": {
             "locator": "Planting date section",
@@ -4097,6 +4333,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "input 'gdd_after_planting_f' is not available",
+          "reference": null,
           "rule_id": "fc_pw_05",
           "source": {
             "locator": "GDU formula paragraph",
@@ -4112,6 +4349,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 1.5-2.5 in; not measured on this field",
+          "reference": {
+            "condition_key": "seeding_depth",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "between",
+            "source_url": "https://corn.ces.ncsu.edu/news/what-are-the-optimal-planting-conditions-for-corn/",
+            "unit": "in",
+            "value_max": 2.5,
+            "value_min": 1.5,
+            "value_text": null,
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "fc_pw_06",
           "source": {
             "locator": "Item 3 Planting Depth",
@@ -4127,6 +4376,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "rule needs production system 'late planting'; the plan's system was not given",
+          "reference": null,
           "rule_id": "fc_pw_07",
           "source": {
             "locator": "Paragraphs on Piedmont Research Station study",
@@ -4142,6 +4392,18 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "published reference value 6 pH; not measured on this field",
+          "reference": {
+            "condition_key": "soil_ph_target",
+            "is_grower_target": false,
+            "kind": "published_reference",
+            "operator": "eq",
+            "source_url": "https://content.ces.ncsu.edu/soil-acidity-and-liming-for-agricultural-soils",
+            "unit": "pH",
+            "value_max": null,
+            "value_min": 6.0,
+            "value_text": "Mineral soils; 5.5 mineral-organic; 5.0 organic",
+            "verified_date": "2026-11-12"
+          },
           "rule_id": "fc_soil_01",
           "source": {
             "locator": "Table 2 Field crops",
@@ -4157,6 +4419,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "input 'forecast_precip_in' is not available",
+          "reference": null,
           "rule_id": "fc_wt_01",
           "source": {
             "locator": "Planting questions list item 2 paragraph",
@@ -4172,6 +4435,7 @@
           "conflicts_with": [],
           "flagged": false,
           "reason": "no evaluator for condition 'seedbed_moisture'",
+          "reference": null,
           "rule_id": "fc_wt_02",
           "source": {
             "locator": "Item 2 Soil Moisture",

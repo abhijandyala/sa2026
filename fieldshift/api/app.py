@@ -21,6 +21,7 @@ from fieldshift.field.routes import router as field_router
 from fieldshift.planner.routes import router as planner_router
 from fieldshift.report.http import issue
 from fieldshift.report.meta import response_meta
+from fieldshift.report.routes import router as report_router
 from fieldshift.tools.routes import router as tools_router
 from fieldshift.weather.power_client import is_offline
 from fieldshift.weather.snapshot import load_snapshot
@@ -85,7 +86,7 @@ def create_app() -> FastAPI:
                         headers=getattr(exc, "headers", None))
 
     error_docs = {400: {"model": InvalidInputResponse}, 500: {"model": ServerErrorResponse}}
-    for r in (core_router, planner_router, field_router, tools_router):
+    for r in (core_router, planner_router, report_router, field_router, tools_router):
         app.include_router(r, responses=error_docs)
 
     @app.get("/health", response_model=HealthResponse, responses=error_docs)

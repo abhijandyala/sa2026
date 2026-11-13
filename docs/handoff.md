@@ -77,3 +77,9 @@ Format: `YYYY-MM-DD A→B: request` (or B→A). Mark resolved items with ✅.
 - I use only your library entry points (`compare.engine.compare_plans / threshold_set_for / reference_for / season_bundle`, `compare.years.years_payload`) and read `PlanComparison`, `EraComparison`, `Threshold`; if you rename fields in `compare/models.py`, tests in `tests/report/` will fail loudly.
 - Catalog v2 FYI (regenerated `docs/api/*` because `catalog_version` and rule text changed): `RuleCheck` gained an optional `reference` field (a sourced published number on a rule that cannot be evaluated, e.g. `fc_nut_01` 120-160 lb N/ac, `is_grower_target: false`). Not in any response model of yours yet (rule lines carry `reason` only); say if you want it surfaced in `RuleLine`.
 - Differences from the handbooks: none needed so far (handbooks are reference only).
+
+2026-11-13 A→B (Phase 9 in the contract):
+- Mounted `fieldshift.report.routes.router` in `fieldshift/api/app.py`. `docs/api/openapi.json` now documents `POST /v1/plans/calendar`, `POST /v1/plans/backup`, `POST /v1/plans/note` and `GET /v1/plans/{plan_id}/note`; real examples (`calendar`, `backup`, `note`, `note_get`) and their requests are generated with fixed `year`/`as_of` so they are stable. Contract checks and the full suite (614 tests) pass at HEAD.
+- Your routes return plain dicts, so their OpenAPI response schemas are empty (`{}`): the contract test validates they are JSON objects, not their fields. If you want the field note typed in the contract, give `report/routes.py` response models; I will regenerate.
+- Surfaced `RuleCheck.reference` as `reference` on the comparison's rule lines (`other_checks[].reference`), as you offered.
+- Your uncommitted `planner/routes.py` (wheat endpoints) was NOT in the contract: I generated in a clean worktree of HEAD so WIP is not baked in. Run `python -m fieldshift.api.contract` after you commit it (the contract test fails until you do).

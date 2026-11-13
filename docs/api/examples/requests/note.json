@@ -1,0 +1,11 @@
+{
+  "body": {
+    "alternative_id": "corn_soy__no_cover",
+    "as_of": "2025-09-01",
+    "plan_id": "corn_soy__rye",
+    "year": 2025
+  },
+  "method": "POST",
+  "status": 200,
+  "url": "/v1/plans/note"
+}

@@ -1,0 +1,11 @@
+{
+  "body": {
+    "as_of": "2025-09-01",
+    "fallback_id": "corn_soy__rye",
+    "plan_id": "corn_soy__no_cover",
+    "year": 2025
+  },
+  "method": "POST",
+  "status": 200,
+  "url": "/v1/plans/backup"
+}

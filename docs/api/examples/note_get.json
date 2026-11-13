@@ -1,0 +1,2316 @@
+{
+  "adviser_note": {
+    "fields": [
+      {
+        "field_id": "adviser_name",
+        "label": "Adviser name",
+        "value": null
+      },
+      {
+        "field_id": "organization",
+        "label": "Organization",
+        "value": null
+      },
+      {
+        "field_id": "reviewed_on",
+        "label": "Date reviewed",
+        "value": null
+      },
+      {
+        "field_id": "agreement",
+        "label": "Agreement with the plan (agree / agree with changes / disagree)",
+        "value": null
+      },
+      {
+        "field_id": "changes_suggested",
+        "label": "Changes suggested",
+        "value": null
+      },
+      {
+        "field_id": "local_knowledge",
+        "label": "Local knowledge the data does not capture",
+        "value": null
+      },
+      {
+        "field_id": "follow_up",
+        "label": "Follow-up actions and who owns them",
+        "value": null
+      }
+    ],
+    "instructions": "For the adviser to complete; the backend leaves these blank."
+  },
+  "alternatives": [
+    {
+      "assumptions": [
+        "next_check_date is 7 days before the decision deadline (assumed, not from the catalog)"
+      ],
+      "backtest": {
+        "reason": "the first release compares the two plans as fixed plans; an optional backtest using only data available at the decision date is not built",
+        "status": "unavailable"
+      },
+      "decision_deadline": "2024-09-30",
+      "difference_vs_default": {
+        "heavy_rain_days_outside_cover_median": {
+          "audit_id": "a5b19bc3d55",
+          "unit": "days",
+          "value": 0.0
+        },
+        "label": "alternative minus default",
+        "living_cover_days_planned": {
+          "audit_id": "aca4052d4b8",
+          "unit": "days",
+          "value": -211
+        },
+        "note": "Both plans were run over the same seasons with the same frozen thresholds. This is a descriptive comparison of fixed plans, not a forecast of which will do better.",
+        "rain_mm_outside_cover_median": {
+          "audit_id": "a318eeaa053",
+          "unit": "mm",
+          "value": 604.08
+        },
+        "spring_check_counts": {},
+        "termination_gap_days": null
+      },
+      "divergence": {
+        "action_id": "seed",
+        "default_date": "2024-10-01",
+        "fallback_date": null,
+        "first_date": "2024-10-01",
+        "what": "seed: default 2024-10-01 vs fallback none"
+      },
+      "fallback_source": "grower",
+      "kind": "fixed_alternative",
+      "next_check_date": null,
+      "plan": {
+        "calendar": {
+          "cover_label": null,
+          "days_without_planned_cover": {
+            "audit_id": "ac903c7eabf",
+            "unit": "days",
+            "value": 234
+          },
+          "establishment": "inapplicable",
+          "living_cover_days_planned": {
+            "audit_id": "a1dc7702fad",
+            "unit": "days",
+            "value": 0
+          },
+          "termination_gap_days": null,
+          "winter_days": {
+            "audit_id": "a951f52f4b2",
+            "unit": "days",
+            "value": 234
+          }
+        },
+        "dates_basis": "assumed",
+        "grower_inputs": {
+          "low_moisture_concern": null,
+          "observations": [],
+          "residue_report": null
+        },
+        "label": "No planted winter cover",
+        "next_crop": "soybean",
+        "next_plant": "05-12",
+        "plan_id": "corn_soy__no_cover",
+        "planting_year": "2025",
+        "prev_harvest": "09-20",
+        "previous_crop": "field_corn",
+        "production_system": null,
+        "region": "NC Piedmont",
+        "winter": {
+          "kind": "none"
+        }
+      },
+      "spring_checks": [],
+      "status": "complete",
+      "switch_condition": {
+        "inputs_needed": [],
+        "kind": "grower_decision",
+        "rule_ids": [],
+        "text": "No catalog rule decides this switch; it is the grower's call by 2024-09-30."
+      },
+      "timing": "past_deadline",
+      "winter": {
+        "eligible_seasons": {
+          "audit_id": "aa727b95ee8",
+          "unit": "seasons",
+          "value": 44
+        },
+        "label": "Rain that fell while no living cover was planned (a weather record, not erosion)",
+        "per_season_median": {
+          "heavy_rain_days_outside_cover": {
+            "audit_id": "a79252772d6",
+            "unit": "days",
+            "value": 0.0
+          },
+          "rain_mm_outside_cover": {
+            "audit_id": "a5bc9d4282b",
+            "unit": "mm",
+            "value": 682.22
+          }
+        },
+        "reasons": [
+          "1 season(s) not complete: record_starts_after_window_start"
+        ],
+        "residue_context": [
+          {
+            "changes_living_cover_indicator": false,
+            "kind": "corn_residue",
+            "note": "Corn residue may remain after harvest. Context only: it is not living cover and changes no count."
+          }
+        ],
+        "seasons": {
+          "audit_id": "a83e0fbe09a",
+          "unit": "seasons",
+          "value": 45
+        },
+        "seasons_with_heavy_rain_outside_cover": {
+          "audit_id": "aafae55c2df",
+          "unit": "seasons",
+          "value": 3
+        },
+        "segments": [
+          "no_planned_cover"
+        ],
+        "status": "partial"
+      }
+    }
+  ],
+  "audit": {
+    "count": 66,
+    "derivations": [
+      "calculation",
+      "extension",
+      "nasa"
+    ],
+    "entries": {
+      "a00e37685b4": {
+        "audit_id": "a00e37685b4",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons with a complete spring window"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons with a complete spring window"
+        },
+        "unit": "seasons",
+        "value": 45
+      },
+      "a033cd21440": {
+        "audit_id": "a033cd21440",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "rank of this spring among eligible springs",
+          "year": "2020"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "rank (1 = driest)",
+        "value": 45
+      },
+      "a036ae06f96": {
+        "audit_id": "a036ae06f96",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "rank of this spring among eligible springs",
+          "year": "1986"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "rank (1 = driest)",
+        "value": 1
+      },
+      "a0bf9e1b658": {
+        "audit_id": "a0bf9e1b658",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "eligible springs ranked"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "seasons",
+        "value": 45
+      },
+      "a0c04d221c8": {
+        "audit_id": "a0c04d221c8",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "rank of this spring among eligible springs",
+          "year": "2007"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "rank (1 = driest)",
+        "value": 23
+      },
+      "a16e751cde5": {
+        "audit_id": "a16e751cde5",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "modeled surface wetness, window mean (GWETTOP)",
+          "year": "2007"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "fraction 0-1",
+        "value": 0.706
+      },
+      "a191ffea49c": {
+        "audit_id": "a191ffea49c",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons with at least one heavy-rain day outside cover"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons with at least one heavy-rain day outside cover"
+        },
+        "unit": "seasons",
+        "value": 1
+      },
+      "a19a0481d1f": {
+        "audit_id": "a19a0481d1f",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "heavy-rain days outside planned cover",
+          "year": "2020"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "days",
+        "value": 0
+      },
+      "a1dc7702fad": {
+        "audit_id": "a1dc7702fad",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "planned living-cover days [seed, terminate)"
+        },
+        "label": null,
+        "source_ref": {
+          "dates_basis": "assumed",
+          "kind": "plan_input",
+          "ref": "corn_soy__no_cover"
+        },
+        "unit": "days",
+        "value": 0
+      },
+      "a1e4900777c": {
+        "audit_id": "a1e4900777c",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "modeled root-zone wetness, window mean (GWETROOT)",
+          "year": "2007"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "fraction 0-1",
+        "value": 0.6763
+      },
+      "a2bb5ce6dd4": {
+        "audit_id": "a2bb5ce6dd4",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "30-day precipitation before planting",
+          "year": "2020"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 158.19
+      },
+      "a318eeaa053": {
+        "audit_id": "a318eeaa053",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "alternative minus default"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 604.08
+      },
+      "a370ec37933": {
+        "audit_id": "a370ec37933",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons with the event (rye_soy_short_gap_moisture)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons with the event (rye_soy_short_gap_moisture)"
+        },
+        "unit": "seasons",
+        "value": 4
+      },
+      "a390144cbfc": {
+        "audit_id": "a390144cbfc",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "count / denominator * 100"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "count / denominator * 100"
+        },
+        "unit": "percent",
+        "value": 20.0
+      },
+      "a3c29347dde": {
+        "audit_id": "a3c29347dde",
+        "derivation": "calculation",
+        "inputs": {
+          "eligible_seasons": 44,
+          "what": "median over eligible seasons of rain outside planned cover"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 78.14
+      },
+      "a40caa0dbf5": {
+        "audit_id": "a40caa0dbf5",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "evaluable seasons, the denominator (rye_soy_short_gap_moisture)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "evaluable seasons, the denominator (rye_soy_short_gap_moisture)"
+        },
+        "unit": "seasons",
+        "value": 20
+      },
+      "a46b819f393": {
+        "audit_id": "a46b819f393",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "frozen threshold heavy_rain_mm"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "threshold",
+          "ref": "heavy_rain_mm",
+          "threshold_set_id": "d00101e09f5cae7e"
+        },
+        "unit": "mm",
+        "value": 76.2
+      },
+      "a547e883045": {
+        "audit_id": "a547e883045",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons with the event (dry_spring)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons with the event (dry_spring)"
+        },
+        "unit": "seasons",
+        "value": 4
+      },
+      "a5730f61476": {
+        "audit_id": "a5730f61476",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "planting years in the era (dry_spring)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "planting years in the era (dry_spring)"
+        },
+        "unit": "seasons",
+        "value": 20
+      },
+      "a5b19bc3d55": {
+        "audit_id": "a5b19bc3d55",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "alternative minus default"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "days",
+        "value": 0.0
+      },
+      "a5bb03d974f": {
+        "audit_id": "a5bb03d974f",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "modeled root-zone wetness, window mean (GWETROOT)",
+          "year": "2020"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "fraction 0-1",
+        "value": 0.808
+      },
+      "a5bc9d4282b": {
+        "audit_id": "a5bc9d4282b",
+        "derivation": "calculation",
+        "inputs": {
+          "eligible_seasons": 44,
+          "what": "median over eligible seasons of rain outside planned cover"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 682.22
+      },
+      "a5c4710eacc": {
+        "audit_id": "a5c4710eacc",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons at or below the dry cutoff"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons at or below the dry cutoff"
+        },
+        "unit": "seasons",
+        "value": 9
+      },
+      "a5fb3bbddd7": {
+        "audit_id": "a5fb3bbddd7",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "planting years in the era (rye_soy_short_gap_moisture)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "planting years in the era (rye_soy_short_gap_moisture)"
+        },
+        "unit": "seasons",
+        "value": 20
+      },
+      "a627678ece9": {
+        "audit_id": "a627678ece9",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "rain outside planned cover",
+          "year": "1986"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 5.57
+      },
+      "a6288964b91": {
+        "audit_id": "a6288964b91",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "events / evaluable * 100"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "events / evaluable * 100"
+        },
+        "unit": "percent",
+        "value": 0.0
+      },
+      "a664bb22b23": {
+        "audit_id": "a664bb22b23",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "median 30-day precipitation over eligible seasons"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 82.9
+      },
+      "a67d8b0187b": {
+        "audit_id": "a67d8b0187b",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "planned living-cover days [seed, terminate)"
+        },
+        "label": null,
+        "source_ref": {
+          "dates_basis": "assumed",
+          "kind": "plan_input",
+          "ref": "corn_soy__rye"
+        },
+        "unit": "days",
+        "value": 211
+      },
+      "a6f9ae7d60b": {
+        "audit_id": "a6f9ae7d60b",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "rain outside planned cover",
+          "year": "2007"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 30.38
+      },
+      "a701d6eabe6": {
+        "audit_id": "a701d6eabe6",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "30-day precipitation before planting",
+          "year": "1986"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 17.56
+      },
+      "a711def0f97": {
+        "audit_id": "a711def0f97",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "30-day precipitation before planting",
+          "year": "2007"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 82.9
+      },
+      "a79252772d6": {
+        "audit_id": "a79252772d6",
+        "derivation": "calculation",
+        "inputs": {
+          "eligible_seasons": 44,
+          "what": "median over eligible seasons of heavy-rain days outside planned cover"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "days",
+        "value": 0.0
+      },
+      "a7f5769fb67": {
+        "audit_id": "a7f5769fb67",
+        "derivation": "extension",
+        "inputs": {
+          "what": "published reference value (minimum)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "catalog_rule",
+          "ref": "sb_nut_01",
+          "url": "https://www.ncagr.gov/orange-book-soil-fertility/open"
+        },
+        "unit": "lb_N_per_acre",
+        "value": 0.0
+      },
+      "a83e0fbe09a": {
+        "audit_id": "a83e0fbe09a",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "planting years replayed"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "planting years replayed"
+        },
+        "unit": "seasons",
+        "value": 45
+      },
+      "a8529d7f4e6": {
+        "audit_id": "a8529d7f4e6",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "recent pct - earlier pct"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "recent pct - earlier pct"
+        },
+        "unit": "percentage points",
+        "value": 5.0
+      },
+      "a8addee48b4": {
+        "audit_id": "a8addee48b4",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons the check could be evaluated (rye_soy_short_gap_moisture)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons the check could be evaluated (rye_soy_short_gap_moisture)"
+        },
+        "unit": "seasons",
+        "value": 45
+      },
+      "a8d86fb5366": {
+        "audit_id": "a8d86fb5366",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons with the event (winter_heavy_rain_outside_cover)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons with the event (winter_heavy_rain_outside_cover)"
+        },
+        "unit": "seasons",
+        "value": 1
+      },
+      "a8d8d5f05fe": {
+        "audit_id": "a8d8d5f05fe",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "events / evaluable * 100"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "events / evaluable * 100"
+        },
+        "unit": "percent",
+        "value": 20.0
+      },
+      "a8e7d64ba90": {
+        "audit_id": "a8e7d64ba90",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "planting years in the era (winter_heavy_rain_outside_cover)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "planting years in the era (winter_heavy_rain_outside_cover)"
+        },
+        "unit": "seasons",
+        "value": 20
+      },
+      "a941c0544ed": {
+        "audit_id": "a941c0544ed",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "winter days outside planned cover"
+        },
+        "label": null,
+        "source_ref": {
+          "dates_basis": "assumed",
+          "kind": "plan_input",
+          "ref": "corn_soy__rye"
+        },
+        "unit": "days",
+        "value": 23
+      },
+      "a951f52f4b2": {
+        "audit_id": "a951f52f4b2",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "winter window [prev_harvest, next_plant)"
+        },
+        "label": null,
+        "source_ref": {
+          "dates_basis": "assumed",
+          "kind": "plan_input",
+          "ref": "corn_soy__no_cover"
+        },
+        "unit": "days",
+        "value": 234
+      },
+      "a961c8ed37d": {
+        "audit_id": "a961c8ed37d",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "modeled root-zone wetness, window mean (GWETROOT)",
+          "year": "1986"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "fraction 0-1",
+        "value": 0.575
+      },
+      "a970d347861": {
+        "audit_id": "a970d347861",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "events / evaluable * 100"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "events / evaluable * 100"
+        },
+        "unit": "percent",
+        "value": 5.0
+      },
+      "a9d74f829ea": {
+        "audit_id": "a9d74f829ea",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "fixed similarity band"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "fixed similarity band"
+        },
+        "unit": "percentage points",
+        "value": 10.0
+      },
+      "aa727b95ee8": {
+        "audit_id": "aa727b95ee8",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons with a complete winter record"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons with a complete winter record"
+        },
+        "unit": "seasons",
+        "value": 44
+      },
+      "aafae55c2df": {
+        "audit_id": "aafae55c2df",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons with at least one heavy-rain day outside cover"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons with at least one heavy-rain day outside cover"
+        },
+        "unit": "seasons",
+        "value": 3
+      },
+      "ab01df3ad5c": {
+        "audit_id": "ab01df3ad5c",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "evaluable seasons, the denominator (dry_spring)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "evaluable seasons, the denominator (dry_spring)"
+        },
+        "unit": "seasons",
+        "value": 20
+      },
+      "ab4ac9b51e4": {
+        "audit_id": "ab4ac9b51e4",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "fixed minimum coverage per era"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "fixed minimum coverage per era"
+        },
+        "unit": "seasons",
+        "value": 15
+      },
+      "ab501be9aed": {
+        "audit_id": "ab501be9aed",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "winter window [prev_harvest, next_plant)"
+        },
+        "label": null,
+        "source_ref": {
+          "dates_basis": "assumed",
+          "kind": "plan_input",
+          "ref": "corn_soy__rye"
+        },
+        "unit": "days",
+        "value": 234
+      },
+      "ab8e1b76730": {
+        "audit_id": "ab8e1b76730",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "rain outside planned cover",
+          "year": "2020"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 67.45
+      },
+      "abc5aff8a7b": {
+        "audit_id": "abc5aff8a7b",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "evaluable seasons, the denominator (winter_heavy_rain_outside_cover)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "evaluable seasons, the denominator (winter_heavy_rain_outside_cover)"
+        },
+        "unit": "seasons",
+        "value": 20
+      },
+      "abcacb22f17": {
+        "audit_id": "abcacb22f17",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons with the event (winter_heavy_rain_outside_cover)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons with the event (winter_heavy_rain_outside_cover)"
+        },
+        "unit": "seasons",
+        "value": 0
+      },
+      "ac35cd5d802": {
+        "audit_id": "ac35cd5d802",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "heavy-rain days outside planned cover",
+          "year": "1986"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "days",
+        "value": 0
+      },
+      "ac903c7eabf": {
+        "audit_id": "ac903c7eabf",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "winter days outside planned cover"
+        },
+        "label": null,
+        "source_ref": {
+          "dates_basis": "assumed",
+          "kind": "plan_input",
+          "ref": "corn_soy__no_cover"
+        },
+        "unit": "days",
+        "value": 234
+      },
+      "aca4052d4b8": {
+        "audit_id": "aca4052d4b8",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "alternative minus default"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "alternative minus default"
+        },
+        "unit": "days",
+        "value": -211
+      },
+      "acb0afeedbc": {
+        "audit_id": "acb0afeedbc",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "next_plant - terminate"
+        },
+        "label": null,
+        "source_ref": {
+          "dates_basis": "assumed",
+          "kind": "plan_input",
+          "ref": "corn_soy__rye"
+        },
+        "unit": "days",
+        "value": 12
+      },
+      "ace3f91858b": {
+        "audit_id": "ace3f91858b",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "heavy-rain days outside planned cover",
+          "year": "2007"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "days",
+        "value": 0
+      },
+      "acf528b9364": {
+        "audit_id": "acf528b9364",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "seasons the check would have fired (rye_soy_short_gap_moisture)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "seasons the check would have fired (rye_soy_short_gap_moisture)"
+        },
+        "unit": "seasons",
+        "value": 9
+      },
+      "acfff21e24c": {
+        "audit_id": "acfff21e24c",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "modeled surface wetness, window mean (GWETTOP)",
+          "year": "1986"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "fraction 0-1",
+        "value": 0.5653
+      },
+      "ad3662f44a0": {
+        "audit_id": "ad3662f44a0",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "30 days before next_plant, inclusive"
+        },
+        "label": null,
+        "source_ref": {
+          "dates_basis": "assumed",
+          "kind": "plan_input",
+          "ref": "corn_soy__rye"
+        },
+        "unit": "days",
+        "value": 30
+      },
+      "ad9c6893cd7": {
+        "audit_id": "ad9c6893cd7",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "frozen dry cutoff"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "mm",
+        "value": 64.18
+      },
+      "ae53f693f58": {
+        "audit_id": "ae53f693f58",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "recent pct - earlier pct"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "recent pct - earlier pct"
+        },
+        "unit": "percentage points",
+        "value": 0.0
+      },
+      "aefff77d102": {
+        "audit_id": "aefff77d102",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "frozen threshold spring_dry_mm@05-12"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "threshold",
+          "ref": "spring_dry_mm@05-12",
+          "threshold_set_id": "d00101e09f5cae7e"
+        },
+        "unit": "mm",
+        "value": 64.18
+      },
+      "af0e1d8e7a9": {
+        "audit_id": "af0e1d8e7a9",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "bottom 20% of the full 1981-2025 record for this window (frozen)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "threshold",
+          "ref": "spring_dry_cutoff:05-12",
+          "threshold_set_id": "d00101e09f5cae7e"
+        },
+        "unit": "mm",
+        "value": 64.18
+      },
+      "af6eb6c0e59": {
+        "audit_id": "af6eb6c0e59",
+        "derivation": "calculation",
+        "inputs": {
+          "what": "evaluable seasons, the denominator (winter_heavy_rain_outside_cover)"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "calculation",
+          "ref": "evaluable seasons, the denominator (winter_heavy_rain_outside_cover)"
+        },
+        "unit": "seasons",
+        "value": 19
+      },
+      "af943f9a9ac": {
+        "audit_id": "af943f9a9ac",
+        "derivation": "nasa",
+        "inputs": {
+          "what": "modeled surface wetness, window mean (GWETTOP)",
+          "year": "2020"
+        },
+        "label": null,
+        "source_ref": {
+          "kind": "weather_snapshot",
+          "label": "NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
+          "ref": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+        },
+        "unit": "fraction 0-1",
+        "value": 0.828
+      }
+    },
+    "unclassified": 0
+  },
+  "calendar": {
+    "actions": [
+      {
+        "action_id": "harvest",
+        "date": "2024-09-20",
+        "end_date": null,
+        "evidence": [],
+        "flagged": false,
+        "kind": "harvest",
+        "label": "Harvest field_corn",
+        "status": "complete",
+        "trigger": "plan date (prev_harvest)",
+        "zone": null
+      },
+      {
+        "action_id": "seed",
+        "date": "2024-10-01",
+        "end_date": null,
+        "evidence": [],
+        "flagged": false,
+        "kind": "seed",
+        "label": "Seed cereal_rye",
+        "status": "complete",
+        "trigger": "plan date (winter.seed)",
+        "zone": null
+      },
+      {
+        "action_id": "check:cr_soil_01",
+        "date": "2024-10-01",
+        "end_date": null,
+        "evidence": [
+          {
+            "missing_inputs": [],
+            "reason": "no evaluator for condition 'drainage_class'",
+            "reference": null,
+            "rule_id": "cr_soil_01",
+            "source": {
+              "locator": "Establishment and Fieldwork",
+              "title": "Cereal Rye (SARE Managing Cover Crops Profitably 3rd ed.)",
+              "url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
+              "verified_date": "2026-11-12"
+            },
+            "status": "manual_check",
+            "verdict": "manual_check"
+          }
+        ],
+        "flagged": false,
+        "kind": "check",
+        "label": "Prefers light loams or sands; tolerant of poor drainage.",
+        "status": "manual_check",
+        "trigger": "rule cr_soil_01 (Heavy or poorly drained soils); due on the cover crop's seeding date",
+        "zone": null
+      },
+      {
+        "action_id": "spring_window",
+        "date": "2025-04-12",
+        "end_date": "2025-05-11",
+        "evidence": [],
+        "flagged": false,
+        "kind": "window",
+        "label": "Spring dryness window (the 30 days before planting)",
+        "status": "complete",
+        "trigger": "30 days before next_plant, inclusive",
+        "zone": null
+      },
+      {
+        "action_id": "check:cr_tt_03",
+        "date": "2025-04-30",
+        "end_date": null,
+        "evidence": [
+          {
+            "missing_inputs": [
+              "spring.is_dry or grower.low_moisture_concern"
+            ],
+            "reason": "12-day termination-to-planting gap does not meet the rule (>= 14 days); applies_when cannot tell: dryness is unavailable (spring status <Status.UNAVAILABLE: 'unavailable'>) and no low-moisture concern was reported",
+            "reference": null,
+            "rule_id": "cr_tt_03",
+            "source": {
+              "locator": "Soil Moisture Considerations",
+              "title": "NC State Soybean Production Guide: Rotational Considerations",
+              "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations",
+              "verified_date": "2026-11-12"
+            },
+            "status": "unknown",
+            "verdict": "unknown"
+          }
+        ],
+        "flagged": false,
+        "kind": "check",
+        "label": "Consider ending rye at least 14 days before soybean planting when low soil moisture is a concern.",
+        "status": "unknown",
+        "trigger": "rule cr_tt_03 (Low soil moisture is a concern before soybean planting); fires when the spring is dry or the grower reports the concern; due on the cover crop's termination date",
+        "zone": null
+      },
+      {
+        "action_id": "terminate",
+        "date": "2025-04-30",
+        "end_date": null,
+        "evidence": [],
+        "flagged": false,
+        "kind": "terminate",
+        "label": "Terminate cereal_rye",
+        "status": "complete",
+        "trigger": "plan date (winter.terminate)",
+        "zone": null
+      },
+      {
+        "action_id": "check:sb_nut_01",
+        "date": "2025-05-12",
+        "end_date": null,
+        "evidence": [
+          {
+            "missing_inputs": [],
+            "reason": "sourced reference N rate 0 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
+            "reference": {
+              "is_grower_target": false,
+              "kind": "published_reference",
+              "label": "published reference, not the grower's target",
+              "operator": "eq",
+              "source_url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+              "unit": "lb_N_per_acre",
+              "value_max": null,
+              "value_min": {
+                "audit_id": "a7f5769fb67",
+                "unit": "lb_N_per_acre",
+                "value": 0.0
+              }
+            },
+            "rule_id": "sb_nut_01",
+            "source": {
+              "locator": "Table 2.3 p. 15: Soybean row and nitrogen-units footnote",
+              "title": "Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014",
+              "url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+              "verified_date": "2026-11-13"
+            },
+            "status": "manual_check",
+            "verdict": "manual_check"
+          }
+        ],
+        "flagged": false,
+        "kind": "check",
+        "label": "The published routine soybean fertilizer nitrogen recommendation is zero. Crop nitrogen uptake and nutrient guidance for a combined wheat\u2013soybean system are...",
+        "status": "manual_check",
+        "trigger": "rule sb_nut_01 (Routine soybean fertilizer recommendation, not diagnosed nitrogen-fixation failure.); due on the planting date",
+        "zone": null
+      },
+      {
+        "action_id": "check:sb_pw_02",
+        "date": "2025-05-12",
+        "end_date": null,
+        "evidence": [
+          {
+            "missing_inputs": [],
+            "reason": "qualitative rule: Before mid-April",
+            "reference": null,
+            "rule_id": "sb_pw_02",
+            "source": {
+              "locator": "Planting before mid-April; Figure 2",
+              "title": "Data-Driven Recommendations for NC Soybean Planting Date (NC State Soybeans)",
+              "url": "https://soybeans.ces.ncsu.edu/news/data-driven-recommendations-for-nc-soybean-planting-date/",
+              "verified_date": "2026-11-12"
+            },
+            "status": "manual_check",
+            "verdict": "manual_check"
+          }
+        ],
+        "flagged": false,
+        "kind": "check",
+        "label": "Yield penalty and shorter plants when planted before mid-April regardless of maturity group.",
+        "status": "manual_check",
+        "trigger": "rule sb_pw_02 (Planting before mid-April in the Piedmont or Coastal Plain); due on the planting date",
+        "zone": null
+      },
+      {
+        "action_id": "check:sb_pw_03",
+        "date": "2025-05-12",
+        "end_date": null,
+        "evidence": [
+          {
+            "missing_inputs": [],
+            "reason": "qualitative rule: Past the third week of May",
+            "reference": null,
+            "rule_id": "sb_pw_03",
+            "source": {
+              "locator": "Planting past mid-May; Figure 1",
+              "title": "Data-Driven Recommendations for NC Soybean Planting Date (NC State Soybeans)",
+              "url": "https://soybeans.ces.ncsu.edu/news/data-driven-recommendations-for-nc-soybean-planting-date/",
+              "verified_date": "2026-11-12"
+            },
+            "status": "manual_check",
+            "verdict": "manual_check"
+          }
+        ],
+        "flagged": false,
+        "kind": "check",
+        "label": "Yields consistently decline when planting is delayed past the third week of May.",
+        "status": "manual_check",
+        "trigger": "rule sb_pw_03 (Planting delayed past third week of May); due on the planting date",
+        "zone": null
+      },
+      {
+        "action_id": "check:sb_pw_05",
+        "date": "2025-05-12",
+        "end_date": null,
+        "evidence": [
+          {
+            "missing_inputs": [],
+            "reason": "no evaluator for condition 'soil_moisture_status'",
+            "reference": null,
+            "rule_id": "sb_pw_05",
+            "source": {
+              "locator": "Opening paragraphs",
+              "title": "Planting Soybeans in a Drought (NC State Soybeans 2026)",
+              "url": "https://soybeans.ces.ncsu.edu/news/soybean-planting-decisions-under-drought-conditions-2026/",
+              "verified_date": "2026-11-12"
+            },
+            "status": "manual_check",
+            "verdict": "manual_check"
+          }
+        ],
+        "flagged": false,
+        "kind": "check",
+        "label": "Hold off planting until the optimal window and until soil moisture improves.",
+        "status": "manual_check",
+        "trigger": "rule sb_pw_05 (Drought conditions in central and western NC (2026)); due on the planting date",
+        "zone": null
+      },
+      {
+        "action_id": "check:sb_soil_01",
+        "date": "2025-05-12",
+        "end_date": null,
+        "evidence": [
+          {
+            "missing_inputs": [],
+            "reason": "no evaluator for condition 'slope_position'",
+            "reference": null,
+            "rule_id": "sb_soil_01",
+            "source": {
+              "locator": "Soils and Topography",
+              "title": "10. Water Management in Soybeans (AG-835)",
+              "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/10-water-management-in-soybeans",
+              "verified_date": "2026-11-12"
+            },
+            "status": "manual_check",
+            "verdict": "manual_check"
+          }
+        ],
+        "flagged": false,
+        "kind": "check",
+        "label": "Runoff on Piedmont hills limits plant-available water. Manual field check.",
+        "status": "manual_check",
+        "trigger": "rule sb_soil_01 (Sloping Piedmont fields); due on the planting date",
+        "zone": null
+      },
+      {
+        "action_id": "check:sb_wt_01",
+        "date": "2025-05-12",
+        "end_date": null,
+        "evidence": [
+          {
+            "missing_inputs": [],
+            "reason": "qualitative rule: Frost damage; seedling disease; early insect pressure",
+            "reference": null,
+            "rule_id": "sb_wt_01",
+            "source": {
+              "locator": "Soybean paragraph",
+              "title": "2025 Hertford Corn & Soybean Planting Guidance (NC State Extension)",
+              "url": "https://hertford.ces.ncsu.edu/news/2025-hertford-corn-soybean-planting-guidance/",
+              "verified_date": "2026-11-12"
+            },
+            "status": "manual_check",
+            "verdict": "manual_check"
+          }
+        ],
+        "flagged": false,
+        "kind": "check",
+        "label": "Too-early planting risks frost damage, seedling disease and end-of-season quality problems. Manual check.",
+        "status": "manual_check",
+        "trigger": "rule sb_wt_01 (Planting too early); due on the planting date",
+        "zone": null
+      },
+      {
+        "action_id": "plant",
+        "date": "2025-05-12",
+        "end_date": null,
+        "evidence": [],
+        "flagged": false,
+        "kind": "plant",
+        "label": "Plant soybean",
+        "status": "complete",
+        "trigger": "plan date (next_plant)",
+        "zone": null
+      }
+    ],
+    "notes": [],
+    "scenarios": {
+      "dry": {
+        "decisions_note": "Checks that fire in this dry spring but not in the typical one. The plan's dates do not move; these are the decisions that become live.",
+        "decisions_that_could_change": [
+          {
+            "date": "2025-04-30",
+            "question": "Consider ending rye at least 14 days before soybean planting when low soil moisture is a concern.",
+            "reason": "12-day termination-to-planting gap does not meet the rule (>= 14 days); applies_when active: dry replay",
+            "rule_id": "cr_tt_03",
+            "source": {
+              "locator": "Soil Moisture Considerations",
+              "title": "NC State Soybean Production Guide: Rotational Considerations",
+              "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations",
+              "verified_date": "2026-11-12"
+            }
+          }
+        ],
+        "replay": "/v1/seasons/1986/replay",
+        "spring": {
+          "cutoff_mm": {
+            "audit_id": "ad9c6893cd7",
+            "unit": "mm",
+            "value": 64.18
+          },
+          "is_dry": true,
+          "of": {
+            "audit_id": "a0bf9e1b658",
+            "unit": "seasons",
+            "value": 45
+          },
+          "rank": {
+            "audit_id": "a036ae06f96",
+            "unit": "rank (1 = driest)",
+            "value": 1
+          },
+          "status": "complete",
+          "total_mm": {
+            "audit_id": "a701d6eabe6",
+            "unit": "mm",
+            "value": 17.56
+          }
+        },
+        "wetness": {
+          "gwetroot_window_mean": {
+            "audit_id": "a961c8ed37d",
+            "unit": "fraction 0-1",
+            "value": 0.575
+          },
+          "gwettop_window_mean": {
+            "audit_id": "acfff21e24c",
+            "unit": "fraction 0-1",
+            "value": 0.5653
+          },
+          "label": "modeled (a model estimate, not a field measurement)",
+          "status": "complete"
+        },
+        "winter": {
+          "heavy_rain_days_outside_cover": {
+            "audit_id": "ac35cd5d802",
+            "unit": "days",
+            "value": 0
+          },
+          "rain_outside_cover_mm": {
+            "audit_id": "a627678ece9",
+            "unit": "mm",
+            "value": 5.57
+          }
+        },
+        "year": "1986"
+      },
+      "status": "complete",
+      "typical": {
+        "replay": "/v1/seasons/2007/replay",
+        "spring": {
+          "cutoff_mm": {
+            "audit_id": "ad9c6893cd7",
+            "unit": "mm",
+            "value": 64.18
+          },
+          "is_dry": false,
+          "of": {
+            "audit_id": "a0bf9e1b658",
+            "unit": "seasons",
+            "value": 45
+          },
+          "rank": {
+            "audit_id": "a0c04d221c8",
+            "unit": "rank (1 = driest)",
+            "value": 23
+          },
+          "status": "complete",
+          "total_mm": {
+            "audit_id": "a711def0f97",
+            "unit": "mm",
+            "value": 82.9
+          }
+        },
+        "wetness": {
+          "gwetroot_window_mean": {
+            "audit_id": "a1e4900777c",
+            "unit": "fraction 0-1",
+            "value": 0.6763
+          },
+          "gwettop_window_mean": {
+            "audit_id": "a16e751cde5",
+            "unit": "fraction 0-1",
+            "value": 0.706
+          },
+          "label": "modeled (a model estimate, not a field measurement)",
+          "status": "complete"
+        },
+        "winter": {
+          "heavy_rain_days_outside_cover": {
+            "audit_id": "ace3f91858b",
+            "unit": "days",
+            "value": 0
+          },
+          "rain_outside_cover_mm": {
+            "audit_id": "a6f9ae7d60b",
+            "unit": "mm",
+            "value": 30.38
+          }
+        },
+        "year": "2007"
+      },
+      "wet": {
+        "drainage_access_checks": {
+          "basis": "zone terrain and drainage (sample zones)",
+          "heavy_rain_days_outside_cover": {
+            "audit_id": "a19a0481d1f",
+            "unit": "days",
+            "value": 0
+          },
+          "items": [
+            {
+              "check": "inspect drainage and field access before planting",
+              "due": "2025-05-12",
+              "name": "Northeast block",
+              "status": "manual_check",
+              "why": "mean elevation 186.83 m is at or below the field mean 187.94 m and mean slope 1.2% is at most 2%",
+              "zone": "zone_ne"
+            }
+          ],
+          "status": "complete"
+        },
+        "replay": "/v1/seasons/2020/replay",
+        "spring": {
+          "cutoff_mm": {
+            "audit_id": "ad9c6893cd7",
+            "unit": "mm",
+            "value": 64.18
+          },
+          "is_dry": false,
+          "of": {
+            "audit_id": "a0bf9e1b658",
+            "unit": "seasons",
+            "value": 45
+          },
+          "rank": {
+            "audit_id": "a033cd21440",
+            "unit": "rank (1 = driest)",
+            "value": 45
+          },
+          "status": "complete",
+          "total_mm": {
+            "audit_id": "a2bb5ce6dd4",
+            "unit": "mm",
+            "value": 158.19
+          }
+        },
+        "wetness": {
+          "gwetroot_window_mean": {
+            "audit_id": "a5bb03d974f",
+            "unit": "fraction 0-1",
+            "value": 0.808
+          },
+          "gwettop_window_mean": {
+            "audit_id": "af943f9a9ac",
+            "unit": "fraction 0-1",
+            "value": 0.828
+          },
+          "label": "modeled (a model estimate, not a field measurement)",
+          "status": "complete"
+        },
+        "winter": {
+          "heavy_rain_days_outside_cover": {
+            "audit_id": "a19a0481d1f",
+            "unit": "days",
+            "value": 0
+          },
+          "rain_outside_cover_mm": {
+            "audit_id": "ab8e1b76730",
+            "unit": "mm",
+            "value": 67.45
+          }
+        },
+        "year": "2020"
+      }
+    },
+    "status": "complete",
+    "year": "2025"
+  },
+  "eras": {
+    "dry_spring": {
+      "basis": "own_evaluable_seasons",
+      "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
+      "diff_pp": {
+        "audit_id": "ae53f693f58",
+        "unit": "percentage points",
+        "value": 0.0
+      },
+      "earlier": {
+        "end": "2000",
+        "evaluable": {
+          "audit_id": "ab01df3ad5c",
+          "unit": "seasons",
+          "value": 20
+        },
+        "events": {
+          "audit_id": "a547e883045",
+          "unit": "seasons",
+          "value": 4
+        },
+        "not_evaluable": [],
+        "pct": {
+          "audit_id": "a8d8d5f05fe",
+          "unit": "percent",
+          "value": 20.0
+        },
+        "seasons": {
+          "audit_id": "a5730f61476",
+          "unit": "seasons",
+          "value": 20
+        },
+        "start": "1981"
+      },
+      "excluded_from_eras": [
+        "2001",
+        "2002",
+        "2003",
+        "2004",
+        "2005"
+      ],
+      "min_evaluable_per_era": {
+        "audit_id": "ab4ac9b51e4",
+        "unit": "seasons",
+        "value": 15
+      },
+      "recent": {
+        "end": "2025",
+        "evaluable": {
+          "audit_id": "ab01df3ad5c",
+          "unit": "seasons",
+          "value": 20
+        },
+        "events": {
+          "audit_id": "a547e883045",
+          "unit": "seasons",
+          "value": 4
+        },
+        "not_evaluable": [],
+        "pct": {
+          "audit_id": "a8d8d5f05fe",
+          "unit": "percent",
+          "value": 20.0
+        },
+        "seasons": {
+          "audit_id": "a5730f61476",
+          "unit": "seasons",
+          "value": 20
+        },
+        "start": "2006"
+      },
+      "result": "similar",
+      "similarity_band_pp": {
+        "audit_id": "a9d74f829ea",
+        "unit": "percentage points",
+        "value": 10.0
+      },
+      "status": "complete",
+      "threshold_set_id": "d00101e09f5cae7e",
+      "thresholds": {
+        "spring_dry_mm@05-12": {
+          "audit_id": "aefff77d102",
+          "unit": "mm",
+          "value": 64.18
+        }
+      }
+    },
+    "rye_soy_short_gap_moisture": {
+      "basis": "own_evaluable_seasons",
+      "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
+      "diff_pp": {
+        "audit_id": "ae53f693f58",
+        "unit": "percentage points",
+        "value": 0.0
+      },
+      "earlier": {
+        "end": "2000",
+        "evaluable": {
+          "audit_id": "a40caa0dbf5",
+          "unit": "seasons",
+          "value": 20
+        },
+        "events": {
+          "audit_id": "a370ec37933",
+          "unit": "seasons",
+          "value": 4
+        },
+        "not_evaluable": [],
+        "pct": {
+          "audit_id": "a8d8d5f05fe",
+          "unit": "percent",
+          "value": 20.0
+        },
+        "seasons": {
+          "audit_id": "a5fb3bbddd7",
+          "unit": "seasons",
+          "value": 20
+        },
+        "start": "1981"
+      },
+      "excluded_from_eras": [
+        "2001",
+        "2002",
+        "2003",
+        "2004",
+        "2005"
+      ],
+      "min_evaluable_per_era": {
+        "audit_id": "ab4ac9b51e4",
+        "unit": "seasons",
+        "value": 15
+      },
+      "recent": {
+        "end": "2025",
+        "evaluable": {
+          "audit_id": "a40caa0dbf5",
+          "unit": "seasons",
+          "value": 20
+        },
+        "events": {
+          "audit_id": "a370ec37933",
+          "unit": "seasons",
+          "value": 4
+        },
+        "not_evaluable": [],
+        "pct": {
+          "audit_id": "a8d8d5f05fe",
+          "unit": "percent",
+          "value": 20.0
+        },
+        "seasons": {
+          "audit_id": "a5fb3bbddd7",
+          "unit": "seasons",
+          "value": 20
+        },
+        "start": "2006"
+      },
+      "result": "similar",
+      "similarity_band_pp": {
+        "audit_id": "a9d74f829ea",
+        "unit": "percentage points",
+        "value": 10.0
+      },
+      "status": "complete",
+      "threshold_set_id": "d00101e09f5cae7e",
+      "thresholds": {
+        "spring_dry_mm@05-12": {
+          "audit_id": "aefff77d102",
+          "unit": "mm",
+          "value": 64.18
+        }
+      }
+    },
+    "winter_heavy_rain_outside_cover": {
+      "basis": "own_evaluable_seasons",
+      "caveat": "The share of seasons is similar in 1981-2000 and 2006-2025 (within 10 percentage points). Descriptive comparison of two periods only; not a trend, cause, or forecast.",
+      "diff_pp": {
+        "audit_id": "a8529d7f4e6",
+        "unit": "percentage points",
+        "value": 5.0
+      },
+      "earlier": {
+        "end": "2000",
+        "evaluable": {
+          "audit_id": "af6eb6c0e59",
+          "unit": "seasons",
+          "value": 19
+        },
+        "events": {
+          "audit_id": "abcacb22f17",
+          "unit": "seasons",
+          "value": 0
+        },
+        "not_evaluable": [
+          {
+            "reason": "record_starts_after_window_start",
+            "year": "1981"
+          }
+        ],
+        "pct": {
+          "audit_id": "a6288964b91",
+          "unit": "percent",
+          "value": 0.0
+        },
+        "seasons": {
+          "audit_id": "a8e7d64ba90",
+          "unit": "seasons",
+          "value": 20
+        },
+        "start": "1981"
+      },
+      "excluded_from_eras": [
+        "2001",
+        "2002",
+        "2003",
+        "2004",
+        "2005"
+      ],
+      "min_evaluable_per_era": {
+        "audit_id": "ab4ac9b51e4",
+        "unit": "seasons",
+        "value": 15
+      },
+      "recent": {
+        "end": "2025",
+        "evaluable": {
+          "audit_id": "abc5aff8a7b",
+          "unit": "seasons",
+          "value": 20
+        },
+        "events": {
+          "audit_id": "a8d86fb5366",
+          "unit": "seasons",
+          "value": 1
+        },
+        "not_evaluable": [],
+        "pct": {
+          "audit_id": "a970d347861",
+          "unit": "percent",
+          "value": 5.0
+        },
+        "seasons": {
+          "audit_id": "a8e7d64ba90",
+          "unit": "seasons",
+          "value": 20
+        },
+        "start": "2006"
+      },
+      "result": "similar",
+      "similarity_band_pp": {
+        "audit_id": "a9d74f829ea",
+        "unit": "percentage points",
+        "value": 10.0
+      },
+      "status": "complete",
+      "threshold_set_id": "d00101e09f5cae7e",
+      "thresholds": {
+        "heavy_rain_mm": {
+          "audit_id": "a46b819f393",
+          "unit": "mm",
+          "value": 76.2
+        }
+      }
+    }
+  },
+  "limits": [
+    "Descriptive comparison of two historical periods only; not a trend, cause or forecast.",
+    "Weather values are NASA POWER estimates for a regional grid cell, not field measurements.",
+    "Soil wetness (GWETTOP / GWETROOT) is modeled and is shown as modeled everywhere.",
+    "Cover-crop establishment is uncertain; living cover is planned, not observed.",
+    "Catalog rules are guidance from the cited sources; checks marked manual_check or unknown need a person or more input.",
+    "Rain outside planned cover is a rainfall record, not an erosion or soil-loss estimate.",
+    "Plan dates are demo defaults (assumed), not grower-entered; edit them before use.",
+    "The alternative is compared as a fixed plan; no forecast of which plan will do better."
+  ],
+  "meta": {
+    "catalog_version": "v2:8eeb5bf961eb",
+    "plan_version": "d4c4e77a829943f1",
+    "request_id": "req_example",
+    "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+  },
+  "note_version": "1",
+  "plan": {
+    "calendar": {
+      "cover_label": "planned (not observed)",
+      "days_without_planned_cover": {
+        "audit_id": "a941c0544ed",
+        "unit": "days",
+        "value": 23
+      },
+      "establishment": "uncertain",
+      "living_cover_days_planned": {
+        "audit_id": "a67d8b0187b",
+        "unit": "days",
+        "value": 211
+      },
+      "termination_gap_days": {
+        "audit_id": "acb0afeedbc",
+        "unit": "days",
+        "value": 12
+      },
+      "winter_days": {
+        "audit_id": "ab501be9aed",
+        "unit": "days",
+        "value": 234
+      }
+    },
+    "dates_basis": "assumed",
+    "grower_inputs": {
+      "low_moisture_concern": null,
+      "observations": [],
+      "residue_report": null
+    },
+    "label": "Cereal rye before soybean",
+    "next_crop": "soybean",
+    "next_plant": "05-12",
+    "plan_id": "corn_soy__rye",
+    "planting_year": "2025",
+    "prev_harvest": "09-20",
+    "previous_crop": "field_corn",
+    "production_system": null,
+    "region": "NC Piedmont",
+    "winter": {
+      "crop_id": "cereal_rye",
+      "kind": "cover",
+      "seed": "10-01",
+      "terminate": "04-30"
+    }
+  },
+  "sources": [
+    {
+      "locator": "Soils and Topography",
+      "title": "10. Water Management in Soybeans (AG-835)",
+      "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/10-water-management-in-soybeans",
+      "verified_date": "2026-11-12"
+    },
+    {
+      "locator": "Soybean paragraph",
+      "title": "2025 Hertford Corn & Soybean Planting Guidance (NC State Extension)",
+      "url": "https://hertford.ces.ncsu.edu/news/2025-hertford-corn-soybean-planting-guidance/",
+      "verified_date": "2026-11-12"
+    },
+    {
+      "locator": "Establishment and Fieldwork",
+      "title": "Cereal Rye (SARE Managing Cover Crops Profitably 3rd ed.)",
+      "url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
+      "verified_date": "2026-11-12"
+    },
+    {
+      "locator": "Table 2.3 p. 15: Soybean row and nitrogen-units footnote",
+      "title": "Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014",
+      "url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+      "verified_date": "2026-11-13"
+    },
+    {
+      "locator": "Planting before mid-April; Figure 2",
+      "title": "Data-Driven Recommendations for NC Soybean Planting Date (NC State Soybeans)",
+      "url": "https://soybeans.ces.ncsu.edu/news/data-driven-recommendations-for-nc-soybean-planting-date/",
+      "verified_date": "2026-11-12"
+    },
+    {
+      "locator": "Planting past mid-May; Figure 1",
+      "title": "Data-Driven Recommendations for NC Soybean Planting Date (NC State Soybeans)",
+      "url": "https://soybeans.ces.ncsu.edu/news/data-driven-recommendations-for-nc-soybean-planting-date/",
+      "verified_date": "2026-11-12"
+    },
+    {
+      "locator": "Soil Moisture Considerations",
+      "title": "NC State Soybean Production Guide: Rotational Considerations",
+      "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations",
+      "verified_date": "2026-11-12"
+    },
+    {
+      "locator": "Opening paragraphs",
+      "title": "Planting Soybeans in a Drought (NC State Soybeans 2026)",
+      "url": "https://soybeans.ces.ncsu.edu/news/soybean-planting-decisions-under-drought-conditions-2026/",
+      "verified_date": "2026-11-12"
+    },
+    {
+      "locator": "PRECTOTCORR, T2M, T2M_MAX, T2M_MIN, GWETTOP, GWETROOT",
+      "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
+      "title": "NASA POWER Daily API (AG community), Union County reference grid cell",
+      "url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+      "verified_date": "2026-11-13T03:24:40Z"
+    }
+  ],
+  "spring": {
+    "dry_cutoff_mm": {
+      "audit_id": "af0e1d8e7a9",
+      "unit": "mm",
+      "value": 64.18
+    },
+    "dry_seasons": {
+      "audit_id": "a5c4710eacc",
+      "unit": "seasons",
+      "value": 9
+    },
+    "dry_years": [
+      "1981",
+      "1983",
+      "1986",
+      "1993",
+      "2001",
+      "2008",
+      "2010",
+      "2021",
+      "2022"
+    ],
+    "eligible_seasons": {
+      "audit_id": "a00e37685b4",
+      "unit": "seasons",
+      "value": 45
+    },
+    "excluded_years": [],
+    "median_total_mm": {
+      "audit_id": "a664bb22b23",
+      "unit": "mm",
+      "value": 82.9
+    },
+    "status": "complete",
+    "window_days": {
+      "audit_id": "ad3662f44a0",
+      "unit": "days",
+      "value": 30
+    }
+  },
+  "spring_checks": [
+    {
+      "check_id": "rye_soy_short_gap_moisture",
+      "count": {
+        "audit_id": "acf528b9364",
+        "unit": "seasons",
+        "value": 9
+      },
+      "denominator": {
+        "audit_id": "a8addee48b4",
+        "unit": "seasons",
+        "value": 45
+      },
+      "fires_when": "gap < 14 days AND (dry replay OR grower low-moisture concern)",
+      "label": "Would have prompted a field-moisture check",
+      "optional": false,
+      "pct": {
+        "audit_id": "a390144cbfc",
+        "unit": "percent",
+        "value": 20.0
+      },
+      "qualifying_years": [
+        "1981",
+        "1983",
+        "1986",
+        "1993",
+        "2001",
+        "2008",
+        "2010",
+        "2021",
+        "2022"
+      ],
+      "rule_ids": [
+        "cr_tt_03"
+      ],
+      "skipped_years": [],
+      "source": {
+        "locator": "Soil Moisture Considerations",
+        "title": "NC State Soybean Production Guide: Rotational Considerations",
+        "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations",
+        "verified_date": "2026-11-12"
+      }
+    }
+  ],
+  "status": "complete",
+  "unresolved_checks": [
+    {
+      "due": "2024-10-01",
+      "flagged": false,
+      "missing_inputs": [],
+      "reason": "no evaluator for condition 'drainage_class'",
+      "rule_id": "cr_soil_01",
+      "source": {
+        "locator": "Establishment and Fieldwork",
+        "title": "Cereal Rye (SARE Managing Cover Crops Profitably 3rd ed.)",
+        "url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
+        "verified_date": "2026-11-12"
+      },
+      "status": "manual_check",
+      "what": "Prefers light loams or sands; tolerant of poor drainage."
+    },
+    {
+      "due": "2025-04-30",
+      "flagged": false,
+      "missing_inputs": [
+        "spring.is_dry or grower.low_moisture_concern"
+      ],
+      "reason": "12-day termination-to-planting gap does not meet the rule (>= 14 days); applies_when cannot tell: dryness is unavailable (spring status <Status.UNAVAILABLE: 'unavailable'>) and no low-moisture concern was reported",
+      "rule_id": "cr_tt_03",
+      "source": {
+        "locator": "Soil Moisture Considerations",
+        "title": "NC State Soybean Production Guide: Rotational Considerations",
+        "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations",
+        "verified_date": "2026-11-12"
+      },
+      "status": "unknown",
+      "what": "Consider ending rye at least 14 days before soybean planting when low soil moisture is a concern."
+    },
+    {
+      "due": "2025-05-12",
+      "flagged": false,
+      "missing_inputs": [],
+      "reason": "sourced reference N rate 0 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
+      "rule_id": "sb_nut_01",
+      "source": {
+        "locator": "Table 2.3 p. 15: Soybean row and nitrogen-units footnote",
+        "title": "Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014",
+        "url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+        "verified_date": "2026-11-13"
+      },
+      "status": "manual_check",
+      "what": "The published routine soybean fertilizer nitrogen recommendation is zero. Crop nitrogen uptake and nutrient guidance for a combined wheat\u2013soybean system are..."
+    },
+    {
+      "due": "2025-05-12",
+      "flagged": false,
+      "missing_inputs": [],
+      "reason": "qualitative rule: Before mid-April",
+      "rule_id": "sb_pw_02",
+      "source": {
+        "locator": "Planting before mid-April; Figure 2",
+        "title": "Data-Driven Recommendations for NC Soybean Planting Date (NC State Soybeans)",
+        "url": "https://soybeans.ces.ncsu.edu/news/data-driven-recommendations-for-nc-soybean-planting-date/",
+        "verified_date": "2026-11-12"
+      },
+      "status": "manual_check",
+      "what": "Yield penalty and shorter plants when planted before mid-April regardless of maturity group."
+    },
+    {
+      "due": "2025-05-12",
+      "flagged": false,
+      "missing_inputs": [],
+      "reason": "qualitative rule: Past the third week of May",
+      "rule_id": "sb_pw_03",
+      "source": {
+        "locator": "Planting past mid-May; Figure 1",
+        "title": "Data-Driven Recommendations for NC Soybean Planting Date (NC State Soybeans)",
+        "url": "https://soybeans.ces.ncsu.edu/news/data-driven-recommendations-for-nc-soybean-planting-date/",
+        "verified_date": "2026-11-12"
+      },
+      "status": "manual_check",
+      "what": "Yields consistently decline when planting is delayed past the third week of May."
+    },
+    {
+      "due": "2025-05-12",
+      "flagged": false,
+      "missing_inputs": [],
+      "reason": "no evaluator for condition 'soil_moisture_status'",
+      "rule_id": "sb_pw_05",
+      "source": {
+        "locator": "Opening paragraphs",
+        "title": "Planting Soybeans in a Drought (NC State Soybeans 2026)",
+        "url": "https://soybeans.ces.ncsu.edu/news/soybean-planting-decisions-under-drought-conditions-2026/",
+        "verified_date": "2026-11-12"
+      },
+      "status": "manual_check",
+      "what": "Hold off planting until the optimal window and until soil moisture improves."
+    },
+    {
+      "due": "2025-05-12",
+      "flagged": false,
+      "missing_inputs": [],
+      "reason": "no evaluator for condition 'slope_position'",
+      "rule_id": "sb_soil_01",
+      "source": {
+        "locator": "Soils and Topography",
+        "title": "10. Water Management in Soybeans (AG-835)",
+        "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/10-water-management-in-soybeans",
+        "verified_date": "2026-11-12"
+      },
+      "status": "manual_check",
+      "what": "Runoff on Piedmont hills limits plant-available water. Manual field check."
+    },
+    {
+      "due": "2025-05-12",
+      "flagged": false,
+      "missing_inputs": [],
+      "reason": "qualitative rule: Frost damage; seedling disease; early insect pressure",
+      "rule_id": "sb_wt_01",
+      "source": {
+        "locator": "Soybean paragraph",
+        "title": "2025 Hertford Corn & Soybean Planting Guidance (NC State Extension)",
+        "url": "https://hertford.ces.ncsu.edu/news/2025-hertford-corn-soybean-planting-guidance/",
+        "verified_date": "2026-11-12"
+      },
+      "status": "manual_check",
+      "what": "Too-early planting risks frost damage, seedling disease and end-of-season quality problems. Manual check."
+    }
+  ],
+  "winter": {
+    "eligible_seasons": {
+      "audit_id": "aa727b95ee8",
+      "unit": "seasons",
+      "value": 44
+    },
+    "label": "Rain that fell while no living cover was planned (a weather record, not erosion)",
+    "per_season_median": {
+      "heavy_rain_days_outside_cover": {
+        "audit_id": "a79252772d6",
+        "unit": "days",
+        "value": 0.0
+      },
+      "rain_mm_outside_cover": {
+        "audit_id": "a3c29347dde",
+        "unit": "mm",
+        "value": 78.14
+      }
+    },
+    "reasons": [
+      "1 season(s) not complete: record_starts_after_window_start"
+    ],
+    "residue_context": [
+      {
+        "changes_living_cover_indicator": false,
+        "kind": "corn_residue",
+        "note": "Corn residue may remain after harvest. Context only: it is not living cover and changes no count."
+      },
+      {
+        "changes_living_cover_indicator": false,
+        "kind": "cover_residue",
+        "note": "Terminated cover residue may remain after termination. Context only: it does not extend the living-cover interval."
+      }
+    ],
+    "seasons": {
+      "audit_id": "a83e0fbe09a",
+      "unit": "seasons",
+      "value": 45
+    },
+    "seasons_with_heavy_rain_outside_cover": {
+      "audit_id": "a191ffea49c",
+      "unit": "seasons",
+      "value": 1
+    },
+    "segments": [
+      "living_cover",
+      "before_establishment",
+      "after_termination",
+      "no_planned_cover"
+    ],
+    "status": "partial"
+  }
+}
