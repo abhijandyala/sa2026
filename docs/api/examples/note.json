@@ -75,7 +75,7 @@
         "default_date": "2024-10-01",
         "fallback_date": null,
         "first_date": "2024-10-01",
-        "what": "seed: default 2024-10-01 vs fallback none"
+        "what": "seed: default 2024-10-01 (Seed cereal_rye) vs fallback none (None)"
       },
       "fallback_source": "grower",
       "kind": "fixed_alternative",
@@ -426,19 +426,22 @@
         "unit": "seasons",
         "value": 20
       },
-      "a46b819f393": {
-        "audit_id": "a46b819f393",
-        "derivation": "calculation",
+      "a50ec1b31e9": {
+        "audit_id": "a50ec1b31e9",
+        "derivation": "extension",
         "inputs": {
-          "what": "frozen threshold heavy_rain_mm"
+          "method": "published_fixed",
+          "what": "published threshold heavy_rain_mm"
         },
         "label": null,
         "source_ref": {
-          "kind": "threshold",
-          "ref": "heavy_rain_mm",
-          "threshold_set_id": "d00101e09f5cae7e"
+          "kind": "catalog_rule",
+          "locator": "PDF p. 4, precipitation discussion",
+          "ref": "fc_v2_ref_very_heavy_rain",
+          "threshold_set_id": "d00101e09f5cae7e",
+          "url": "https://files.nc.gov/ncdeq/climate-change/climate-scinece-report/NC-Climate-Science-Report_Plain_Language_Summary.pdf"
         },
-        "unit": "mm",
+        "unit": "mm/day",
         "value": 76.2
       },
       "a547e883045": {
@@ -1924,8 +1927,8 @@
       "threshold_set_id": "d00101e09f5cae7e",
       "thresholds": {
         "heavy_rain_mm": {
-          "audit_id": "a46b819f393",
-          "unit": "mm",
+          "audit_id": "a50ec1b31e9",
+          "unit": "mm/day",
           "value": 76.2
         }
       }
@@ -2039,6 +2042,12 @@
       "verified_date": "2026-11-12"
     },
     {
+      "locator": "PDF p. 4, precipitation discussion",
+      "title": "North Carolina Climate Science Report: Plain Language Summary; March 2020",
+      "url": "https://files.nc.gov/ncdeq/climate-change/climate-scinece-report/NC-Climate-Science-Report_Plain_Language_Summary.pdf",
+      "verified_date": "2026-11-13"
+    },
+    {
       "locator": "Opening paragraphs",
       "title": "Planting Soybeans in a Drought (NC State Soybeans 2026)",
       "url": "https://soybeans.ces.ncsu.edu/news/soybean-planting-decisions-under-drought-conditions-2026/",
@@ -2137,6 +2146,40 @@
     }
   ],
   "status": "complete",
+  "thresholds": [
+    {
+      "locator": "PDF p. 4, precipitation discussion",
+      "method": "published_fixed",
+      "name": "heavy_rain_mm",
+      "note": "Applied to NASA POWER daily values, which are Local Solar Time days (time_standard=LST), not a rolling 24-hour window; a storm split across two solar days can fall below the value on each day. Rainfall-depth weather metric only: not erosion, runoff or soil loss. Zero-count winters are valid results.",
+      "published": true,
+      "reference_span": "1981-01-01..2025-06-30",
+      "status": "complete",
+      "title": "North Carolina Climate Science Report: Plain Language Summary; March 2020",
+      "unit": "mm/day",
+      "url": "https://files.nc.gov/ncdeq/climate-change/climate-scinece-report/NC-Climate-Science-Report_Plain_Language_Summary.pdf",
+      "value": {
+        "audit_id": "a50ec1b31e9",
+        "unit": "mm/day",
+        "value": 76.2
+      },
+      "verified_date": "2026-11-13"
+    },
+    {
+      "method": "bottom_20pct_order_statistic",
+      "name": "spring_dry_mm@05-12",
+      "note": null,
+      "published": false,
+      "reference_span": "1981..2025",
+      "status": "complete",
+      "unit": "mm",
+      "value": {
+        "audit_id": "aefff77d102",
+        "unit": "mm",
+        "value": 64.18
+      }
+    }
+  ],
   "unresolved_checks": [
     {
       "due": "2024-10-01",

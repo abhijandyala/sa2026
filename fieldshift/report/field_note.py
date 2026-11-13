@@ -22,6 +22,7 @@ from fieldshift.planner.backup import (
     BackupPlan,
     build_backup_plan,
     compare_fixed_plans,
+    distinct_ids,
 )
 from fieldshift.planner.calendar import (
     ActionCalendar,
@@ -49,6 +50,7 @@ class _Nums:
 
     def __init__(self, book: AuditBook, ctx: Context, plan: Plan, dates_basis: str):
         self.book, self.ctx, self.plan, self.dates_basis = book, ctx, plan, dates_basis
+        self.ts: Any = None  # the frozen ThresholdSet, set once the comparison has run
         self.snapshot = source_ref(
             "weather_snapshot", ctx.snapshot_hash,
             label="NASA POWER daily (MERRA-2 / POWER), Union County snapshot",
@@ -67,6 +69,25 @@ class _Nums:
         """A number computed from the plan's own dates: ``grower`` entered or ``assumed`` demo."""
         ref = source_ref("plan_input", self.plan.plan_id, dates_basis=self.dates_basis)
         return self.book.num(v, unit, "calculation", ref, {"what": what, **inputs})
+
+    def threshold(self, name: str, value: Any) -> dict[str, Any] | None:
+        """A frozen threshold's value. Published ones (``Threshold.source``) are ``extension``."""
+        th = self.ts.thresholds.get(name) if self.ts is not None else None
+        sid = self.ts.threshold_set_id if self.ts is not None else None
+        if th is not None and th.source is not None:
+            ref = source_ref(
+                "catalog_rule", th.source.rule_id, url=th.source.url, locator=th.source.locator,
+                threshold_set_id=sid,
+            )  # fmt: skip
+            return self.book.num(
+                value,
+                th.unit,
+                "extension",
+                ref,
+                {"what": f"published threshold {name}", "method": th.method},
+            )
+        return self.calc(value, th.unit if th else None, f"frozen threshold {name}",
+                         ref=source_ref("threshold", name, threshold_set_id=sid))  # fmt: skip
 
     def extension(self, v: Any, unit: str | None, rule_id: str, url: str | None, what: str):
         ref = source_ref("catalog_rule", rule_id, url=url)
@@ -229,13 +250,29 @@ def _eras_section(res: Any, n: _Nums) -> dict[str, Any]:
             "min_evaluable_per_era": n.calc(e.min_evaluable_per_era, "seasons", "fixed minimum coverage per era"),
             "basis": e.basis,
             "threshold_set_id": e.threshold_set_id,
-            "thresholds": {
-                k: n.calc(v, "mm", f"frozen threshold {k}", ref=source_ref("threshold", k, threshold_set_id=e.threshold_set_id))
-                for k, v in e.thresholds.items()
-            },
+            "thresholds": {k: n.threshold(k, v) for k, v in e.thresholds.items()},
             "excluded_from_eras": _years(list(e.excluded_from_eras)),
             "earlier": era(e.earlier), "recent": era(e.recent),
         }  # fmt: skip
+    return out
+
+
+def _thresholds_section(ts: Any, n: _Nums) -> list[dict[str, Any]]:
+    """Every frozen threshold used, with its method and (when published) its source."""
+    out = []
+    for name, t in sorted(ts.thresholds.items()):
+        out.append(
+            {
+                "name": name, "method": t.method, "status": str(t.status), "unit": t.unit,
+                "value": n.threshold(name, t.value), "reference_span": t.reference_span,
+                "note": t.note, "published": t.source is not None,
+                **(
+                    {"title": t.source.title, "url": t.source.url, "locator": t.source.locator,
+                     "verified_date": t.source.verified_date}
+                    if t.source is not None else {}
+                ),
+            }
+        )  # fmt: skip
     return out
 
 
@@ -417,9 +454,15 @@ def _alternative_section(
                         "seasons",
                         f"seasons the alternative would have fired ({cid})",
                     ),
-                    "denominator": n.calc(
-                        v["denominator"], "seasons", f"evaluable seasons ({cid})"
+                    "default_denominator": n.calc(
+                        v["default_denominator"], "seasons", f"evaluable seasons, default ({cid})"
                     ),
+                    "alternative_denominator": n.calc(
+                        v["fallback_denominator"],
+                        "seasons",
+                        f"evaluable seasons, alternative ({cid})",
+                    ),
+                    "same_denominator": v["same_denominator"],
                 }
                 for cid, v in diff.get("spring_check_counts", {}).items()
             },
@@ -474,6 +517,8 @@ def build_field_note(
     """Build the field note JSON for ``plan`` (and one fixed ``alternative``)."""
     index = ctx.index
     year = year or default_planting_year()
+    if alternative is not None:
+        alternative = distinct_ids(plan, alternative)  # results are keyed by plan_id
     plans = [plan] + ([alternative] if alternative is not None else [])
     results, ts, _shared = engine.compare_plans(plans, ctx)
     base = results[0]
@@ -490,6 +535,7 @@ def build_field_note(
     book = AuditBook()
     basis = "assumed" if dates_assumed else "grower"
     n = _Nums(book, ctx, plan, basis)
+    n.ts = ts
     cal = add_scenarios(build_action_calendar(plan, index, year=year, inputs=inputs), plan, ctx)
 
     note: dict[str, Any] = {
@@ -501,6 +547,7 @@ def build_field_note(
         "spring": _spring_section(base, n, ts, plan),
         "spring_checks": _checks_section(base, n),
         "eras": _eras_section(base, n),
+        "thresholds": _thresholds_section(ts, n),
         "calendar": _calendar_section(cal, n),
         "unresolved_checks": _unresolved(cal, base),
     }
@@ -512,6 +559,7 @@ def build_field_note(
             else "grower"
         )
         an = _Nums(book, ctx, alternative, alt_basis)
+        an.ts = ts
         acal = build_action_calendar(alternative, index, year=year, inputs=inputs)
         backup = build_backup_plan(plan, alternative, index, year=year, as_of=as_of, inputs=inputs)
         backup = compare_fixed_plans(backup, plan, alternative, ctx)

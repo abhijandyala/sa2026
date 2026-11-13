@@ -195,3 +195,71 @@ def test_backup_identical_plans_have_nothing_to_switch(ctx, rye):
 def test_backup_for_invalid_fallback_reports_the_issue(ctx, rye):
     b = build_backup_plan(rye, edited(rye, seed="09-01"), ctx.index, year=YEAR)
     assert b.status == "invalid_input" and b.issues[0]["field"] == "fallback"
+
+
+# ------------------------------------------------------------------ review fixes (phase-9-B)
+
+
+def test_crop_only_change_with_identical_dates_still_diverges(ctx, rye):
+    clover = edited(rye, crop_id="crimson_clover").model_copy(
+        update={"plan_id": "clover_same_dates"}
+    )
+    b = build_backup_plan(rye, clover, ctx.index, year=YEAR)
+    assert b.divergence is not None and b.divergence.action_id in ("seed", "terminate")
+    assert "cereal_rye" in b.divergence.what and "crimson_clover" in b.divergence.what
+    assert b.decision_deadline == b.divergence.first_date - __import__("datetime").timedelta(days=1)
+    assert not any("nothing to switch" in n for n in b.notes)
+
+
+def test_later_termination_is_not_called_a_dry_weather_switch(ctx, rye):
+    later = edited(rye, terminate="05-05").model_copy(update={"plan_id": "later"})
+    sc = build_backup_plan(rye, later, ctx.index, year=YEAR).switch_condition
+    assert sc.kind == "grower_decision" and "does not end the cover earlier" in sc.text
+
+
+def test_an_earlier_termination_that_still_fires_the_check_is_not_a_dry_switch(ctx, rye):
+    a_bit_earlier = edited(
+        rye, terminate="04-29"
+    )  # 13-day gap, still < 14.model_copy(update={"plan_id": "bit_earlier"})
+    sc = build_backup_plan(rye, a_bit_earlier, ctx.index, year=YEAR).switch_condition
+    assert sc.kind == "grower_decision" and "still triggers the same moisture check" in sc.text
+
+
+def test_edited_alternative_with_the_same_plan_id_keeps_its_own_results(ctx, rye):
+    same_id = edited(rye, terminate="04-14")  # plan_id identical to the default's
+    b = compare_fixed_plans(
+        build_backup_plan(rye, same_id, ctx.index, year=YEAR), rye, same_id, ctx
+    )
+    c = b.comparison
+    assert (
+        c["default"]["termination_gap_days"] == 12 and c["fallback"]["termination_gap_days"] == 28
+    )
+    assert c["fallback_minus_default"]["termination_gap_days"] == 16
+    counts = c["fallback_minus_default"]["spring_check_counts"]["rye_soy_short_gap_moisture"]
+    assert counts["default"] > 0 and counts["fallback"] == 0
+
+
+def test_denominators_are_reported_separately_when_coverage_differs(ctx, rye):
+    july = edited(rye, terminate="06-28").model_copy(
+        update={"next_plant": "07-05", "plan_id": "july"}
+    )
+    b = compare_fixed_plans(build_backup_plan(rye, july, ctx.index, year=YEAR), rye, july, ctx)
+    c = b.comparison["fallback_minus_default"]["spring_check_counts"]["rye_soy_short_gap_moisture"]
+    assert (c["default_denominator"], c["fallback_denominator"]) == (45, 44)
+    assert c["same_denominator"] is False
+
+
+def test_calendar_summaries_use_the_requested_year_not_2025(ctx, rye):
+    a = edited(rye, terminate="03-01", seed="10-01").model_copy(
+        update={"next_plant": "03-20", "plan_id": "a"}
+    )
+    c = edited(a, terminate="02-27").model_copy(update={"plan_id": "c"})
+    b = compare_fixed_plans(build_backup_plan(a, c, ctx.index, year=2028), a, c, ctx)
+    # 2028 is a leap year: Feb 29 is inside the window, so the 3-day difference is real
+    assert (
+        b.comparison["default"]["living_cover_days_planned"]
+        - b.comparison["fallback"]["living_cover_days_planned"]
+        == 3
+    )
+    assert b.comparison["fallback_minus_default"]["living_cover_days_planned"] == -3
+    assert b.comparison["fallback_minus_default"]["termination_gap_days"] == 3

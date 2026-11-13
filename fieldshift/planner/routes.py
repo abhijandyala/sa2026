@@ -11,15 +11,17 @@ because that is a result about the plan rather than a malformed request.
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 from pydantic import ValidationError
 
+from fieldshift.compare.context import Context, get_context
 from fieldshift.contracts import FieldIssue, Plan
 from fieldshift.planner.checker import check_plan, default_planting_year, plan_version
 from fieldshift.planner.crops import list_crops
 from fieldshift.planner.finder import PRIORITIES, find_plans
+from fieldshift.planner.wheat_path import demo_plan, evaluate_wheat_double_crop, plan_from_dates
 from fieldshift.report.http import invalid, issue, read_object
 from fieldshift.report.meta import get_index, response_meta
 
@@ -141,3 +143,115 @@ async def post_find(request: Request) -> Any:
 def get_crops() -> dict[str, Any]:
     out = list_crops(get_index())
     return {"meta": response_meta(), **out.model_dump(mode="json")}
+
+
+# --------------------------------------------------------------------------- wheat double-crop
+
+_WHEAT_FLAT = ("prev_harvest", "wheat_plant", "wheat_harvest", "soybean_plant")
+_WHEAT_OPTIONAL = ("previous_crop_id", "region", "production_system", "grower", "plan_id", "label")
+
+
+@router.get("/plans/wheat/template")
+def get_wheat_template() -> dict[str, Any]:
+    """Demo dates for the wheat -> double-crop soybean path. ASSUMED, not grower-entered."""
+    return {
+        "meta": response_meta(),
+        "dates_basis": "assumed",
+        "plan": demo_plan().model_dump(mode="json"),
+        "enter": list(_WHEAT_FLAT),
+        "note": "The catalog has no numeric Piedmont wheat windows; the grower enters the dates.",
+    }
+
+
+@router.post("/plans/wheat")
+async def post_wheat(request: Request, ctx: Annotated[Context, Depends(get_context)]) -> Any:
+    """Wheat -> double-crop soybean. Body: ``{plan}`` (a winter_grain plan) or the flat dates
+    ``{prev_harvest, wheat_plant, wheat_harvest, soybean_plant}`` (MM-DD), plus optional
+    ``maturity_group``, ``year``, ``inputs``, ``compare_to_plan_id`` or ``compare_to_plan`` (a
+    full-season soybean plan, compared as different-calendar only)."""
+    body, err = await read_object(request)
+    if err is not None:
+        return err
+    assert body is not None
+    issues: list[dict[str, str]] = []
+    plan: Plan | None = None
+    if body.get("plan") is not None:
+        try:
+            plan = Plan.model_validate(body["plan"])
+        except ValidationError as exc:
+            issues += _validation_issues(exc, "plan.")
+    else:
+        missing = [k for k in _WHEAT_FLAT if body.get(k) is None]
+        if missing:
+            issues += [issue(k, "required", f"{k} is required (MM-DD)") for k in missing]
+        else:
+            try:
+                plan = plan_from_dates(
+                    **{k: body[k] for k in _WHEAT_FLAT},
+                    **{k: body[k] for k in _WHEAT_OPTIONAL if body.get(k) is not None},
+                )
+            except ValidationError as exc:
+                rename = {"harvest": "wheat_harvest", "plant": "wheat_plant", "winter.harvest": "wheat_harvest",
+                          "winter.plant": "wheat_plant", "next_plant": "soybean_plant"}  # fmt: skip
+                issues += [
+                    {**i, "field": rename.get(i["field"], i["field"])}
+                    for i in _validation_issues(exc, "")
+                ]
+            except TypeError as exc:
+                issues.append(issue("body", "invalid_type", str(exc)))
+    year = body.get("year")
+    if year is not None and (
+        isinstance(year, bool) or not isinstance(year, int) or not MIN_YEAR <= year <= MAX_YEAR
+    ):
+        issues.append(
+            issue("year", "invalid_year", f"year must be an integer in {MIN_YEAR}-{MAX_YEAR}")
+        )
+    inputs = body.get("inputs")
+    if inputs is not None and (
+        not isinstance(inputs, dict) or not all(_valid_input_value(v) for v in inputs.values())
+    ):
+        issues.append(
+            issue("inputs", "invalid_value", "inputs must be an object of finite numbers")
+        )
+    full: Plan | None = None
+    if body.get("compare_to_plan") is not None and body.get("compare_to_plan_id") is not None:
+        issues.append(
+            issue(
+                "compare_to_plan",
+                "ambiguous",
+                "give compare_to_plan or compare_to_plan_id, not both",
+            )
+        )
+    elif body.get("compare_to_plan") is not None:
+        try:
+            full = Plan.model_validate(body["compare_to_plan"])
+        except ValidationError as exc:
+            issues += _validation_issues(exc, "compare_to_plan.")
+    elif body.get("compare_to_plan_id") is not None:
+        from fieldshift.api.samples import load_samples
+
+        sp = load_samples().plans.get(str(body["compare_to_plan_id"]))
+        if sp is None or sp.plan is None:
+            issues.append(
+                issue("compare_to_plan_id", "unknown_plan", "unknown or unavailable sample plan")
+            )
+        else:
+            full = sp.plan
+    if issues or plan is None:
+        return invalid(issues)
+    result = evaluate_wheat_double_crop(
+        plan, ctx, maturity_group=body.get("maturity_group"), year=year or default_planting_year(),
+        inputs=inputs, full_season_plan=full,
+    )  # fmt: skip
+    if result["status"] == "invalid_input":
+        return invalid(
+            [
+                issue(
+                    f"plan.{i['field']}" if i["field"] != "maturity_group" else "maturity_group",
+                    i["code"],
+                    i["message"],
+                )
+                for i in result["issues"]
+            ]
+        )
+    return {"meta": response_meta(plan_version(plan, result["year"], inputs)), "result": result}

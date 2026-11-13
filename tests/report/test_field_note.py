@@ -194,3 +194,58 @@ def test_note_is_deterministic_apart_from_the_request_id(ctx, rye):
     b = build_field_note(rye, ctx, year=YEAR, as_of=AS_OF)
     a["meta"].pop("request_id"), b["meta"].pop("request_id")
     assert json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
+
+
+# ------------------------------------------------------------------ review fixes (phase-9-B)
+
+
+def test_alternative_with_the_same_plan_id_is_compared_correctly(ctx, rye):
+    alt = edited(rye, terminate="04-14")  # same plan_id on purpose
+    note = build_field_note(rye, ctx, alternative=alt, year=YEAR, as_of=AS_OF)
+    (a,) = note["alternatives"]
+    assert note["plan"]["calendar"]["termination_gap_days"]["value"] == 12
+    assert a["plan"]["calendar"]["termination_gap_days"]["value"] == 28
+    assert a["difference_vs_default"]["termination_gap_days"]["value"] == 16
+    assert verify(note) == []
+
+
+def test_alternative_difference_matches_the_displayed_calendars_in_a_leap_year(ctx, rye):
+    a = edited(rye, terminate="03-01").model_copy(update={"next_plant": "03-20", "plan_id": "a"})
+    b = edited(a, terminate="02-27").model_copy(update={"plan_id": "b"})
+    note = build_field_note(a, ctx, alternative=b, year=2028, as_of=date(2028, 1, 1))
+    shown = note["plan"]["calendar"]["living_cover_days_planned"]["value"]
+    alt_shown = note["alternatives"][0]["plan"]["calendar"]["living_cover_days_planned"]["value"]
+    diff = note["alternatives"][0]["difference_vs_default"]["living_cover_days_planned"]["value"]
+    assert diff == alt_shown - shown == -3
+    gap_diff = note["alternatives"][0]["difference_vs_default"]["termination_gap_days"]["value"]
+    assert (
+        gap_diff
+        == note["alternatives"][0]["plan"]["calendar"]["termination_gap_days"]["value"]
+        - note["plan"]["calendar"]["termination_gap_days"]["value"]
+    )
+
+
+def test_denominators_are_separate_audited_numbers(ctx, rye):
+    july = edited(rye, terminate="06-28").model_copy(
+        update={"next_plant": "07-05", "plan_id": "july"}
+    )
+    note = build_field_note(rye, ctx, alternative=july, year=YEAR, as_of=AS_OF)
+    c = note["alternatives"][0]["difference_vs_default"]["spring_check_counts"][
+        "rye_soy_short_gap_moisture"
+    ]
+    assert (c["default_denominator"]["value"], c["alternative_denominator"]["value"]) == (45, 44)
+    assert c["same_denominator"] is False and verify(note) == []
+
+
+def test_published_heavy_rain_threshold_is_an_extension_number_with_its_source(ctx, rye):
+    note = build_field_note(rye, ctx, year=YEAR, as_of=AS_OF)
+    published = [t for t in note["thresholds"] if t["published"]]
+    assert published and published[0]["url"] and published[0]["locator"]
+    by_path = {p: e for p, _n, e in walk_all(note)}
+    heavy = by_path["eras.winter_heavy_rain_outside_cover.thresholds.heavy_rain_mm"]
+    assert heavy["derivation"] == "extension" and heavy["source_ref"]["kind"] == "catalog_rule"
+    assert heavy["source_ref"]["url"] == published[0]["url"]
+    assert any(s["url"] == published[0]["url"] for s in note["sources"])
+    # computed (not published) thresholds stay "calculation"
+    cutoff = by_path["spring.dry_cutoff_mm"]
+    assert cutoff["derivation"] == "calculation"

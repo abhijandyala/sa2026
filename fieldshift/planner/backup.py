@@ -85,14 +85,16 @@ def _plan_dates(cal: ActionCalendar) -> dict[str, date]:
 def _divergence(default: ActionCalendar, fallback: ActionCalendar) -> Divergence | None:
     d, f = _plan_dates(default), _plan_dates(fallback)
     best: Divergence | None = None
+    la = {a.action_id: a.label for a in default.actions}
+    lb = {a.action_id: a.label for a in fallback.actions}
     for aid in PLAN_ACTIONS:
         dd, fd = d.get(aid), f.get(aid)
-        if dd == fd:
+        if dd == fd and la.get(aid) == lb.get(aid):  # same date AND same crop/action
             continue
         first = min(x for x in (dd, fd) if x is not None)
         what = (
-            f"{aid}: default {dd.isoformat() if dd else 'none'} vs fallback "
-            f"{fd.isoformat() if fd else 'none'}"
+            f"{aid}: default {dd.isoformat() if dd else 'none'} ({la.get(aid)}) vs fallback "
+            f"{fd.isoformat() if fd else 'none'} ({lb.get(aid)})"
         )
         cand = Divergence(
             action_id=aid, default_date=dd, fallback_date=fd, first_date=first, what=what
@@ -113,6 +115,26 @@ def _switch_condition(
     d_flags = {a.action_id.removeprefix("check:") for a in default.actions if a.flagged}
     f_flags = {a.action_id.removeprefix("check:") for a in fallback.actions if a.flagged}
     when = f"by {deadline.isoformat()}" if deadline else "before the plans diverge"
+    fallback_ids = {a.action_id for a in fallback.actions}
+    addressed = [rid for rid in gated if f"check:{rid}" not in fallback_ids]
+    earlier = (
+        div is not None and div.action_id == "terminate" and div.default_date is not None
+        and div.fallback_date is not None and div.fallback_date < div.default_date
+    )  # fmt: skip
+    if div is not None and div.action_id == "terminate" and gated and not (earlier and addressed):
+        reason = (
+            "the fallback does not end the cover earlier"
+            if not earlier
+            else "the fallback still triggers the same moisture check"
+        )
+        return SwitchCondition(
+            kind="grower_decision",
+            text=(
+                f"No catalog rule says this switch addresses a dry spring: {reason}. "
+                f"It is the grower's call {when}: {div.what}."
+            ),
+            rule_ids=gated,
+        )
     if div is not None and div.action_id == "terminate" and gated:
         return SwitchCondition(
             kind="dry_or_moisture_concern",
@@ -120,7 +142,7 @@ def _switch_condition(
                 f"Switch to the fallback {when} if the spring is running dry or the grower reports "
                 f"a low-moisture concern: {div.what}."
             ),
-            rule_ids=gated,
+            rule_ids=addressed,
             inputs_needed=["a field moisture check or a grower-reported concern"],
         )
     cleared = sorted(d_flags - f_flags)
@@ -238,17 +260,30 @@ def build_backup_plan(
     )  # fmt: skip
 
 
+def distinct_ids(default: Plan, other: Plan) -> Plan:
+    """``other`` with an internal id that differs from ``default``'s (results are keyed by id)."""
+    if other.plan_id != default.plan_id:
+        return other
+    return other.model_copy(update={"plan_id": f"{other.plan_id}__alternative"})
+
+
 def compare_fixed_plans(backup: BackupPlan, default: Plan, fallback: Plan, ctx: Any) -> BackupPlan:
     """Attach the fixed-plan comparison (both plans over every season, one frozen ThresholdSet)."""
     from fieldshift.compare import engine
+    from fieldshift.seasons.align import build_calendar
 
     if backup.status != Status.COMPLETE:
         return backup
+    fallback = distinct_ids(default, fallback)
     results, ts, shared = engine.compare_plans([default, fallback], ctx)
     plans = {r.plan_id: r for r in results}
+    year = backup.year or default_planting_year()
 
-    def brief(pid: str) -> dict[str, Any]:
+    def brief(pid: str, plan: Plan) -> dict[str, Any]:
         r = plans[pid]
+        cal = build_calendar(
+            plan, year
+        )  # the planting year the calendars show, not the 2025 summary
         if (
             r.status != Status.COMPLETE
             or r.calendar is None
@@ -259,9 +294,10 @@ def compare_fixed_plans(backup: BackupPlan, default: Plan, fallback: Plan, ctx: 
         return {
             "plan_id": pid,
             "status": str(r.status),
-            "living_cover_days_planned": r.calendar.living_cover_days_planned,
-            "days_without_planned_cover": r.calendar.days_without_planned_cover,
-            "termination_gap_days": r.calendar.termination_gap_days,
+            "calendar_year": year,
+            "living_cover_days_planned": cal.cover.days if cal.cover else 0,
+            "days_without_planned_cover": cal.winter_days - (cal.cover.days if cal.cover else 0),
+            "termination_gap_days": cal.termination_gap_days,
             "rain_mm_outside_cover_median": r.winter.per_season_median.get("rain_mm_outside_cover"),
             "heavy_rain_days_outside_cover_median": r.winter.per_season_median.get(
                 "heavy_rain_days_outside_cover"
@@ -278,7 +314,7 @@ def compare_fixed_plans(backup: BackupPlan, default: Plan, fallback: Plan, ctx: 
             "flagged_other_checks": [x.rule_id for x in r.other_checks if x.flagged],
         }
 
-    d, f = brief(default.plan_id), brief(fallback.plan_id)
+    d, f = brief(default.plan_id, default), brief(fallback.plan_id, fallback)
     diff: dict[str, Any] = {}
     if d.get("status") == "complete" and f.get("status") == "complete":
         for k in ("living_cover_days_planned", "rain_mm_outside_cover_median",
@@ -288,8 +324,11 @@ def compare_fixed_plans(backup: BackupPlan, default: Plan, fallback: Plan, ctx: 
         dc = {c["check_id"]: c for c in d["spring_checks"]}
         fc = {c["check_id"]: c for c in f["spring_checks"]}
         diff["spring_check_counts"] = {
-            cid: {"default": dc[cid]["count"], "fallback": fc[cid]["count"],
-                  "denominator": dc[cid]["denominator"]}
+            cid: {
+                "default": dc[cid]["count"], "default_denominator": dc[cid]["denominator"],
+                "fallback": fc[cid]["count"], "fallback_denominator": fc[cid]["denominator"],
+                "same_denominator": dc[cid]["denominator"] == fc[cid]["denominator"],
+            }
             for cid in sorted(set(dc) & set(fc))
         }  # fmt: skip
     backup.comparison = {

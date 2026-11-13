@@ -11,6 +11,7 @@
     "comparison": {
       "basis": "fixed_plans",
       "default": {
+        "calendar_year": 2025,
         "days_without_planned_cover": 234,
         "flagged_other_checks": [],
         "heavy_rain_days_outside_cover_median": 0.0,
@@ -22,6 +23,7 @@
         "termination_gap_days": null
       },
       "fallback": {
+        "calendar_year": 2025,
         "days_without_planned_cover": 23,
         "flagged_other_checks": [],
         "heavy_rain_days_outside_cover_median": 0.0,
@@ -197,7 +199,7 @@
       "default_date": null,
       "fallback_date": "2024-10-01",
       "first_date": "2024-10-01",
-      "what": "seed: default none vs fallback 2024-10-01"
+      "what": "seed: default none (None) vs fallback 2024-10-01 (Seed cereal_rye)"
     },
     "fallback_plan_id": "corn_soy__rye",
     "fallback_source": "grower",

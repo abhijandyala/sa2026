@@ -1,0 +1,9 @@
+CHANGES NEEDED
+
+- high | fieldshift/planner/backup.py:248 | Edited alternatives retaining the default’s plan_id overwrite its comparison result; gaps 12/28 become 28/28 with zero difference. | Preserve results by position or use distinct internal keys.
+- high | fieldshift/planner/backup.py:89 | Crop-only changes with identical dates produce no divergence or deadline and claim “nothing to switch.” | Compare crop/action identity alongside dates.
+- high | fieldshift/planner/backup.py:116 | Any termination change triggers a dry-weather switch—even April 30 → May 10, which prolongs cover during dryness. | Require an earlier termination and evidence that the fallback addresses the concern.
+- medium | fieldshift/planner/backup.py:290 | Comparison reports one denominator despite different coverage: May/July plans yield 45/44, but the difference block reports 45 for both. | Compare shared evaluable years or expose separate denominators.
+- medium | fieldshift/report/routes.py:138 | Validation checks only the requested year; February 28–29 cover in 2028 passes, then historical replay raises uncaught InvalidPlanError. | Validate replay years and return typed HTTP 400 issues.
+- medium | fieldshift/report/field_note.py:392 | Alternative differences use 2025 calendar summaries while displayed calendars use the requested year. In 2028, cover days 152/150 report −1; gaps 9/11 report +1. | Calculate calendar differences from the displayed calendars.
+- medium | fieldshift/report/field_note.py:233 | Published 76.2 mm heavy-rain threshold is audited as “calculation”; its publication is absent from sources. | Carry Threshold.source into the audit and source list, with derivation “extension.”

@@ -29,6 +29,7 @@ from fieldshift.contracts import Plan, SeasonCalendar, Status
 from fieldshift.field.zones import ZoneSet, collection_assessment, load_zones
 from fieldshift.metrics.rules import GATES, RuleCheck
 from fieldshift.planner.checker import CheckResult, check_plan, default_planting_year
+from fieldshift.seasons.align import build_calendar
 
 ActionKind = Literal["harvest", "seed", "terminate", "plant", "window", "check"]
 _ORDER = {"harvest": 0, "seed": 1, "window": 2, "check": 3, "terminate": 4, "plant": 5}
@@ -167,6 +168,34 @@ def _plan_actions(plan: Plan, cal: SeasonCalendar) -> list[Action]:
                        label="Spring dryness window (the 30 days before planting)",
                        trigger="30 days before next_plant, inclusive"))  # fmt: skip
     return acts
+
+
+def plan_year_issues(plan: Plan, years: Any) -> list[dict[str, str]]:
+    """Typed issues for the first historical (or requested) year in which ``plan`` is invalid.
+
+    A plan can be valid in one year and impossible in another (a Feb 28/29 cover window that
+    collapses in a non-leap year), and the historical replay runs every year.
+    """
+    from fieldshift.contracts import InvalidPlanError
+
+    seen: set[str] = set()
+    out: list[dict[str, str]] = []
+    for y in years:
+        try:
+            build_calendar(plan, y)
+        except InvalidPlanError as exc:
+            for i in exc.issues:
+                key = f"{i.field}:{i.code}"
+                if key not in seen:
+                    seen.add(key)
+                    out.append(
+                        {
+                            "field": i.field,
+                            "code": i.code,
+                            "message": f"{i.message} (planting year {y})",
+                        }
+                    )
+    return out
 
 
 def _sort(actions: list[Action]) -> list[Action]:

@@ -123,3 +123,20 @@ def test_unsupported_plan_is_a_200_with_a_status(client):
     assert n.status_code == 200 and n.json()["status"] == "unsupported"
     c = client.post("/v1/plans/calendar", json={"plan": p, "year": YEAR})
     assert c.status_code == 200 and c.json()["calendar"]["status"] == "unsupported"
+
+
+def test_a_plan_valid_in_the_requested_year_but_not_in_every_replay_year_is_a_typed_400(client):
+    # Feb 28 seed and Feb 29 termination: fine in leap 2028, but the terminate day collapses onto
+    # the seed day in non-leap years, which the historical replay would hit.
+    from fieldshift.api.samples import load_samples
+
+    p = load_samples().plans["corn_soy__rye"].plan.model_dump(mode="json")
+    p["winter"].update(seed="02-28", terminate="02-29")
+    p["next_plant"], p["prev_harvest"] = "03-10", "10-01"
+    for path in ("/v1/plans/note", "/v1/plans/calendar", "/v1/plans/backup"):
+        r = client.post(path, json={"plan": p, "year": 2028})
+        assert r.status_code == 400, path
+        assert (
+            r.json()["issues"][0]["field"].startswith("plan.winter")
+            and "planting year" in r.json()["issues"][0]["message"]
+        )

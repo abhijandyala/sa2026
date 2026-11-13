@@ -25,7 +25,12 @@ from fieldshift.api.samples import load_samples
 from fieldshift.compare.context import Context, get_context
 from fieldshift.contracts import FieldIssue, Plan
 from fieldshift.planner.backup import build_backup_plan, compare_fixed_plans
-from fieldshift.planner.calendar import add_scenarios, build_action_calendar, diff_calendars
+from fieldshift.planner.calendar import (
+    add_scenarios,
+    build_action_calendar,
+    diff_calendars,
+    plan_year_issues,
+)
 from fieldshift.planner.checker import default_planting_year, plan_version
 from fieldshift.report.field_note import build_field_note
 from fieldshift.report.http import invalid, issue, read_object
@@ -131,14 +136,12 @@ def _finite(v: Any) -> bool:
 
 
 def _check_plan_errors(plan: Plan, field: str, year: int, ctx: Context) -> list[dict[str, str]]:
-    from fieldshift.compare.engine import build_calendar
-    from fieldshift.contracts import InvalidPlanError
+    """Typed issues for the requested year AND every historical planting year (the replay runs
+    them all, and a Feb 28/29 window can be valid in one year and impossible in another)."""
+    from fieldshift.compare.engine import YEARS
 
-    try:
-        build_calendar(plan, year)
-    except InvalidPlanError as exc:
-        return [issue(f"{field}.{i.field}", i.code, i.message) for i in exc.issues]
-    return []
+    found = plan_year_issues(plan, [year, *YEARS])
+    return [issue(f"{field}.{i['field']}", i["code"], i["message"]) for i in found]
 
 
 @router.post("/plans/calendar")

@@ -2898,6 +2898,92 @@
         ]
       }
     },
+    "/v1/plans/wheat": {
+      "post": {
+        "description": "Wheat -> double-crop soybean. Body: ``{plan}`` (a winter_grain plan) or the flat dates\n``{prev_harvest, wheat_plant, wheat_harvest, soybean_plant}`` (MM-DD), plus optional\n``maturity_group``, ``year``, ``inputs``, ``compare_to_plan_id`` or ``compare_to_plan`` (a\nfull-season soybean plan, compared as different-calendar only).",
+        "operationId": "post_wheat_v1_plans_wheat_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Post Wheat V1 Plans Wheat Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Post Wheat",
+        "tags": [
+          "planner"
+        ]
+      }
+    },
+    "/v1/plans/wheat/template": {
+      "get": {
+        "description": "Demo dates for the wheat -> double-crop soybean path. ASSUMED, not grower-entered.",
+        "operationId": "get_wheat_template_v1_plans_wheat_template_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Wheat Template V1 Plans Wheat Template Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidInputResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Wheat Template",
+        "tags": [
+          "planner"
+        ]
+      }
+    },
     "/v1/plans/{plan_id}/note": {
       "get": {
         "description": "The field note for a sample plan; ``alternative`` is another sample plan id.",
