@@ -16,7 +16,7 @@
 |---|---|---|---|
 | `current_practice` | Current practice | `corn_soy__no_cover` | `soy_corn__no_cover` |
 | `winter_cover` | Winter cover | `corn_soy__rye`, with the default termination giving a 12-day gap (handbook case) | `soy_corn__rye` |
-| `add_grain_crop` | Add a grain crop | `corn_soy__wheat_dc` (winter wheat → double-crop soybean). Status is `unavailable: catalog_missing` until Perplexity's wheat rows land | `soy_corn__no_cover` |
+| `add_grain_crop` | Add a grain crop | `corn_soy__wheat_dc` (winter wheat → double-crop soybean). With catalog v2 it returns `partial`: demo dates from `GET /v1/plans/wheat/template` (prev harvest 09-20, wheat 10-25 to 06-05, soybean 06-12), labeled `dates_basis: assumed`; compared to full-season soybean only as `different-calendar`. Catalog v1 still gives `unavailable: catalog_missing` | `soy_corn__no_cover` |
 
 **Crimson clover is not a preset.** `corn_soy__clover` is the checker's "plan with problems" example. It flags:
 - `sb_rc_02`: legume cover before soybean
