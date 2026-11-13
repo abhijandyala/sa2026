@@ -45,7 +45,7 @@ def _tags(*t: str) -> frozenset[str]:
 
 _NC_ALL = RegionRule("nc_all")
 
-# Every distinct ``region`` string in data/catalogs/v1/crop_rules.csv.
+# Every distinct ``region`` string in the v1/v2 crop_rules.csv.
 REGION_MAP: dict[str, RegionRule] = {
     "North Carolina statewide": _NC_ALL,
     "North Carolina": _NC_ALL,

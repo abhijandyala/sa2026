@@ -47,7 +47,11 @@ async def post_fertilizer(request: Request) -> Any:
         basis=body.get("basis"), crop_id=body.get("crop_id"),
     )  # fmt: skip
     if result.status == "invalid_input":
-        return invalid([i.model_dump() for i in result.issues])
+        return invalid(
+            [i.model_dump() for i in result.issues],
+            n_reference=result.n_reference.model_dump(mode="json") if result.n_reference else None,
+            notes=result.notes,
+        )
     return {"meta": response_meta(), "result": result.model_dump(mode="json")}
 
 

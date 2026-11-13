@@ -19,6 +19,7 @@ from fieldshift.contracts import Plan, Status, WinterManagement
 from fieldshift.field.regions import region_match
 from fieldshift.metrics.rules import RuleCheck
 from fieldshift.planner.checker import CheckResult, check_plan, default_planting_year
+from fieldshift.planner.wheat import wheat_catalog_state
 
 Priority = Literal["soil_protection", "planting_window", "limited_water"]
 PRIORITIES: tuple[Priority, ...] = ("soil_protection", "planting_window", "limited_water")
@@ -202,12 +203,15 @@ def find_plans(
             opt.notes = notes
             options.append(opt)
 
+    wheat_state, wheat_reason = wheat_catalog_state(index)
     excluded.append(
         Excluded(
             option_id="winter_wheat_double_crop",
-            status=Status.UNAVAILABLE,
-            reason="catalog_missing: winter wheat planting/harvest rows and the double-crop "
-            "soybean window are not in the catalog yet",
+            status=wheat_state if wheat_state != Status.COMPLETE else Status.PARTIAL,
+            reason=(wheat_reason or "")
+            + ("; " if wheat_reason else "")
+            + "not enumerated automatically: enter the wheat harvest and soybean planting dates "
+            "in a winter_grain plan and use /v1/plans/check",
         )
     )
 

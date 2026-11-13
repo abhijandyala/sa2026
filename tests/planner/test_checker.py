@@ -119,19 +119,27 @@ def test_grower_concern_makes_the_rye_rule_fire_without_weather(index):
     assert no_concern.status == "unknown"  # no weather in a plain check: do not call it clear
 
 
-def test_winter_wheat_path_is_labeled_catalog_missing(index):
-    p = plan(
-        winter=WinterManagement(
-            kind="winter_grain", crop_id="winter_wheat", plant="10-25", harvest="06-05"
-        ),
-        next_plant="06-20",
-    )
-    res = check_plan(p, index, year=YEAR)
+WHEAT_PLAN = dict(
+    winter=WinterManagement(
+        kind="winter_grain", crop_id="winter_wheat", plant="10-25", harvest="06-05"
+    ),
+    next_plant="06-20",
+)
+
+
+def test_winter_wheat_path_is_labeled_catalog_missing_in_v1(index_v1):
+    res = check_plan(plan(**WHEAT_PLAN), index_v1, year=YEAR)
     assert res.status == "complete"
-    assert (
-        res.path_notes[0].status == "unavailable" and "catalog_missing" in res.path_notes[0].reason
-    )
+    assert res.path_notes[0].status == "unavailable"
+    assert "catalog_missing" in res.path_notes[0].reason
     assert res.rule("ww_rc_01").flagged  # wheat after corn, caution
+
+
+def test_winter_wheat_path_in_v2_is_partial_with_grower_entered_dates(index):
+    res = check_plan(plan(**WHEAT_PLAN), index, year=YEAR)
+    note = res.path_notes[0]
+    assert note.status == "partial" and "grower" in note.reason
+    assert res.rule("ww_rc_01").flagged
 
 
 def test_check_is_deterministic_and_plan_version_is_stable(index):
@@ -157,8 +165,36 @@ def test_crops_listing_shows_roles_and_path_availability(index):
     assert crops["cereal_rye"].crop_role == "cover_crop"
     assert crops["field_corn"].paths[0].status == "complete"
     wheat = {p.path: p for p in crops["winter_wheat"].paths}
+    assert wheat["as_next_crop"].status == "complete"  # v2 has wheat planting_window rows
+    assert wheat["winter_grain_double_crop"].status == "partial"
+
+
+def test_crops_listing_v1_wheat_is_unavailable(index_v1):
+    wheat = {
+        p.path: p for p in {c.crop_id: c for c in list_crops(index_v1).crops}["winter_wheat"].paths
+    }
     assert wheat["as_next_crop"].status == "partial"
     assert wheat["winter_grain_double_crop"].status == "unavailable"
+
+
+def test_crops_listing_carries_the_sourced_n_reference_not_a_target(index):
+    crops = {c.crop_id: c for c in list_crops(index).crops}
+    fc, sb = crops["field_corn"].nitrogen_reference, crops["soybean"].nitrogen_reference
+    assert (fc["value_min"], fc["value_max"], fc["unit"]) == (120.0, 160.0, "lb_N_per_acre")
+    assert sb["value_min"] == 0.0 and sb["value_max"] is None  # a real zero, not missing
+    assert fc["is_grower_target"] is False and "not your target" in fc["label"]
+    assert crops["cereal_rye"].nitrogen_reference is None
+
+
+def test_checker_shows_fc_nut_01_as_a_sourced_reference_manual_check(index):
+    p = plan(previous_crop_id="soybean", next_crop_id="field_corn", next_plant="05-10")
+    c = check_plan(p, index, year=YEAR).rule("fc_nut_01")
+    assert c.status == "manual_check" and not c.flagged
+    assert (c.reference["value_min"], c.reference["value_max"]) == (120.0, 160.0)
+    assert c.reference["is_grower_target"] is False
+    assert "not the grower's target" in c.reason and "soil test" in c.reason
+    sb = check_plan(plan(), index, year=YEAR).rule("sb_nut_01")
+    assert sb.reference["value_min"] == 0.0 and sb.reference["value_min"] is not None
 
 
 # ---------------------------------------------------------------- finder
@@ -179,7 +215,8 @@ def test_finder_enumerates_options_and_priorities_only_reorder(index):
     assert facts(res_a) == facts(res_b) == facts(res_c)  # ranking never changes the facts
     assert [o.rank for o in res_a.options] == list(range(1, len(res_a.options) + 1))
     assert res_a.excluded[-1].option_id == "winter_wheat_double_crop"
-    assert res_a.excluded[-1].status == "unavailable"
+    assert res_a.excluded[-1].status == "partial"  # v2: grower-entered dates, not enumerated
+    assert "grower" in res_a.excluded[-1].reason
 
 
 def test_finder_priorities_change_the_order(index):
@@ -224,7 +261,7 @@ def test_http_check_carries_metadata(client):
     assert r.status_code == 200
     meta = r.json()["meta"]
     assert set(meta) == {"plan_version", "catalog_version", "snapshot_hash", "request_id"}
-    assert meta["catalog_version"].startswith("v1:")
+    assert meta["catalog_version"].startswith("v2:")
     assert r.json()["result"]["status"] == "complete"
 
 

@@ -16,10 +16,14 @@ def issue(field: str, code: str, message: str) -> dict[str, str]:
     return FieldIssue(field=field, code=code, message=message).model_dump()
 
 
-def invalid(issues: list[dict[str, str]]) -> JSONResponse:
-    """HTTP 400 with ``status: invalid_input``, typed field issues and the response metadata."""
+def invalid(issues: list[dict[str, str]], **extra: Any) -> JSONResponse:
+    """HTTP 400 with ``status: invalid_input``, typed field issues and the response metadata.
+
+    ``extra`` adds context fields to the body (for example a sourced reference that still applies).
+    """
     return JSONResponse(
-        status_code=400, content={"status": "invalid_input", "issues": issues, **response_meta()}
+        status_code=400,
+        content={"status": "invalid_input", "issues": issues, **extra, **response_meta()},
     )
 
 

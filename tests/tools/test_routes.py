@@ -200,3 +200,24 @@ def test_zones_analyze_rejects_unknown_change_zone(client):
         json={"changes": [{"kind": "regrading", "reported_on": "2030-01-01", "zone_id": "nope"}]},
     )
     assert r.status_code == 400 and r.json()["issues"][0]["field"] == "changes.0.zone_id"
+
+
+def test_fertilizer_route_no_target_400_still_carries_the_n_reference(client):
+    r = post(
+        client,
+        "/v1/fertilizer/calc",
+        targets={},
+        product={"fertilizer_id": "urea_46_0_0"},
+        crop_id="field_corn",
+    )
+    assert r.status_code == 400
+    ref = r.json()["n_reference"]
+    assert (ref["value_min"], ref["value_max"], ref["is_grower_target"]) == (120.0, 160.0, False)
+    ok = post(
+        client,
+        "/v1/fertilizer/calc",
+        targets={"n_lb_per_acre": 100},
+        product={"fertilizer_id": "urea_46_0_0"},
+        crop_id="field_corn",
+    )
+    assert ok.json()["result"]["target_vs_reference"]["position"] == "below"

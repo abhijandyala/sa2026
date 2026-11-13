@@ -1,4 +1,10 @@
-from fieldshift.catalogs import CatalogIndex, load_catalog
+from fieldshift.catalogs import (
+    DEFAULT_CATALOG_DIR,
+    V1_CATALOG_DIR,
+    V2_CATALOG_DIR,
+    CatalogIndex,
+    load_catalog,
+)
 from fieldshift.catalogs.validate import (
     CROPS_FILE,
     FERTILIZERS_FILE,
@@ -11,11 +17,11 @@ def keys(catalog, severity="error"):
     return {(i.file, i.row, i.field) for i in catalog.issues if i.severity == severity}
 
 
-# ------------------------------------------------------------------ real v1 catalogs
+# ------------------------------------------------------------------ real v1 catalogs (regression)
 
 
 def test_v1_loads_with_only_the_two_blank_verified_date_warnings():
-    cat = load_catalog()
+    cat = load_catalog(V1_CATALOG_DIR)
     assert cat.errors == []
     assert len(cat.crops) == 5
     assert len(cat.rules) == 85
@@ -27,7 +33,7 @@ def test_v1_loads_with_only_the_two_blank_verified_date_warnings():
 
 
 def test_v1_blank_verified_rows_are_kept_as_data_without_auto_n_rate():
-    cat = load_catalog()
+    cat = load_catalog(V1_CATALOG_DIR)
     idx = CatalogIndex(cat)
     for rid in ("fc_nut_01", "sb_nut_01"):
         r = idx.rule(rid)
@@ -37,14 +43,14 @@ def test_v1_blank_verified_rows_are_kept_as_data_without_auto_n_rate():
 
 
 def test_exposure_duration_several_is_kept_qualitative():
-    r = CatalogIndex(load_catalog()).rule("sb_wt_02")
+    r = CatalogIndex(load_catalog(V1_CATALOG_DIR)).rule("sb_wt_02")
     assert r.exposure_duration is None
     assert r.exposure_duration_text == "several"
     assert r.exposure_unit == "days"
 
 
 def test_blank_is_none_and_real_zero_stays_zero():
-    cat = load_catalog()
+    cat = load_catalog(V1_CATALOG_DIR)
     urea = next(f for f in cat.fertilizers if f.fertilizer_id == "urea_46_0_0")
     assert urea.p2o5_pct == 0 and urea.p2o5_pct is not None
     fc_pw_01 = CatalogIndex(cat).rule("fc_pw_01")
@@ -53,12 +59,12 @@ def test_blank_is_none_and_real_zero_stays_zero():
 
 
 def test_manifest_has_hashes_and_row_counts():
-    m = load_catalog().manifest
+    m = load_catalog(V1_CATALOG_DIR).manifest
     assert m.version == "v1"
     assert m.files[RULES_FILE].rows == 85 and m.files[RULES_FILE].usable_rows == 85
     assert m.files[RULES_FILE].warnings == 2
     assert len(m.files[RULES_FILE].sha256) == 64
-    assert load_catalog().manifest.content_hash == m.content_hash  # deterministic
+    assert load_catalog(V1_CATALOG_DIR).manifest.content_hash == m.content_hash  # deterministic
 
 
 def test_parse_mm_dd():
@@ -201,7 +207,7 @@ def test_missing_file(tmp_path):
 
 
 def test_index_lookups():
-    idx = CatalogIndex(load_catalog())
+    idx = CatalogIndex(load_catalog(V1_CATALOG_DIR))
     assert idx.crop("soybean").crop_role == "cash_crop"
     assert idx.crop("nope") is None
     assert {r.rule_id for r in idx.rules_by_type("termination_timing")} >= {"cr_tt_03", "cr_tt_04"}
@@ -262,3 +268,52 @@ def test_crop_dropped_for_a_parse_error_also_orphans_its_rules(mutate):
     assert (CROPS_FILE, 3, "verified_date") in keys(cat)
     assert (RULES_FILE, 4, "crop_id") in keys(cat)
     assert "fx_03" not in {r.rule_id for r in cat.rules}
+
+
+# ------------------------------------------------------------------ catalog v2
+
+
+def test_default_catalog_is_v2_and_v1_stays_loadable():
+    assert DEFAULT_CATALOG_DIR == V2_CATALOG_DIR
+    assert load_catalog().version == "v2" and load_catalog(V1_CATALOG_DIR).version == "v1"
+
+
+def test_v2_loads_with_zero_errors_and_zero_warnings():
+    cat = load_catalog(V2_CATALOG_DIR)
+    assert cat.errors == [] and cat.issues == []
+    assert (len(cat.crops), len(cat.rules), len(cat.fertilizers)) == (5, 98, 5)
+    assert cat.manifest.files[RULES_FILE].rows == cat.manifest.files[RULES_FILE].usable_rows == 98
+
+
+def test_v2_new_units_are_accepted_and_kept_verbatim():
+    idx = CatalogIndex(load_catalog(V2_CATALOG_DIR))
+    drilled, late = idx.rule("ww_v2_seed_drilled"), idx.rule("sb_v2_seed_late")
+    assert (drilled.unit, drilled.value_min, drilled.value_max) == ("seeds/ft2", 30.0, 35.0)
+    assert (late.unit, late.value_min, late.value_max) == ("seeds/acre", 165000.0, 175000.0)
+
+
+def test_unknown_units_are_still_rejected(mutate):
+    cat = load_catalog(mutate(RULES_FILE, 3, "unit", "seeds/hectare"))
+    assert (RULES_FILE, 3, "unit") in keys(cat)
+
+
+def test_v2_n_rate_rows_fc_nut_01_range_and_sb_nut_01_real_zero():
+    idx = CatalogIndex(load_catalog(V2_CATALOG_DIR))
+    fc, sb = idx.rule("fc_nut_01"), idx.rule("sb_nut_01")
+    assert (fc.operator, fc.value_min, fc.value_max, fc.unit) == (
+        "between", 120.0, 160.0, "lb_N_per_acre",
+    )  # fmt: skip
+    assert sb.operator == "eq" and sb.value_min == 0.0 and sb.value_min is not None
+    assert sb.value_max is None  # blank stays None
+    assert fc.verified_date is not None and sb.verified_date is not None
+
+
+def test_v2_differs_from_v1_only_in_the_two_n_rows_plus_the_new_wheat_and_soybean_rows():
+    v1 = {r.rule_id: r for r in load_catalog(V1_CATALOG_DIR).rules}
+    v2 = {r.rule_id: r for r in load_catalog(V2_CATALOG_DIR).rules}
+    assert set(v1) <= set(v2)
+    changed = {rid for rid in v1 if v1[rid] != v2[rid]}
+    assert changed == {"fc_nut_01", "sb_nut_01"}
+    assert {rid for rid in v2 if rid not in v1} == {
+        r for r in v2 if r.startswith(("ww_v2_", "sb_v2_"))
+    }

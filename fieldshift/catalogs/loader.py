@@ -25,7 +25,12 @@ from fieldshift.catalogs.models import Crop, CropRule, Fertilizer, ValidationIss
 
 T = TypeVar("T")  # no PEP 695 syntax: the shared checkout also runs on Python 3.11
 
-DEFAULT_CATALOG_DIR = Path(__file__).resolve().parents[2] / "data" / "catalogs" / "v1"
+CATALOGS_ROOT = Path(__file__).resolve().parents[2] / "data" / "catalogs"
+V1_CATALOG_DIR = CATALOGS_ROOT / "v1"
+V2_CATALOG_DIR = CATALOGS_ROOT / "v2"
+DEFAULT_CATALOG_DIR = (
+    V2_CATALOG_DIR  # v2 (2026-11-13) is the working catalog; v1 stays for regressions
+)
 
 _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 

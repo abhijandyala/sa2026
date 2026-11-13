@@ -81,7 +81,7 @@
     }
   },
   "meta": {
-    "catalog_version": "v1:3168a34a7a5d",
+    "catalog_version": "v2:8eeb5bf961eb",
     "plan_version": "c9f7b423d5776074",
     "request_id": "req_example",
     "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
@@ -144,7 +144,7 @@
     ],
     "rotation_ids": []
   },
-  "result_id": "06b3e843b7e2e765",
+  "result_id": "b2a3e710ffa9535f",
   "shared_eligible_years": {
     "full_season": [],
     "note": "unsupported_location: weather_history_not_available_for_location",

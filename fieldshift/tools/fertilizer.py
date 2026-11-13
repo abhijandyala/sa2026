@@ -73,6 +73,30 @@ class NutrientLine(BaseModel):
     total_delivered_lb: float | None = None
 
 
+class NReference(BaseModel):
+    """A catalog-published N rate for a crop (fc_nut_01, sb_nut_01). A reference, never a target."""
+
+    rule_id: str
+    crop_id: str
+    operator: str | None
+    value_min: float | None  # a real 0 (sb_nut_01) is kept
+    value_max: float | None
+    unit: str | None
+    source_title: str | None
+    source_url: str | None
+    verified_date: str | None
+    is_grower_target: bool = False
+    label: str = (
+        "published reference rate from the cited source; not your target. The N target comes "
+        "from your soil test or other applicable guidance"
+    )
+
+
+class TargetVsReference(BaseModel):
+    position: Literal["below", "within", "above", "equal"]
+    text: str
+
+
 class FertilizerResult(BaseModel):
     status: Status  # complete | invalid_input
     issues: list[FieldIssue] = Field(default_factory=list)
@@ -85,7 +109,45 @@ class FertilizerResult(BaseModel):
     total_product_short_tons: float | None = None
     nutrients: list[NutrientLine] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
+    n_reference: NReference | None = None
+    target_vs_reference: TargetVsReference | None = None
     derivation: str = "calculation"
+
+
+def n_reference(index: CatalogIndex, crop_id: str | None) -> NReference | None:
+    """The sourced N reference row for a crop, with its numbers (``None`` if the row has none)."""
+    rid = NO_AUTO_N_RULE.get(crop_id or "")
+    rule = index.rule(rid) if rid else None
+    if rule is None or (rule.value_min is None and rule.value_max is None):
+        return None
+    return NReference(
+        rule_id=rule.rule_id, crop_id=rule.crop_id, operator=rule.operator,
+        value_min=rule.value_min, value_max=rule.value_max, unit=rule.unit,
+        source_title=rule.source_title, source_url=rule.source_url,
+        verified_date=rule.verified_date.isoformat() if rule.verified_date else None,
+    )  # fmt: skip
+
+
+def _show(ref: NReference) -> str:
+    lo, hi = ref.value_min, ref.value_max
+    if lo is not None and hi is not None and hi != lo:
+        return f"{lo:g}-{hi:g} lb N/ac"
+    return f"{(lo if lo is not None else hi):g} lb N/ac"
+
+
+def _position(ref: NReference, target: float) -> TargetVsReference:
+    lo = ref.value_min if ref.value_min is not None else ref.value_max
+    hi = ref.value_max if ref.value_max is not None else lo
+    assert lo is not None and hi is not None
+    if lo == hi:
+        pos = "equal" if target == lo else ("below" if target < lo else "above")
+    else:
+        pos = "within" if lo <= target <= hi else ("below" if target < lo else "above")
+    return TargetVsReference(
+        position=pos,  # type: ignore[arg-type]
+        text=f"your N target of {target:g} lb/ac is {pos} the published reference ({_show(ref)}); "
+        "the reference does not replace your soil-test target",
+    )
 
 
 def _bad(field: str, code: str, message: str) -> FertilizerResult:
@@ -164,7 +226,43 @@ def calculate(
     basis: str | None = None,
     crop_id: str | None = None,
 ) -> FertilizerResult:
-    """``targets`` keys: ``n_lb_per_acre``, ``p2o5_lb_per_acre``, ``k2o_lb_per_acre``."""
+    """``targets`` keys: ``n_lb_per_acre``, ``p2o5_lb_per_acre``, ``k2o_lb_per_acre``.
+
+    With ``crop_id`` the result also carries the catalog's sourced N reference (``n_reference``),
+    clearly labeled as not the grower's target. The calculation never uses it.
+    """
+    res = _calculate(targets, product, index, area_acres=area_acres, basis=basis)
+    if crop_id in NO_AUTO_N_RULE:
+        ref = n_reference(index, crop_id)
+        rid = NO_AUTO_N_RULE[crop_id]  # type: ignore[index]
+        n_target = _finite(targets.get("n_lb_per_acre")) if isinstance(targets, dict) else None
+        res.n_reference = ref
+        if n_target is None:
+            if ref is not None:
+                res.notes.append(
+                    f"No N target was given. Catalog rule {rid} publishes a reference of "
+                    f"{_show(ref)} for {crop_id} ({ref.source_title}). That is a reference, not "
+                    "your target: use your soil-test recommendation or other applicable guidance."
+                )
+            else:
+                res.notes.append(
+                    f"No N target was given. Catalog rule {rid} supplies no automatic nitrogen "
+                    f"rate for {crop_id}; use your soil-test recommendation or other applicable "
+                    "guidance."
+                )
+        elif ref is not None and res.status == Status.COMPLETE:
+            res.target_vs_reference = _position(ref, n_target)
+    return res
+
+
+def _calculate(
+    targets: dict[str, Any],
+    product: Product,
+    index: CatalogIndex,
+    *,
+    area_acres: Any = None,
+    basis: str | None = None,
+) -> FertilizerResult:
     info = resolve_product(product, index)
     if isinstance(info, FertilizerResult):
         return info
@@ -188,12 +286,6 @@ def calculate(
         )
 
     notes: list[str] = []
-    if crop_id in NO_AUTO_N_RULE and "n" not in want:
-        rid = NO_AUTO_N_RULE[crop_id]
-        notes.append(
-            f"No N target was given. Catalog rule {rid} supplies no automatic nitrogen rate for "
-            f"{crop_id}; use your soil-test recommendation or other applicable guidance."
-        )
     if not want:
         res = _bad("targets", "no_target", "give at least one nutrient target; no rate is invented")
         res.notes = notes
@@ -230,7 +322,11 @@ def calculate(
         return _bad(
             "basis", "bad_basis", f"basis must be one of the requested nutrients {sorted(want)}"
         )
-    basis = basis or next(n for n in NUTRIENTS if n in want)
+    # Default basis: the first requested nutrient with a positive target (a real 0 target asks for
+    # none of that nutrient, so it cannot set the rate).
+    basis = basis or next(
+        (n for n in NUTRIENTS if want.get(n, 0) > 0), next(n for n in NUTRIENTS if n in want)
+    )
     rate = alone[basis]
     total = rate * area if area else 0.0
     if (

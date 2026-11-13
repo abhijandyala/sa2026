@@ -72,6 +72,8 @@ UNITS = frozenset(
         "in_per_day",
         "in_per_ft",
         "maturity_group",
+        "seeds/ft2",
+        "seeds/acre",
     }
 )
 

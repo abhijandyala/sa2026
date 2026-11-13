@@ -32,6 +32,7 @@ from fieldshift.contracts import (
 )
 from fieldshift.field.regions import region_scope
 from fieldshift.metrics.rules import RuleCheck, SeasonEvaluation, evaluate_season
+from fieldshift.planner.wheat import wheat_catalog_state
 from fieldshift.seasons.align import build_calendar
 
 #: Role each plan slot must have in the catalog.
@@ -148,19 +149,10 @@ def _unsupported(plan: Plan, index: CatalogIndex) -> list[str]:
 def _path_notes(plan: Plan, index: CatalogIndex) -> list[PathNote]:
     notes: list[PathNote] = []
     if plan.winter.kind == "winter_grain":
-        wheat_rules = {r.rule_type for r in index.rules_for_crop(plan.winter.crop_id or "")}
-        missing = [t for t in ("planting_window", "growth_duration") if t not in wheat_rules]
-        if missing:
+        state, reason = wheat_catalog_state(index, plan.winter.crop_id or "")
+        if state != Status.COMPLETE:
             notes.append(
-                PathNote(
-                    path="winter_grain_double_crop",
-                    status=Status.UNAVAILABLE,
-                    reason=(
-                        f"catalog_missing: no {', '.join(missing)} rules for "
-                        f"{plan.winter.crop_id} or for double-crop soybean planting; only "
-                        "rotation rules are evaluated"
-                    ),
-                )
+                PathNote(path="winter_grain_double_crop", status=state, reason=reason or "")
             )
     return notes
 

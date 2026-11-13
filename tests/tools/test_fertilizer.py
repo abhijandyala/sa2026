@@ -1,12 +1,17 @@
 import pytest
 
-from fieldshift.catalogs import CatalogIndex, load_catalog
+from fieldshift.catalogs import V1_CATALOG_DIR, CatalogIndex, load_catalog
 from fieldshift.tools.fertilizer import Product, calculate, parse_grade
 
 
 @pytest.fixture(scope="module")
 def index():
     return CatalogIndex(load_catalog())
+
+
+@pytest.fixture(scope="module")
+def index_v1_fert():
+    return CatalogIndex(load_catalog(V1_CATALOG_DIR))
 
 
 UREA = Product(fertilizer_id="urea_46_0_0")
@@ -137,3 +142,66 @@ def test_tiny_grades_and_overflowing_results_are_typed_errors(index):
     assert ok.status == "complete" and ok.product_lb_per_acre == 10000.0
     big = calculate({"n_lb_per_acre": 99999}, Product(grade="0.01-0-0"), index, area_acres=9e6)
     assert big.status == "invalid_input"
+
+
+# ------------------------------------------------------------------ catalog v2 N reference
+
+
+def test_corn_n_reference_is_shown_but_never_used_as_the_target(index):
+    r = calculate(
+        {"p2o5_lb_per_acre": 40},
+        Product(fertilizer_id="mes10_12_40_0"),
+        index,
+        crop_id="field_corn",
+    )
+    assert r.n_reference.rule_id == "fc_nut_01"
+    assert (r.n_reference.value_min, r.n_reference.value_max) == (120.0, 160.0)
+    assert r.n_reference.is_grower_target is False and "not your target" in r.n_reference.label
+    assert any("120-160 lb N/ac" in n and "not your target" in n for n in r.notes)
+    # the calculation ignored it: only the P2O5 target set the rate
+    assert r.product_lb_per_acre == 100.0 and r.basis_nutrient == "p2o5"
+    n_line = next(x for x in r.nutrients if x.nutrient == "n")
+    assert n_line.outcome == "not_requested" and n_line.target_lb_per_acre is None
+
+
+def test_no_target_still_errors_but_carries_the_reference(index):
+    r = calculate({}, UREA, index, crop_id="field_corn")
+    assert r.status == "invalid_input" and r.issues[0].code == "no_target"
+    assert r.n_reference.value_min == 120.0 and r.product_lb_per_acre is None
+
+
+@pytest.mark.parametrize(
+    ("target", "pos"), [(100, "below"), (120, "within"), (160, "within"), (200, "above")]
+)
+def test_grower_target_is_compared_to_the_reference_not_replaced_by_it(index, target, pos):
+    r = calculate({"n_lb_per_acre": target}, UREA, index, crop_id="field_corn")
+    assert r.target_vs_reference.position == pos
+    assert r.product_lb_per_acre == round(target / 0.46, 1)  # rate comes from the grower's target
+    assert "does not replace your soil-test target" in r.target_vs_reference.text
+
+
+def test_soybean_reference_zero_is_a_real_zero(index):
+    r = calculate({"n_lb_per_acre": 30}, UREA, index, crop_id="soybean")
+    assert r.n_reference.value_min == 0.0 and r.n_reference.value_min is not None
+    assert r.target_vs_reference.position == "above"
+    zero = calculate(
+        {"n_lb_per_acre": 0, "k2o_lb_per_acre": 60},
+        Product(fertilizer_id="mop_0_0_60"),
+        index,
+        crop_id="soybean",
+    )
+    assert zero.target_vs_reference.position == "equal" and zero.product_lb_per_acre == 100.0
+
+
+def test_v1_has_no_n_numbers_so_the_old_wording_applies(index_v1_fert):
+    r = calculate(
+        {"k2o_lb_per_acre": 60},
+        Product(fertilizer_id="mop_0_0_60"),
+        index_v1_fert,
+        crop_id="field_corn",
+    )
+    assert r.n_reference is None and any("supplies no automatic nitrogen" in n for n in r.notes)
+
+
+def test_other_crops_get_no_reference(index):
+    assert calculate({"n_lb_per_acre": 10}, UREA, index, crop_id="cereal_rye").n_reference is None

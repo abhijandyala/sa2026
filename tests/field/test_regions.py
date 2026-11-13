@@ -4,8 +4,11 @@ from fieldshift.catalogs import CatalogIndex, load_catalog
 from fieldshift.field.regions import REGION_MAP, normalize_field_region, region_match
 
 
-def test_every_v1_region_text_is_in_the_mapping_table():
-    regions = set(CatalogIndex(load_catalog()).regions())
+@pytest.mark.parametrize("catalog_dir", ["v1", "v2"])
+def test_every_catalog_region_text_is_in_the_mapping_table(catalog_dir):
+    from fieldshift.catalogs import CATALOGS_ROOT
+
+    regions = set(CatalogIndex(load_catalog(CATALOGS_ROOT / catalog_dir)).regions())
     assert regions - set(REGION_MAP) == set()
 
 

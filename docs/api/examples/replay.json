@@ -3331,7 +3331,7 @@
   },
   "key_rain_days": [],
   "meta": {
-    "catalog_version": "v1:3168a34a7a5d",
+    "catalog_version": "v2:8eeb5bf961eb",
     "plan_version": "8f13fe3a74078f66",
     "request_id": "req_example",
     "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"

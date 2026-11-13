@@ -38,7 +38,7 @@
   "input_hash": "289e345077a57d4d41211bcf548a3624c4f59931de21d03d20fdcecadafbe8df",
   "location": null,
   "meta": {
-    "catalog_version": "v1:3168a34a7a5d",
+    "catalog_version": "v2:8eeb5bf961eb",
     "plan_version": "289e345077a57d4d",
     "request_id": "req_example",
     "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
@@ -248,13 +248,13 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'n_rate'",
+          "reason": "sourced reference N rate 0 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
           "rule_id": "sb_nut_01",
           "source": {
-            "locator": "Field Crops table: Soybean row",
-            "title": "Crop Fertilization Based on North Carolina Soil Tests (NCDA&CS)",
-            "url": "https://www.ncagr.gov/agronomic-services/crop-fertilization-based-nc-soil-tests/open",
-            "verified_date": null
+            "locator": "Table 2.3 p. 15: Soybean row and nitrogen-units footnote",
+            "title": "Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014",
+            "url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+            "verified_date": "2026-11-13"
           },
           "status": "manual_check",
           "verdict": "manual_check"
@@ -368,7 +368,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'soil_ph_target'",
+          "reason": "published reference value 6 pH; not measured on this field",
           "rule_id": "sb_soil_03",
           "source": {
             "locator": "Table 2 Field crops",
@@ -383,7 +383,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'seasonal_crop_water_use'",
+          "reason": "published reference value 25 in; not measured on this field",
           "rule_id": "sb_wd_01",
           "source": {
             "locator": "Opening paragraph",
@@ -428,7 +428,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'air_temperature'",
+          "reason": "published reference value 85 degF; not measured on this field",
           "rule_id": "sb_wt_02",
           "source": {
             "locator": "Paragraphs 2-3",
@@ -1312,13 +1312,13 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'n_rate'",
+          "reason": "sourced reference N rate 120-160 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
           "rule_id": "fc_nut_01",
           "source": {
-            "locator": "Field Crops table: Corn grain row",
-            "title": "Crop Fertilization Based on North Carolina Soil Tests (NCDA&CS)",
-            "url": "https://www.ncagr.gov/agronomic-services/crop-fertilization-based-nc-soil-tests/open",
-            "verified_date": null
+            "locator": "Table 2.3 p. 14: Corn, grain; p. 15 nitrogen-units footnote",
+            "title": "Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014",
+            "url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+            "verified_date": "2026-11-13"
           },
           "status": "manual_check",
           "verdict": "manual_check"
@@ -1406,7 +1406,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'seeding_depth'",
+          "reason": "published reference value 1.5-2.5 in; not measured on this field",
           "rule_id": "fc_pw_06",
           "source": {
             "locator": "Item 3 Planting Depth",
@@ -1436,7 +1436,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'soil_ph_target'",
+          "reason": "published reference value 6 pH; not measured on this field",
           "rule_id": "fc_soil_01",
           "source": {
             "locator": "Table 2 Field crops",
@@ -2443,7 +2443,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'n_scavenged'",
+          "reason": "published reference value 25-50 lb_N_per_acre; not measured on this field",
           "rule_id": "cr_trait_01",
           "source": {
             "locator": "Nutrient catch crop",
@@ -2503,7 +2503,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'germination_temperature_unspecified'",
+          "reason": "published reference value 34 degF; not measured on this field",
           "rule_id": "cr_wt_01",
           "source": {
             "locator": "Establishment and Fieldwork",
@@ -2518,13 +2518,13 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'n_rate'",
+          "reason": "sourced reference N rate 0 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
           "rule_id": "sb_nut_01",
           "source": {
-            "locator": "Field Crops table: Soybean row",
-            "title": "Crop Fertilization Based on North Carolina Soil Tests (NCDA&CS)",
-            "url": "https://www.ncagr.gov/agronomic-services/crop-fertilization-based-nc-soil-tests/open",
-            "verified_date": null
+            "locator": "Table 2.3 p. 15: Soybean row and nitrogen-units footnote",
+            "title": "Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014",
+            "url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+            "verified_date": "2026-11-13"
           },
           "status": "manual_check",
           "verdict": "manual_check"
@@ -2638,7 +2638,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'soil_ph_target'",
+          "reason": "published reference value 6 pH; not measured on this field",
           "rule_id": "sb_soil_03",
           "source": {
             "locator": "Table 2 Field crops",
@@ -2653,7 +2653,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'seasonal_crop_water_use'",
+          "reason": "published reference value 25 in; not measured on this field",
           "rule_id": "sb_wd_01",
           "source": {
             "locator": "Opening paragraph",
@@ -2698,7 +2698,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'air_temperature'",
+          "reason": "published reference value 85 degF; not measured on this field",
           "rule_id": "sb_wt_02",
           "source": {
             "locator": "Paragraphs 2-3",
@@ -3957,7 +3957,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'n_scavenged'",
+          "reason": "published reference value 25-50 lb_N_per_acre; not measured on this field",
           "rule_id": "cr_trait_01",
           "source": {
             "locator": "Nutrient catch crop",
@@ -3987,7 +3987,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'germination_temperature_unspecified'",
+          "reason": "published reference value 34 degF; not measured on this field",
           "rule_id": "cr_wt_01",
           "source": {
             "locator": "Establishment and Fieldwork",
@@ -4002,13 +4002,13 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'n_rate'",
+          "reason": "sourced reference N rate 120-160 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
           "rule_id": "fc_nut_01",
           "source": {
-            "locator": "Field Crops table: Corn grain row",
-            "title": "Crop Fertilization Based on North Carolina Soil Tests (NCDA&CS)",
-            "url": "https://www.ncagr.gov/agronomic-services/crop-fertilization-based-nc-soil-tests/open",
-            "verified_date": null
+            "locator": "Table 2.3 p. 14: Corn, grain; p. 15 nitrogen-units footnote",
+            "title": "Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014",
+            "url": "https://www.ncagr.gov/orange-book-soil-fertility/open",
+            "verified_date": "2026-11-13"
           },
           "status": "manual_check",
           "verdict": "manual_check"
@@ -4111,7 +4111,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'seeding_depth'",
+          "reason": "published reference value 1.5-2.5 in; not measured on this field",
           "rule_id": "fc_pw_06",
           "source": {
             "locator": "Item 3 Planting Depth",
@@ -4141,7 +4141,7 @@
           "conflict": false,
           "conflicts_with": [],
           "flagged": false,
-          "reason": "no evaluator for condition 'soil_ph_target'",
+          "reason": "published reference value 6 pH; not measured on this field",
           "rule_id": "fc_soil_01",
           "source": {
             "locator": "Table 2 Field crops",
@@ -5140,7 +5140,7 @@
       "add_grain_crop"
     ]
   },
-  "result_id": "4c1caf2a36828c10",
+  "result_id": "6abfa3ad41ad82c5",
   "shared_eligible_years": {
     "full_season": [
       1982,

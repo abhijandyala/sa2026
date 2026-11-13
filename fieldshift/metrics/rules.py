@@ -144,6 +144,10 @@ class RuleCheck(BaseModel):
     reason: str
     inputs_used: dict[str, Any] = Field(default_factory=dict)
     missing_inputs: list[str] = Field(default_factory=list)
+    # A published number carried by a rule that cannot be evaluated against this season (for
+    # example the NCDA&CS N range in fc_nut_01). It is a sourced reference, never the grower's
+    # target. ``None`` when the rule carries no number; a real 0 (sb_nut_01) is kept.
+    reference: dict[str, Any] | None = None
     source: RuleSource
 
 
@@ -561,6 +565,39 @@ def _eval_sequence(rule: CropRule, view: SeasonView) -> _Outcome:
     return _Outcome("complete", "crop sequence matches the rule" + note, met=True)
 
 
+def reference_of(rule: CropRule) -> dict[str, Any] | None:
+    """The rule's published number(s) as a sourced reference; ``None`` if it has none."""
+    if rule.value_min is None and rule.value_max is None:
+        return None
+    return {
+        "kind": "published_reference",
+        "condition_key": rule.condition_key,
+        "operator": rule.operator,
+        "value_min": rule.value_min,
+        "value_max": rule.value_max,
+        "unit": rule.unit,
+        "value_text": rule.value_text,
+        "is_grower_target": False,
+        "source_url": rule.source_url,
+        "verified_date": rule.verified_date.isoformat() if rule.verified_date else None,
+    }
+
+
+def _reference_reason(rule: CropRule, ref: dict[str, Any]) -> str:
+    lo, hi, unit = ref["value_min"], ref["value_max"], ref["unit"] or ""
+    shown = (
+        f"{lo:g}-{hi:g}"
+        if lo is not None and hi is not None and hi != lo
+        else f"{(lo if lo is not None else hi):g}"
+    )
+    if rule.rule_type == "nutrient_guidance" and rule.condition_key == "n_rate":
+        return (
+            f"sourced reference N rate {shown} {unit} ({rule.source_title}); "
+            "it is not the grower's target: the target comes from the soil test"
+        )
+    return f"published reference value {shown} {unit}; not measured on this field"
+
+
 def _choose_evaluator(rule: CropRule) -> Callable[[CropRule, SeasonView], _Outcome] | None:
     if rule.condition_key == "days_between_termination_and_planting" and rule.operator:
         return _eval_gap
@@ -652,7 +689,10 @@ def evaluate_rule(
             if rule.condition_key is None
             else f"no evaluator for condition '{rule.condition_key}'"
         )
-        return _check(rule, "manual_check", why, verdict="manual_check")
+        ref = reference_of(rule)
+        if ref is not None:
+            why = _reference_reason(rule, ref)
+        return _check(rule, "manual_check", why, verdict="manual_check", reference=ref)
     out = evaluator(rule, view)
     if out.status == "unknown" and (gate_name := GATES.get(rule.rule_id)) is not None:
         gate_state, gate_reason, gate_inputs = _gate_state(gate_name, view)

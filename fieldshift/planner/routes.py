@@ -79,9 +79,7 @@ def _parse_common(body: dict[str, Any]) -> tuple[dict[str, Any] | None, list[dic
             for k, v in inputs.items():
                 if not _valid_input_value(v):
                     issues.append(
-                        issue(
-                            f"inputs.{k}", "invalid_value", "input values must be finite numbers"
-                        )
+                        issue(f"inputs.{k}", "invalid_value", "input values must be finite numbers")
                     )
     if issues:
         return None, issues

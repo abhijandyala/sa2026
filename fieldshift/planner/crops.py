@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 
 from fieldshift.catalogs.index import CatalogIndex
 from fieldshift.contracts import Status
+from fieldshift.planner.wheat import wheat_catalog_state
+from fieldshift.tools.fertilizer import n_reference
 
 #: Rule types a crop needs before each path can be fully evaluated.
 REQUIRED_RULE_TYPES: dict[str, dict[str, tuple[str, ...]]] = {
@@ -33,6 +35,8 @@ class CropInfo(BaseModel):
     rule_count: int
     rule_types: dict[str, int]
     paths: list[PathAvailability]
+    # Sourced N reference (fc_nut_01 / sb_nut_01): a published number, never the grower's target.
+    nitrogen_reference: dict | None = None
 
 
 class CropsResponse(BaseModel):
@@ -64,14 +68,18 @@ def list_crops(index: CatalogIndex) -> CropsResponse:
                 )
             )
         if crop.crop_id == "winter_wheat":
-            paths.append(
-                PathAvailability(
-                    path="winter_grain_double_crop",
-                    status=Status.UNAVAILABLE,
-                    missing_rule_types=["planting_window", "growth_duration"],
-                    note="catalog_missing: wheat planting/harvest and double-crop soybean window",
+            state, reason = wheat_catalog_state(index)
+            if state != Status.COMPLETE:
+                paths.append(
+                    PathAvailability(
+                        path="winter_grain_double_crop",
+                        status=state,
+                        missing_rule_types=["calendar_windows"]
+                        if state == Status.PARTIAL
+                        else ["planting_window", "growth_duration"],
+                        note=reason,
+                    )
                 )
-            )
         crops.append(
             CropInfo(
                 crop_id=crop.crop_id,
@@ -83,6 +91,11 @@ def list_crops(index: CatalogIndex) -> CropsResponse:
                 rule_count=len(rules),
                 rule_types=dict(sorted(types.items())),
                 paths=paths,
+                nitrogen_reference=(
+                    ref.model_dump(mode="json")
+                    if (ref := n_reference(index, crop.crop_id))
+                    else None
+                ),
             )
         )
     return CropsResponse(catalog_version=index.version, crops=crops)
