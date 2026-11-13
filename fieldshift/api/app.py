@@ -69,7 +69,7 @@ def create_app() -> FastAPI:
         cov = snap.manifest["coverage"]
         return {
             "meta": response_meta(),
-            "status": "ok",
+            "status": "complete",
             "offline": is_offline(),
             "snapshot_hash": snap.snapshot_hash,
             "weather": {

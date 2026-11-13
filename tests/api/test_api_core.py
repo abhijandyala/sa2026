@@ -311,7 +311,9 @@ def test_years_lists_all_45_with_statuses_and_shortcuts(client):
 
 
 def test_rotations_endpoint_lists_the_three_presets(client):
-    r = client.get("/v1/rotations").json()
+    env = client.get("/v1/rotations").json()
+    assert set(env["meta"]) == {"plan_version", "catalog_version", "snapshot_hash", "request_id"}
+    r = env["rotations"]
     assert [x["rotation_id"] for x in r] == ["current_practice", "winter_cover", "add_grain_crop"]
     assert r[1]["legs"] == ["corn_soy__rye", "soy_corn__rye"]
 
@@ -342,3 +344,70 @@ def test_a_replay_is_reproducible_by_a_standalone_script_from_raw_only(client, p
     assert ref["rain_outside_cover_mm"] == api["winter"]["rain_outside_cover_mm"]
     assert ref["heavy_rain_days_outside_cover"] == api["winter"]["heavy_rain_days_outside_cover"]
     assert ref["n_eligible_springs"] == api["spring"]["of"]
+
+
+# --- review fixes ------------------------------------------------------------------------------------------------
+
+
+def test_replay_payload_rows_wetness_and_checks_reproduce_from_raw(client):
+    for plan_id, year in [("corn_soy__rye", 2008), ("corn_soy__rye", 1981), ("soy_corn__rye", 2015)]:
+        api = client.get(f"/v1/seasons/{year}/replay?plan={plan_id}").json()
+        out = subprocess.run(
+            [sys.executable, "-I", str(ROOT / "scripts/reproduce_replay.py"), "--raw", str(RAW),
+             "--plans", str(PLANS), "--plan", plan_id, "--year", str(year)],
+            capture_output=True, text=True, check=True,
+        )
+        ref = json.loads(out.stdout)
+        assert len(ref["daily"]) == len(api["daily"])
+        for a, b in zip(api["daily"], ref["daily"], strict=True):
+            assert a["date"] == b["date"] and a["segment"] == b["segment"]
+            for k in ("precip_mm", "tmax_c", "tmin_c", "gwettop", "gwetroot"):
+                assert a[k] == b[k], (plan_id, year, a["date"], k)
+        assert api["wetness"]["gwettop_window_mean"] == ref["gwettop_window_mean"]
+        assert api["wetness"]["gwetroot_window_mean"] == ref["gwetroot_window_mean"]
+        fired = any(c["rule_ids"] == ["cr_tt_03"] for c in api["checks_triggered"])
+        assert fired == bool(ref["cr_tt_03_flagged"])
+
+
+def test_shared_era_results_keep_each_plans_own_threshold(client):
+    body = post(client, "/v1/plans/compare", {"plan_ids": ["corn_soy__rye", "soy_corn__rye"]}).json()
+    corn, soy = body["plans"]
+    for plan in (corn, soy):
+        shared = plan["eras_shared_years"]["dry_spring"]
+        own = plan["eras"]["dry_spring"]
+        assert shared["thresholds"] == own["thresholds"]
+        assert shared["earlier"]["threshold_value"] == plan["spring"]["cutoff_mm"]
+    assert corn["spring"]["cutoff_mm"] != soy["spring"]["cutoff_mm"]
+
+
+def test_shared_full_season_years_are_reported(client):
+    body = post(client, "/v1/plans/compare", {"plan_ids": ["corn_soy__rye", "corn_soy__no_cover"]}).json()
+    assert body["shared_eligible_years"]["full_season"] == list(range(1982, 2026))
+
+
+def test_replay_returns_every_flagged_check_for_a_plan_with_problems(client):
+    ids = {c["rule_ids"][0] for c in
+           client.get("/v1/seasons/2008/replay?plan=corn_soy__clover").json()["checks_triggered"]}
+    assert {"sb_rc_02", "cc_rc_02"} <= ids
+
+
+def test_sensitivity_rule_validation_and_check_id_alias(client):
+    bad = post(client, "/v1/plans/sensitivity", {"plan_id": "corn_soy__rye", "rule_id": "zz_zz_99"})
+    assert bad.status_code == 400 and bad.json()["issues"][0]["field"] == "rule_id"
+    alias = post(client, "/v1/plans/sensitivity",
+                 {"plan_id": "corn_soy__rye", "rule_id": "rye_soy_short_gap_moisture"}).json()
+    assert alias["rule_ids"] == ["cr_tt_03"] and alias["status"] == "complete"
+    other = post(client, "/v1/plans/sensitivity", {"plan_id": "corn_soy__rye", "rule_id": "cc_pw_01"})
+    assert other.json()["status"] == "inapplicable"
+
+
+def test_sensitivity_flags_gaps_that_cross_feb_29(client):
+    p = sample_plan("corn_soy__rye")
+    p.update(prev_harvest="10-15", next_plant="03-10")
+    p["winter"].update(seed="10-20", terminate="02-25")
+    pts = post(client, "/v1/plans/sensitivity", {"plan": p}).json()["points"]
+    before_leap_day = [x for x in pts if x["terminate"] < "03-01" and x["terminate"] > "01-31"]
+    assert before_leap_day and all(x["gap_days_in_leap_years"] == x["gap_days"] + 1
+                                   for x in before_leap_day)
+    after_leap_day = [x for x in pts if "03-01" <= x["terminate"] <= "03-10"]
+    assert after_leap_day and all(x["gap_days_in_leap_years"] is None for x in after_leap_day)

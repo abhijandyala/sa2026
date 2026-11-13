@@ -37,6 +37,14 @@ from fieldshift.seasons.facts import build_season_facts
 DEFAULT_RULE = "cr_tt_03"
 
 
+def _leap_gap(plan: Plan) -> int | None:
+    """Gap in a leap-year season (2020); differs from the reference year only across Feb 29."""
+    try:
+        return build_calendar(plan, 2020).termination_gap_days
+    except InvalidPlanError:
+        return None
+
+
 def sweep_termination(
     plan: Plan, ctx: Context, ts: ThresholdSet, rule_id: str = DEFAULT_RULE
 ) -> dict[str, Any]:
@@ -86,8 +94,11 @@ def sweep_termination(
             if chk is not None and chk.status == Status.COMPLETE:
                 denom += 1
                 count += bool(chk.flagged)
+        gap_ref = (ref_cal.plant - d).days
+        leap_gap = _leap_gap(p2)
         points.append(SensitivityPoint(
-            terminate=md, gap_days=(ref_cal.plant - d).days,
+            terminate=md, gap_days=gap_ref,
+            gap_days_in_leap_years=leap_gap if leap_gap != gap_ref else None,
             living_cover_days_planned=(d - seed_ref).days,
             rain_outside_cover_mm_median=round(statistics.median(rains), 3) if rains else None,
             heavy_rain_days_outside_cover_median=(
@@ -98,7 +109,9 @@ def sweep_termination(
         d += timedelta(days=1)
 
     dry_years = [y for y, _, _, s, _, _, _ in per_year if s.is_dry]
+    applicable = any(p.denominator > 0 for p in points)
     return {
+        "status": Status.COMPLETE if applicable else Status.INAPPLICABLE,
         "base_plan_id": plan.plan_id,
         "varied": "terminate",
         "fixed": {"seed": plan.winter.seed, "next_plant": plan.next_plant,
@@ -111,7 +124,9 @@ def sweep_termination(
         "reference_year": REFERENCE_YEAR,
         "points": points,
         "thresholds": thresholds_view(ts),
-        "note": "One point per valid termination date (reference-year calendar). With the fixed "
+        "note": "One point per valid termination date (reference-year calendar). A date that "
+        "crosses Feb 29 has a different real gap in leap years (`gap_days_in_leap_years`); each "
+        "historical season is evaluated with its own real gap. With the fixed "
         "14-day rule the check count is a step: the dry-year count below 14 days, 0 at or above "
         "(unless the grower reports a low-moisture concern, which fires every evaluable season "
         "below 14 days).",

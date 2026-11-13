@@ -22,16 +22,23 @@ FILL = -999.0
 BASELINE = range(1981, 2026)
 
 
-def load_precip(raw_path: str) -> dict[date, float | None]:
+def load_series(raw_path: str, parameter: str, kind: str) -> dict[date, float | None]:
+    """One POWER parameter by date. kind: 'precip' (>= 0), 'fraction' (0..1) or 'temp'."""
     with open(raw_path, encoding="utf-8") as fh:
         payload = json.load(fh)
     fill = float(payload.get("header", {}).get("fill_value", FILL))
     out: dict[date, float | None] = {}
-    for key, value in payload["properties"]["parameter"]["PRECTOTCORR"].items():
+    for key, value in payload["properties"]["parameter"][parameter].items():
         d = date(int(key[:4]), int(key[4:6]), int(key[6:8]))
         v = None if value is None else float(value)
-        out[d] = None if v is None or math.isnan(v) or v == fill or v < 0 else v
+        bad = v is None or math.isnan(v) or v == fill
+        bad = bad or (kind in ("precip", "fraction") and v < 0) or (kind == "fraction" and v > 1)
+        out[d] = None if bad else v
     return out
+
+
+def load_precip(raw_path: str) -> dict[date, float | None]:
+    return load_series(raw_path, "PRECTOTCORR", "precip")
 
 
 def resolve(year: int, md: str) -> date:
@@ -128,6 +135,46 @@ def main() -> None:
             if not living and v >= heavy:
                 heavy_days_outside += 1
         d += timedelta(days=1)
+    # --- the replay payload: daily rows, wetness means, triggered check -----------------------
+    others = {
+        "tmax_c": load_series(a.raw, "T2M_MAX", "temp"),
+        "tmin_c": load_series(a.raw, "T2M_MIN", "temp"),
+        "gwettop": load_series(a.raw, "GWETTOP", "fraction"),
+        "gwetroot": load_series(a.raw, "GWETROOT", "fraction"),
+    }
+    daily = []
+    d = harvest
+    while d < plant:
+        if seed is None:
+            segment = "no_planned_cover"
+        elif d < seed:
+            segment = "before_establishment"
+        elif d < term:
+            segment = "living_cover"
+        else:
+            segment = "after_termination"
+        daily.append({"date": d.isoformat(), "precip_mm": precip.get(d),
+                      **{k: v.get(d) for k, v in others.items()}, "segment": segment})
+        d += timedelta(days=1)
+    out["daily"] = daily
+    spring_days = [r for r in daily if plant - timedelta(days=30) <= date.fromisoformat(r["date"]) < plant]
+    for key in ("gwettop", "gwetroot"):
+        vals = [r[key] for r in spring_days]
+        full = len(vals) == 30 and all(v is not None for v in vals)
+        out[f"{key}_window_mean"] = round(sum(vals) / 30, 4) if full else None
+    gap = (plant - term).days if term else None
+    concern = plan["grower"].get("low_moisture_concern")
+    rule = None  # cr_tt_03 (handbook): gap < 14 and (dry replay or grower concern)
+    applies = plan["next_crop_id"] == "soybean" and w.get("crop_id") == "cereal_rye"
+    if gap is not None and applies:  # cr_tt_03 is a cereal rye -> soybean rule
+        if gap >= 14:
+            rule = False
+        elif concern is True or out["spring_is_dry"] is True:
+            rule = True
+        elif out["spring_is_dry"] is False and concern is not True:
+            rule = False
+    out["termination_gap_days"] = gap
+    out["cr_tt_03_flagged"] = rule
     out["winter_complete"] = complete
     out["rain_outside_cover_mm"] = round(seg["outside_cover"], 3) if complete else None
     out["rain_living_cover_mm"] = round(seg["living_cover"], 3) if complete else None

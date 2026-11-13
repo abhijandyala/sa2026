@@ -21,8 +21,9 @@ from fieldshift.compare.eras import (
     Indicator,
     check_indicator,
     compare_eras,
-    compare_plans_eras,
     dry_spring_indicator,
+    restrict_to_years,
+    shared_years,
     winter_heavy_rain_indicator,
 )
 from fieldshift.compare.models import (
@@ -295,6 +296,7 @@ def analyze_plan(
     rows = [
         SeasonRow(
             year=b.year, winter_status=b.winter.status, spring_status=b.spring.status,
+            full_season_status=b.coverage.metrics["full_season"].status,
             spring_total_mm=b.spring.total_mm, spring_rank=b.spring.rank,
             spring_is_dry=b.spring.is_dry, rain_outside_cover_mm=b.winter.rain_outside_cover_mm,
             heavy_rain_days_outside_cover=b.winter.heavy_rain_days_outside_cover,
@@ -334,12 +336,13 @@ def compare_plans(
     if len(live) > 1:
         names = set.intersection(*(set(ind) for _, ind in live))
         for name in sorted(names):
-            shared = compare_plans_eras(
-                name, {r.plan_id: ind[name] for r, ind in live}, ts,
-                threshold_names=_threshold_names_for(name, live[0][0], ts),
-            )
-            for r, _ in live:
-                r.eras_shared_years[name] = shared[r.plan_id]
+            years = shared_years({r.plan_id: ind[name] for r, ind in live})
+            for r, ind in live:  # each plan keeps ITS OWN frozen threshold (windows differ)
+                r.eras_shared_years[name] = compare_eras(
+                    name, restrict_to_years(ind[name], years), ts,
+                    threshold_names=_threshold_names_for(name, r, ts),
+                    basis="shared_evaluable_seasons",
+                )
     for r in results:
         m = meta_by_plan.get(r.plan_id, {})
         r.rotation_id, r.leg = m.get("rotation_id"), m.get("leg")
@@ -367,9 +370,9 @@ def _shared_years(results: list[PlanComparison]) -> SharedYears:
         sets = [{s.year for s in r.seasons if getattr(s, attr) == ok} for r in results]
         return sorted(set.intersection(*sets)) if sets else []
 
-    full = []
     return SharedYears(
-        spring=years("spring_status"), winter=years("winter_status"), full_season=full,
+        spring=years("spring_status"), winter=years("winter_status"),
+        full_season=years("full_season_status"),
         note="Years where every compared plan has a complete result; use these when comparing "
         "plans so no plan is judged on years another could not be evaluated.",
     )

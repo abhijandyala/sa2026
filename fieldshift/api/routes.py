@@ -22,18 +22,21 @@ from fieldshift.compare.models import (
     Meta,
     PlanComparison,
     ReplayResponse,
+    RotationsResponse,
     SensitivityResponse,
     YearsResponse,
 )
 from fieldshift.compare.replay import replay_season
 from fieldshift.compare.sensitivity import DEFAULT_RULE, sweep_termination
 from fieldshift.compare.years import years_payload
-from fieldshift.contracts import InvalidPlanError, Plan, Rotation, Status
+from fieldshift.contracts import InvalidPlanError, Plan, Status
 from fieldshift.planner.checker import plan_version
 from fieldshift.report.http import invalid, issue
 from fieldshift.report.meta import response_meta
 
 router = APIRouter(prefix="/v1", tags=["core"])
+
+_CHECK_TO_RULE = {meta[0]: rid for rid, meta in engine.CHECK_META.items()}
 
 FIRST_YEAR, LAST_YEAR = engine.YEARS[0], engine.YEARS[-1]
 
@@ -231,9 +234,13 @@ def sensitivity(body: SensitivityRequest, ctx: Annotated[Context, Depends(get_co
         plan = sp.plan if sp else None
         if plan is None:
             return invalid([issue("plan_id", "plan_unavailable", "that plan is unavailable")])
+    rule_id = _CHECK_TO_RULE.get(body.rule_id, body.rule_id)
+    if rule_id not in {r.rule_id for r in ctx.index.catalog.rules}:
+        return invalid([issue("rule_id", "unknown_rule",
+                              f"unknown rule or check '{body.rule_id}'")])
     try:
         ts = engine.threshold_set_for(ctx, [plan.next_plant])
-        payload = sweep_termination(plan, ctx, ts, body.rule_id)
+        payload = sweep_termination(plan, ctx, ts, rule_id)
     except InvalidPlanError as exc:
         return invalid(_issues_from_plan_error(exc, "plan"))
     return SensitivityResponse(meta=_meta(plan_version(plan)), **payload)
@@ -252,7 +259,7 @@ def years(
     return YearsResponse(meta=_meta(plan_version(sp.plan)), **years_payload(sp.plan, ctx))
 
 
-@router.get("/rotations", response_model=list[Rotation])
+@router.get("/rotations", response_model=RotationsResponse)
 def rotations() -> Any:
     """The presets: each rotation is two plan legs."""
-    return list(load_samples().rotations.values())
+    return RotationsResponse(meta=_meta(None), rotations=list(load_samples().rotations.values()))

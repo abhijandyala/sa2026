@@ -71,8 +71,9 @@ def replay_season(plan: Plan, year: int, ctx: Context, ts: ThresholdSet) -> dict
     triggered: list[TriggeredCheck] = []
     from fieldshift.compare.engine import CHECK_META
 
-    for c in b.evaluation.checks:
-        if c.flagged and c.rule_id in GATES:
+    ordered = sorted(b.evaluation.checks, key=lambda c: (c.rule_id not in GATES, c.rule_id))
+    for c in ordered:
+        if c.flagged:
             cid = CHECK_META.get(c.rule_id, (c.rule_id,))[0]
             triggered.append(TriggeredCheck(
                 check_id=cid, rule_ids=[c.rule_id], reason=c.reason,

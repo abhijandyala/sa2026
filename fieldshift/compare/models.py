@@ -13,7 +13,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from fieldshift.compare.eras import EraComparison
-from fieldshift.contracts import Plan, Status, Threshold
+from fieldshift.contracts import Plan, Rotation, Status, Threshold
 
 
 class _M(BaseModel):
@@ -102,6 +102,7 @@ class SeasonRow(_M):
     year: int
     winter_status: Status
     spring_status: Status
+    full_season_status: Status
     spring_total_mm: float | None
     spring_rank: int | None
     spring_is_dry: bool | None
@@ -213,10 +214,12 @@ class SensitivityPoint(_M):
     heavy_rain_days_outside_cover_median: float | None
     checks_count: int
     denominator: int
+    gap_days_in_leap_years: int | None = None  # set when a Feb 29 crossing changes the gap
 
 
 class SensitivityResponse(_M):
     meta: Meta
+    status: Status  # complete | inapplicable (the rule never applies to this plan)
     base_plan_id: str
     varied: Literal["terminate"]
     fixed: dict[str, Any]
@@ -248,3 +251,11 @@ class YearsResponse(_M):
     years: list[YearRow]
     shortcuts: dict[str, int | None]
     eras: dict[str, Any]
+
+
+# --------------------------------------------------------------------------- rotations
+
+
+class RotationsResponse(_M):
+    meta: Meta
+    rotations: list[Rotation]
