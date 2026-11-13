@@ -163,13 +163,37 @@
       "rotation_id": "add_grain_crop",
       "leg": 1,
       "dates_assumed": true,
-      "editable": [],
+      "dates_basis": "assumed",
+      "editable": [
+        "prev_harvest",
+        "winter.plant",
+        "winter.harvest",
+        "next_plant"
+      ],
       "label": "Winter wheat, then double-crop soybean",
-      "plan": null,
-      "unavailable": {
-        "status": "unavailable",
-        "reason": "catalog_missing",
-        "detail": "Winter wheat planting/harvest and double-crop soybean window rows are not in the catalog yet (Phase 12)."
+      "note": "Demo dates from GET /v1/plans/wheat/template, ASSUMED (the catalog has no numeric Piedmont wheat windows; the grower enters the dates). Catalog v2 evaluates this plan as partial; catalog v1 has no wheat rows (unavailable: catalog_missing).",
+      "plan": {
+        "plan_id": "corn_soy__wheat_dc",
+        "label": "Winter wheat, then double-crop soybean",
+        "previous_crop_id": "field_corn",
+        "prev_harvest": "09-20",
+        "winter": {
+          "kind": "winter_grain",
+          "crop_id": "winter_wheat",
+          "seed": null,
+          "terminate": null,
+          "plant": "10-25",
+          "harvest": "06-05"
+        },
+        "next_crop_id": "soybean",
+        "next_plant": "06-12",
+        "region": "NC Piedmont",
+        "production_system": "conventional",
+        "grower": {
+          "low_moisture_concern": null,
+          "residue_report": null,
+          "observations": []
+        }
       }
     }
   ],

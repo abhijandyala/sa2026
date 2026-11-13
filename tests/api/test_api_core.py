@@ -100,11 +100,12 @@ def test_each_plan_uses_its_own_denominators_and_legs_are_not_summed(client):
     assert "rotation_total" not in body
 
 
-def test_wheat_double_crop_is_unavailable_catalog_missing_and_others_still_work(client):
+def test_wheat_double_crop_is_partial_with_catalog_v2_and_others_still_work(client):
+    """Detail in tests/api/test_api_wheat.py (and the catalog v1 fallback)."""
     body = post(client, "/v1/plans/compare", {"rotation_ids": ["add_grain_crop"]}).json()
     wheat, other = body["plans"]
-    assert (wheat["plan_id"], wheat["status"], wheat["reason"]) == (
-        "corn_soy__wheat_dc", "unavailable", "catalog_missing")
+    assert (wheat["plan_id"], wheat["status"]) == ("corn_soy__wheat_dc", "partial")
+    assert wheat["double_crop"]["path"] == "winter_wheat_double_crop"
     assert other["status"] == "complete"
 
 
@@ -197,7 +198,7 @@ def test_too_many_plans_and_bad_year_and_unknown_plan(client):
     assert post(client, "/v1/plans/compare", {"plans": many}).json()["issues"][0]["code"] == "too_many_plans"
     assert client.get("/v1/seasons/1980/replay").json()["issues"][0]["field"] == "year"
     assert client.get("/v1/seasons/2008/replay?plan=zzz").status_code == 400
-    assert client.get("/v1/seasons/2008/replay?plan=corn_soy__wheat_dc").status_code == 400
+    assert client.get("/v1/seasons/2008/replay?plan=corn_soy__wheat_dc").status_code == 200
 
 
 # --- replay --------------------------------------------------------------------------------------------

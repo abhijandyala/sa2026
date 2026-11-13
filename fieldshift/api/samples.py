@@ -32,7 +32,7 @@ def load_samples() -> Samples:
     plans: dict[str, SamplePlan] = {}
     for s in doc["samples"]:
         plan = Plan.model_validate(s["plan"]) if s.get("plan") else None
-        meta = {k: s.get(k) for k in ("rotation_id", "leg", "dates_assumed", "editable",
+        meta = {k: s.get(k) for k in ("rotation_id", "leg", "dates_assumed", "dates_basis", "editable",
                                       "unavailable", "label", "note")}
         plans[s["plan_id"]] = SamplePlan(s["plan_id"], plan, meta)
     rotations = {r["rotation_id"]: Rotation.model_validate(r) for r in doc["rotations"]}

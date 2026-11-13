@@ -35,11 +35,11 @@
       "start": 2006
     }
   },
-  "input_hash": "289e345077a57d4d41211bcf548a3624c4f59931de21d03d20fdcecadafbe8df",
+  "input_hash": "2182038e08770e09683a14cb20b4b236796e6ee3bd1875a9938cdf3e469038cf",
   "location": null,
   "meta": {
     "catalog_version": "v2:8eeb5bf961eb",
-    "plan_version": "289e345077a57d4d",
+    "plan_version": "2182038e08770e09",
     "request_id": "req_example",
     "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
   },
@@ -59,6 +59,8 @@
       },
       "conflicts": [],
       "dates_assumed": true,
+      "dates_basis": "assumed",
+      "double_crop": null,
       "editable": [
         "prev_harvest",
         "next_plant"
@@ -100,7 +102,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
@@ -146,7 +148,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "heavy_rain_mm": 76.2
           }
@@ -189,7 +191,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
@@ -235,7 +237,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "heavy_rain_mm": 76.2
           }
@@ -1180,6 +1182,8 @@
         ]
       ],
       "dates_assumed": true,
+      "dates_basis": "assumed",
+      "double_crop": null,
       "editable": [
         "prev_harvest",
         "next_plant"
@@ -1221,7 +1225,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
@@ -1267,7 +1271,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "heavy_rain_mm": 76.2
           }
@@ -1310,7 +1314,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
@@ -1356,7 +1360,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "heavy_rain_mm": 76.2
           }
@@ -2252,6 +2256,8 @@
       },
       "conflicts": [],
       "dates_assumed": true,
+      "dates_basis": "assumed",
+      "double_crop": null,
       "editable": [
         "prev_harvest",
         "winter.seed",
@@ -2295,7 +2301,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
@@ -2336,7 +2342,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
@@ -2382,7 +2388,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "heavy_rain_mm": 76.2
           }
@@ -2425,7 +2431,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@05-12": 64.18
           }
@@ -2471,7 +2477,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "heavy_rain_mm": 76.2
           }
@@ -3677,6 +3683,8 @@
         ]
       ],
       "dates_assumed": true,
+      "dates_basis": "assumed",
+      "double_crop": null,
       "editable": [
         "prev_harvest",
         "winter.seed",
@@ -3882,7 +3890,7 @@
           "result": "insufficient_data",
           "similarity_band_pp": 10.0,
           "status": "insufficient_data",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
@@ -3923,7 +3931,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
@@ -3969,7 +3977,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "heavy_rain_mm": 76.2
           }
@@ -4012,7 +4020,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "spring_dry_mm@04-15": 53.51
           }
@@ -4058,7 +4066,7 @@
           "result": "similar",
           "similarity_band_pp": 10.0,
           "status": "complete",
-          "threshold_set_id": "19aecbfb55a7bbfb",
+          "threshold_set_id": "0823af244148ab8e",
           "thresholds": {
             "heavy_rain_mm": 76.2
           }
@@ -5365,16 +5373,577 @@
       "calendar": null,
       "conflicts": [],
       "dates_assumed": true,
-      "editable": [],
+      "dates_basis": "assumed",
+      "double_crop": {
+        "catalog_state": {
+          "reason": "the catalog has no numeric Piedmont calendar windows for winter wheat or double-crop soybean; the wheat harvest and soybean planting dates are entered by the grower, the maturity-group rows are checked, and qualitative or map-based rows are manual_check",
+          "status": "partial"
+        },
+        "cross_calendar": {
+          "difference_label": "double-crop minus full-season, raw millimetres of rain in each plan's own 30-day window",
+          "double_crop": {
+            "baseline": "own_window_baseline",
+            "cutoff_mm": 58.06,
+            "eligible_seasons": 45,
+            "label": "Double-crop soybean spring window (own baseline)",
+            "median_total_mm": 92.5,
+            "plan_id": "corn_soy__wheat_dc",
+            "window": {
+              "days": 30,
+              "example": {
+                "end": "1981-06-11",
+                "start": "1981-05-13",
+                "year": 1981
+              },
+              "plant_md": "06-12"
+            }
+          },
+          "full_season": {
+            "baseline": "own_window_baseline",
+            "cutoff_mm": 64.18,
+            "eligible_seasons": 45,
+            "label": "Full-season soybean spring window (own baseline)",
+            "median_total_mm": 82.9,
+            "plan_id": "corn_soy__no_cover",
+            "window": {
+              "days": 30,
+              "example": {
+                "end": "1981-05-11",
+                "start": "1981-04-12",
+                "year": 1981
+              },
+              "plant_md": "05-12"
+            }
+          },
+          "label": "different-calendar",
+          "median_total_mm_difference": 9.6,
+          "note": "These plans plant in different calendar windows. Each has its own baseline, so ranks, percentiles and dry labels are NOT comparable across them. Only raw 30-day totals (mm) are shown side by side; no shared dry label or era result is computed.",
+          "status": "complete"
+        },
+        "dates": {
+          "basis": "grower",
+          "harvest_to_plant_days": 7,
+          "previous_harvest": "2024-09-20",
+          "soybean_plant": "2025-06-12",
+          "wheat_harvest": "2025-06-05",
+          "wheat_plant": "2024-10-25",
+          "wheat_season_days": 223,
+          "winter_days": 265
+        },
+        "maturity_group": {
+          "checks": [
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [
+                "maturity_group"
+              ],
+              "reason": "input 'maturity_group' is not available",
+              "reference": null,
+              "rule_id": "sb_v2_mg_mid_june",
+              "source": {
+                "locator": "Paragraphs beginning If you look and This data indicates; Figure 1 discussion",
+                "title": "What Is the Best Soybean Maturity Group to Plant Behind Wheat?",
+                "url": "https://soybeans.ces.ncsu.edu/news/what-is-the-best-soybean-maturity-group-to-plant-behind-wheat/",
+                "verified_date": "2026-11-13"
+              },
+              "status": "unknown",
+              "suitability": null,
+              "verdict": "unknown"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "this row was studied at a planting date of 07-08 to 07-22; the plan plants on 2025-06-12, so apply judgment",
+              "reference": null,
+              "rule_id": "sb_v2_mg_mid_july",
+              "source": {
+                "locator": "Paragraph beginning If you look; mid-July finding and Figure 1 discussion",
+                "title": "What Is the Best Soybean Maturity Group to Plant Behind Wheat?",
+                "url": "https://soybeans.ces.ncsu.edu/news/what-is-the-best-soybean-maturity-group-to-plant-behind-wheat/",
+                "verified_date": "2026-11-13"
+              },
+              "status": "manual_check",
+              "suitability": null,
+              "verdict": "manual_check"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [
+                "maturity_group"
+              ],
+              "reason": "input 'maturity_group' is not available",
+              "reference": null,
+              "rule_id": "sb_rc_03",
+              "source": {
+                "locator": "Mid-June results and Figure 1",
+                "title": "NC State Extension: What Is the Best Soybean Maturity Group to Plant Behind Wheat?",
+                "url": "https://soybeans.ces.ncsu.edu/news/what-is-the-best-soybean-maturity-group-to-plant-behind-wheat/",
+                "verified_date": "2026-11-12"
+              },
+              "status": "unknown",
+              "suitability": "caution",
+              "verdict": "unknown"
+            }
+          ],
+          "input": null,
+          "missing": [
+            "maturity_group"
+          ],
+          "planting_context": {
+            "assumption": "mid-month is read as the 15th plus or minus one week",
+            "contexts": {
+              "sb_v2_mg_mid_july": [
+                "07-08",
+                "07-22"
+              ],
+              "sb_v2_mg_mid_june": [
+                "06-08",
+                "06-22"
+              ]
+            },
+            "note": "the planting date matches the sb_v2_mg_mid_june row(s)",
+            "plant_date": "2025-06-12",
+            "rows_in_context": [
+              "sb_v2_mg_mid_june"
+            ]
+          },
+          "status": "unknown"
+        },
+        "notes": [
+          "Check results do not vary by season here: dates and maturity group are the grower's.",
+          "SMAP soil-moisture comparison is not included."
+        ],
+        "path": "winter_wheat_double_crop",
+        "plan_id": "corn_soy__wheat_dc",
+        "rule_checks": {
+          "flagged": [
+            {
+              "condition_met": true,
+              "flagged": true,
+              "missing_inputs": [],
+              "reason": "crop sequence matches the rule",
+              "reference": null,
+              "rule_id": "ww_rc_01",
+              "source": {
+                "locator": "Tips 1\u20133",
+                "title": "NC State Extension: Planting to Reduce Head Scab Risk",
+                "url": "https://smallgrains.ces.ncsu.edu/news/planting-to-reduce-head-scab-risk/",
+                "verified_date": "2026-11-12"
+              },
+              "status": "complete",
+              "suitability": "caution",
+              "verdict": "caution"
+            }
+          ],
+          "inapplicable_to_this_production_system": [
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "rule needs production system 'organic_grain'; the plan is ['conventional']",
+              "reference": null,
+              "rule_id": "ww_v2_pw_freeze_reference",
+              "source": {
+                "locator": "Figure 4-1 caption",
+                "title": "North Carolina Organic Commodities Production Guide: Chapter 4 - Wheat and Small Grains",
+                "url": "https://content.ces.ncsu.edu/north-carolina-organic-commodities-production-guide/chapter-4-crop-production-management-organic-wheat-and-small-grains",
+                "verified_date": "2026-11-13"
+              },
+              "status": "inapplicable",
+              "suitability": null,
+              "verdict": "inapplicable"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "rule needs production system 'organic_grain'; the plan is ['conventional']",
+              "reference": null,
+              "rule_id": "ww_v2_pw_hessian_fly",
+              "source": {
+                "locator": "Insect Pest Management > Hessian Fly; fourth bullet",
+                "title": "North Carolina Organic Commodities Production Guide: Chapter 4 - Wheat and Small Grains",
+                "url": "https://content.ces.ncsu.edu/north-carolina-organic-commodities-production-guide/chapter-4-crop-production-management-organic-wheat-and-small-grains",
+                "verified_date": "2026-11-13"
+              },
+              "status": "inapplicable",
+              "suitability": "caution",
+              "verdict": "inapplicable"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "rule needs production system 'organic_grain'; the plan is ['conventional']",
+              "reference": null,
+              "rule_id": "ww_v2_seed_drilled",
+              "source": {
+                "locator": "Seeding Rate, Drill Calibration, and Drill Operation; first paragraph",
+                "title": "North Carolina Organic Commodities Production Guide: Chapter 4 - Wheat and Small Grains",
+                "url": "https://content.ces.ncsu.edu/north-carolina-organic-commodities-production-guide/chapter-4-crop-production-management-organic-wheat-and-small-grains",
+                "verified_date": "2026-11-13"
+              },
+              "status": "inapplicable",
+              "suitability": null,
+              "verdict": "inapplicable"
+            }
+          ],
+          "manual_check": [
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "published reference value 0-21 days; not measured on this field",
+              "reference": {
+                "condition_key": "days_after_local_mapped_start",
+                "is_grower_target": false,
+                "kind": "published_reference",
+                "operator": "between",
+                "source_url": "https://bertie.ces.ncsu.edu/news/wheat-planting/",
+                "unit": "days",
+                "value_max": 21.0,
+                "value_min": 0.0,
+                "value_text": null,
+                "verified_date": "2026-11-13"
+              },
+              "rule_id": "ww_v2_pw_local_map",
+              "source": {
+                "locator": "Recommendation 3 and Figure 1 caption",
+                "title": "Wheat Planting: NC State University Top Recommendations for High-Yielding Wheat",
+                "url": "https://bertie.ces.ncsu.edu/news/wheat-planting/",
+                "verified_date": "2026-11-13"
+              },
+              "status": "manual_check",
+              "suitability": "preferred",
+              "verdict": "manual_check"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "no evaluator for condition 'harvest_season_context'",
+              "reference": null,
+              "rule_id": "ww_v2_gd_harvest_context",
+              "source": {
+                "locator": "Opening discussion; paragraph beginning The smaller crop supports",
+                "title": "Does Wheat Pencil Out This Fall?",
+                "url": "https://are.ces.ncsu.edu/news/does-wheat-pencil-out-this-fall/",
+                "verified_date": "2026-11-13"
+              },
+              "status": "manual_check",
+              "suitability": null,
+              "verdict": "manual_check"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "no evaluator for condition 'planting_after_small_grain'",
+              "reference": null,
+              "rule_id": "sb_v2_pw_after_wheat_context",
+              "source": {
+                "locator": "Opening paragraph",
+                "title": "What Is the Best Soybean Maturity Group to Plant Behind Wheat?",
+                "url": "https://soybeans.ces.ncsu.edu/news/what-is-the-best-soybean-maturity-group-to-plant-behind-wheat/",
+                "verified_date": "2026-11-13"
+              },
+              "status": "manual_check",
+              "suitability": null,
+              "verdict": "manual_check"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "this row was studied at a planting date of 07-08 to 07-22; the plan plants on 2025-06-12, so apply judgment",
+              "reference": null,
+              "rule_id": "sb_v2_mg_mid_july",
+              "source": {
+                "locator": "Paragraph beginning If you look; mid-July finding and Figure 1 discussion",
+                "title": "What Is the Best Soybean Maturity Group to Plant Behind Wheat?",
+                "url": "https://soybeans.ces.ncsu.edu/news/what-is-the-best-soybean-maturity-group-to-plant-behind-wheat/",
+                "verified_date": "2026-11-13"
+              },
+              "status": "manual_check",
+              "suitability": null,
+              "verdict": "manual_check"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "no evaluator for condition 'delayed_planting_yield'",
+              "reference": null,
+              "rule_id": "sb_v2_pw_delay_yield",
+              "source": {
+                "locator": "Planting Date > Planting Past Mid-May",
+                "title": "North Carolina Soybean Production Guide: 5. Planting Decisions",
+                "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/soybean-planting-decisions",
+                "verified_date": "2026-11-13"
+              },
+              "status": "manual_check",
+              "suitability": "caution",
+              "verdict": "manual_check"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "published reference value 165000-175000 seeds/acre; not measured on this field",
+              "reference": {
+                "condition_key": "seeding_rate",
+                "is_grower_target": false,
+                "kind": "published_reference",
+                "operator": "between",
+                "source_url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/soybean-planting-decisions",
+                "unit": "seeds/acre",
+                "value_max": 175000.0,
+                "value_min": 165000.0,
+                "value_text": null,
+                "verified_date": "2026-11-13"
+              },
+              "rule_id": "sb_v2_seed_late",
+              "source": {
+                "locator": "Seeding Rate > Planting Date; research methods specify 15-inch rows",
+                "title": "North Carolina Soybean Production Guide: 5. Planting Decisions",
+                "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/soybean-planting-decisions",
+                "verified_date": "2026-11-13"
+              },
+              "status": "manual_check",
+              "suitability": null,
+              "verdict": "manual_check"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [],
+              "reason": "no evaluator for condition 'late_planting_narrow_rows'",
+              "reference": null,
+              "rule_id": "sb_v2_spacing_late",
+              "source": {
+                "locator": "Row Spacing; opening paragraph",
+                "title": "North Carolina Soybean Production Guide: 5. Planting Decisions",
+                "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/soybean-planting-decisions",
+                "verified_date": "2026-11-13"
+              },
+              "status": "manual_check",
+              "suitability": null,
+              "verdict": "manual_check"
+            }
+          ],
+          "unknown": [
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [
+                "maturity_group"
+              ],
+              "reason": "input 'maturity_group' is not available",
+              "reference": null,
+              "rule_id": "sb_rc_03",
+              "source": {
+                "locator": "Mid-June results and Figure 1",
+                "title": "NC State Extension: What Is the Best Soybean Maturity Group to Plant Behind Wheat?",
+                "url": "https://soybeans.ces.ncsu.edu/news/what-is-the-best-soybean-maturity-group-to-plant-behind-wheat/",
+                "verified_date": "2026-11-12"
+              },
+              "status": "unknown",
+              "suitability": "caution",
+              "verdict": "unknown"
+            },
+            {
+              "condition_met": null,
+              "flagged": false,
+              "missing_inputs": [
+                "maturity_group"
+              ],
+              "reason": "input 'maturity_group' is not available",
+              "reference": null,
+              "rule_id": "sb_v2_mg_mid_june",
+              "source": {
+                "locator": "Paragraphs beginning If you look and This data indicates; Figure 1 discussion",
+                "title": "What Is the Best Soybean Maturity Group to Plant Behind Wheat?",
+                "url": "https://soybeans.ces.ncsu.edu/news/what-is-the-best-soybean-maturity-group-to-plant-behind-wheat/",
+                "verified_date": "2026-11-13"
+              },
+              "status": "unknown",
+              "suitability": null,
+              "verdict": "unknown"
+            }
+          ]
+        },
+        "soybean_planting_window": {
+          "basis": "grower-entered wheat harvest and soybean planting dates; the catalog has no numeric Piedmont window",
+          "catalog_context": {
+            "condition_met": null,
+            "flagged": false,
+            "kind": "context only; not a calendar rule",
+            "missing_inputs": [],
+            "reason": "no evaluator for condition 'planting_after_small_grain'",
+            "reference": null,
+            "rule_id": "sb_v2_pw_after_wheat_context",
+            "source": {
+              "locator": "Opening paragraph",
+              "title": "What Is the Best Soybean Maturity Group to Plant Behind Wheat?",
+              "url": "https://soybeans.ces.ncsu.edu/news/what-is-the-best-soybean-maturity-group-to-plant-behind-wheat/",
+              "verified_date": "2026-11-13"
+            },
+            "status": "manual_check",
+            "suitability": null,
+            "verdict": "manual_check"
+          },
+          "days_after_wheat_harvest": 7,
+          "delay_caution": {
+            "condition_met": null,
+            "flagged": false,
+            "missing_inputs": [],
+            "reason": "no evaluator for condition 'delayed_planting_yield'",
+            "reference": null,
+            "rule_id": "sb_v2_pw_delay_yield",
+            "source": {
+              "locator": "Planting Date > Planting Past Mid-May",
+              "title": "North Carolina Soybean Production Guide: 5. Planting Decisions",
+              "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/soybean-planting-decisions",
+              "verified_date": "2026-11-13"
+            },
+            "status": "manual_check",
+            "suitability": "caution",
+            "verdict": "manual_check"
+          },
+          "earliest_planting_date": "2025-06-05",
+          "moved_to_after_wheat_harvest": true,
+          "notes": [],
+          "planting_date": "2025-06-12"
+        },
+        "spring": {
+          "baseline": "own_window_baseline",
+          "baseline_note": "Dry/wet labels and ranks use only the 1981-2025 totals for this plan's own 30-day window before 06-12, not any other planting window.",
+          "cutoff_mm": 58.06,
+          "dry_seasons": 9,
+          "dry_years": [
+            1988,
+            1993,
+            1997,
+            1999,
+            2000,
+            2002,
+            2004,
+            2007,
+            2008
+          ],
+          "eligible_seasons": 45,
+          "era_dry_spring": {
+            "basis": "own_evaluable_seasons",
+            "caveat": "This happened in a smaller share of seasons in 2006-2025 than in 1981-2000. Descriptive comparison of two periods only; not a trend, cause, or forecast.",
+            "diff_pp": -15.0,
+            "earlier": {
+              "end": 2000,
+              "evaluable": 20,
+              "events": 5,
+              "not_evaluable": [],
+              "pct": 25.0,
+              "seasons": 20,
+              "start": 1981,
+              "threshold_value": 58.06
+            },
+            "excluded_from_eras": [
+              2001,
+              2002,
+              2003,
+              2004,
+              2005
+            ],
+            "indicator": "dry_spring",
+            "min_evaluable_per_era": 15,
+            "recent": {
+              "end": 2025,
+              "evaluable": 20,
+              "events": 2,
+              "not_evaluable": [],
+              "pct": 10.0,
+              "seasons": 20,
+              "start": 2006,
+              "threshold_value": 58.06
+            },
+            "result": "less_frequent_recent",
+            "similarity_band_pp": 10.0,
+            "status": "complete",
+            "threshold_set_id": "6039adef6c9bb32a",
+            "thresholds": {
+              "spring_dry_mm@06-12": 58.06
+            }
+          },
+          "label": "Double-crop soybean spring window (own baseline)",
+          "median_total_mm": 92.5,
+          "status": "complete",
+          "window": {
+            "days": 30,
+            "example": {
+              "end": "1981-06-11",
+              "start": "1981-05-13",
+              "year": 1981
+            },
+            "plant_md": "06-12"
+          }
+        },
+        "status": "partial",
+        "wetness": {
+          "label": "modeled",
+          "note": "see the replay for aligned daily GWETTOP/GWETROOT"
+        },
+        "winter_exposure": {
+          "reason": "rain-outside-cover exposure is not computed for harvested winter grain",
+          "status": "unavailable"
+        },
+        "year": 2025,
+        "year_constant_checks": {
+          "constant_across_seasons": true,
+          "flagged_rule_ids": [
+            "ww_rc_01"
+          ],
+          "seasons_checked": 45
+        }
+      },
+      "editable": [
+        "prev_harvest",
+        "winter.plant",
+        "winter.harvest",
+        "next_plant"
+      ],
       "eras": {},
       "eras_shared_years": {},
       "label": "Winter wheat, then double-crop soybean",
       "leg": 1,
       "other_checks": [],
       "path_notes": [],
-      "plan": null,
+      "plan": {
+        "grower": {
+          "low_moisture_concern": null,
+          "observations": [],
+          "residue_report": null
+        },
+        "label": "Winter wheat, then double-crop soybean",
+        "next_crop_id": "soybean",
+        "next_plant": "06-12",
+        "plan_id": "corn_soy__wheat_dc",
+        "prev_harvest": "09-20",
+        "previous_crop_id": "field_corn",
+        "production_system": "conventional",
+        "region": "NC Piedmont",
+        "winter": {
+          "crop_id": "winter_wheat",
+          "harvest": "06-05",
+          "kind": "winter_grain",
+          "plant": "10-25",
+          "seed": null,
+          "terminate": null
+        }
+      },
       "plan_id": "corn_soy__wheat_dc",
-      "reason": "catalog_missing",
+      "reason": "the catalog has no numeric Piedmont calendar windows for winter wheat or double-crop soybean; the wheat harvest and soybean planting dates are entered by the grower, the maturity-group rows are checked, and qualitative or map-based rows are manual_check",
       "residue_context": [],
       "rotation_id": "add_grain_crop",
       "rotation_ids": [
@@ -5383,7 +5952,7 @@
       "seasons": [],
       "spring": null,
       "spring_checks": [],
-      "status": "unavailable",
+      "status": "partial",
       "winter": null
     }
   ],
@@ -5404,7 +5973,7 @@
       "add_grain_crop"
     ]
   },
-  "result_id": "6abfa3ad41ad82c5",
+  "result_id": "5c483e97d0703f8b",
   "shared_eligible_years": {
     "full_season": [
       1982,
@@ -5697,6 +6266,72 @@
         "status": "complete",
         "unit": "mm",
         "value": 64.18
+      },
+      "06-12": {
+        "method": "bottom_20pct_order_statistic",
+        "n_reference": 45,
+        "name": "spring_dry_mm@06-12",
+        "note": null,
+        "parameters": {
+          "eligible_years": [
+            1981,
+            1982,
+            1983,
+            1984,
+            1985,
+            1986,
+            1987,
+            1988,
+            1989,
+            1990,
+            1991,
+            1992,
+            1993,
+            1994,
+            1995,
+            1996,
+            1997,
+            1998,
+            1999,
+            2000,
+            2001,
+            2002,
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "excluded_years": [],
+          "fraction": 0.2,
+          "k": 9,
+          "plant_md": "06-12",
+          "tie_rule": "total <= cutoff counts as dry",
+          "window_days": 30
+        },
+        "reference_span": "1981..2025",
+        "source": null,
+        "status": "complete",
+        "unit": "mm",
+        "value": 58.06
       }
     },
     "heavy_rain": {
@@ -5725,6 +6360,6 @@
       "unit": "mm/day",
       "value": 76.2
     },
-    "threshold_set_id": "19aecbfb55a7bbfb"
+    "threshold_set_id": "0823af244148ab8e"
   }
 }

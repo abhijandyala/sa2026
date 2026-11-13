@@ -122,6 +122,7 @@ class PlanComparison(_M):
     rotation_ids: list[str] = Field(default_factory=list)  # every requested rotation containing it
     leg: int | None = None
     dates_assumed: bool | None = None
+    dates_basis: str | None = None  # "assumed" for the sample plans' demo dates
     editable: list[str] = Field(default_factory=list)
     plan: Plan | None = None
     calendar: CalendarSummary | None = None
@@ -135,6 +136,10 @@ class PlanComparison(_M):
     eras_shared_years: dict[str, EraComparison] = Field(default_factory=dict)
     seasons: list[SeasonRow] = Field(default_factory=list)
     residue_context: list[dict[str, Any]] = Field(default_factory=list)
+    # Winter wheat -> double-crop soybean (catalog v2 only): B's wheat path result. It is never
+    # folded into the shared-year or era comparisons; the full-season comparison inside it is
+    # labelled ``different-calendar`` and shows raw totals only.
+    double_crop: dict[str, Any] | None = None
 
 
 class SharedYears(_M):

@@ -12,7 +12,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, field_validator
 
 from fieldshift.api.samples import SamplePlan, load_samples
 from fieldshift.compare import engine
@@ -32,6 +32,7 @@ from fieldshift.compare.replay import replay_season
 from fieldshift.compare.sensitivity import DEFAULT_RULE, sweep_termination
 from fieldshift.compare.years import years_payload
 from fieldshift.contracts import InvalidPlanError, Plan, Status
+from fieldshift.planner.calendar import plan_year_issues
 from fieldshift.planner.checker import plan_version
 from fieldshift.report.http import invalid, issue
 from fieldshift.report.meta import response_meta
@@ -58,6 +59,16 @@ class CompareRequest(BaseModel):
     rotation_ids: list[str] = Field(default_factory=list)
     location: LocationIn | None = None
     include_soil: bool = True
+    # Soybean maturity group (0-10) for a winter-wheat double-crop plan; blank = not entered.
+    maturity_group: (
+        Annotated[StrictInt, Field(ge=0, le=10)] | Annotated[StrictFloat, Field(ge=0, le=10)] | None
+    ) = None
+
+    @field_validator("maturity_group", mode="before")
+    @classmethod
+    def _blank_is_not_entered(cls, v: Any) -> Any:
+        """A blank string means "not entered" (unknown), never 0; a real 0 is kept."""
+        return None if isinstance(v, str) and not v.strip() else v
 
 
 class SensitivityRequest(BaseModel):
@@ -88,12 +99,20 @@ def _sample(plan_id: str, field: str) -> tuple[SamplePlan | None, dict[str, str]
     return sp, None
 
 
+def _full_season_default() -> Plan | None:
+    """The full-season soybean sample a double-crop plan is shown next to when the request
+    has no full-season soybean plan of its own."""
+    sp = load_samples().plans.get("corn_soy__no_cover")
+    return sp.plan if sp else None
+
+
 def _unavailable(sp: SamplePlan) -> PlanComparison:
     info = sp.meta.get("unavailable") or {}
     return PlanComparison(
         plan_id=sp.plan_id, label=sp.meta.get("label"), status=Status.UNAVAILABLE,
         reason=info.get("reason", "unavailable"), rotation_id=sp.meta.get("rotation_id"),
         leg=sp.meta.get("leg"), dates_assumed=sp.meta.get("dates_assumed"),
+        dates_basis=sp.meta.get("dates_basis"),
     )
 
 
@@ -134,11 +153,15 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
 
     # validate edited / provided plans (typed chronology errors)
     for pid, (plan, _m) in wanted.items():
-        if plan is not None and plan.winter.kind != "winter_grain":
+        if plan is not None:
             try:
                 engine.build_calendar(plan, engine.REFERENCE_YEAR)
             except InvalidPlanError as exc:
                 issues += _issues_from_plan_error(exc, f"plans.{pid}")
+            else:
+                if plan.winter.kind == "winter_grain":  # the wheat path replays every year
+                    issues += [issue(f"plans.{pid}.{i['field']}", i["code"], i["message"])
+                               for i in plan_year_issues(plan, engine.YEARS)]
     if issues:
         return invalid(issues)
 
@@ -159,7 +182,8 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
         }
     else:
         results_live, ts, shared = engine.compare_plans(
-            [p for _, p, _ in live], ctx, meta_by_plan={pid: m for pid, _, m in live}
+            [p for _, p, _ in live], ctx, meta_by_plan={pid: m for pid, _, m in live},
+            maturity_group=body.maturity_group, full_season_default=_full_season_default(),
         )
         by_id = {r.plan_id: r for r in results_live}
     results: list[PlanComparison] = []
@@ -177,6 +201,7 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
     }
     input_hash = engine.canonical_hash({
         "plans": [p.model_dump(mode="json") for _, p, _ in live], "location": [lat, lon],
+        "maturity_group": body.maturity_group,  # changes the double-crop checks
         "unavailable": [pid for pid, (p, _m) in wanted.items() if p is None],
     })
     meta = _meta(input_hash[:16])

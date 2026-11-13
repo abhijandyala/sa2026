@@ -35,7 +35,7 @@
       "start": 2006
     }
   },
-  "input_hash": "c9f7b423d57760745476bff1d59332fc2eb8385894c8731c01a550ded6554b45",
+  "input_hash": "40aa7c6ca35051917b172f49600b6dde048c3159bc0be5ef328e977db1a0fcf2",
   "location": {
     "bounds": {
       "basis": "coarse_polygon",
@@ -82,7 +82,7 @@
   },
   "meta": {
     "catalog_version": "v2:8eeb5bf961eb",
-    "plan_version": "c9f7b423d5776074",
+    "plan_version": "40aa7c6ca3505191",
     "request_id": "req_example",
     "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
   },
@@ -91,6 +91,8 @@
       "calendar": null,
       "conflicts": [],
       "dates_assumed": null,
+      "dates_basis": null,
+      "double_crop": null,
       "editable": [],
       "eras": {},
       "eras_shared_years": {},
@@ -144,7 +146,7 @@
     ],
     "rotation_ids": []
   },
-  "result_id": "b2a3e710ffa9535f",
+  "result_id": "1e6ad1e31e269710",
   "shared_eligible_years": {
     "full_season": [],
     "note": "unsupported_location: weather_history_not_available_for_location",

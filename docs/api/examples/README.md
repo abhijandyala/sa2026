@@ -10,7 +10,7 @@ python -m fieldshift.api.contract
 
 | Response file | Request (in `requests/`) | Endpoint |
 |---|---|---|
-| `compare.json` | `requests/compare.json` | `POST /v1/plans/compare` (all three presets; includes the wheat path as `unavailable: catalog_missing`) |
+| `compare.json` | `requests/compare.json` | `POST /v1/plans/compare` (all three presets; the wheat leg is `partial` under catalog v2 with the `double_crop` block, and `unavailable: catalog_missing` under catalog v1) |
 | `compare_unsupported_location.json` | `requests/compare_unsupported_location.json` | same endpoint, a point outside the Union County weather cell |
 | `error_invalid_input.json` | `requests/error_invalid_input.json` | HTTP 400 typed error naming the field |
 | `calendar.json` | `requests/calendar.json` | `POST /v1/plans/calendar` (with scenarios and a diff against a previous plan) |

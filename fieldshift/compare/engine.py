@@ -211,15 +211,58 @@ def _rule_lines(res: Any, exclude: set[str]) -> tuple[list[RuleLine], list, list
     return lines, [c.rule_ids for c in res.conflicts], [n.model_dump(mode="json") for n in res.path_notes]
 
 
+def _analyze_wheat(
+    plan: Plan, ctx: Context, full_season_plan: Plan | None, maturity_group: Any
+) -> PlanComparison:
+    """Winter wheat -> double-crop soybean through B's wheat path (Phase 12).
+
+    Catalog v1 has no wheat rows, so the path itself answers ``unavailable: catalog_missing``.
+    With catalog v2 the result is ``partial``: the grower's dates, the maturity-group checks and
+    the manual_check rows. The plan is never part of the shared-year or era comparisons (its
+    baseline is its own planting window), and the full-season comparison inside ``double_crop``
+    is labelled ``different-calendar`` with raw totals only.
+    """
+    from fieldshift.planner.wheat_path import evaluate_wheat_double_crop
+
+    result = evaluate_wheat_double_crop(
+        plan, ctx, maturity_group=maturity_group, year=REFERENCE_YEAR,
+        full_season_plan=full_season_plan,
+    )
+    if (
+        result["status"] == str(Status.INVALID_INPUT) and full_season_plan is not None
+        and all(i["field"].startswith("compare_to_plan") for i in result["issues"])
+    ):  # an unusable neighbouring plan must not sink this plan; say why there is no comparison
+        why = "; ".join(i["message"] for i in result["issues"])
+        result = evaluate_wheat_double_crop(
+            plan, ctx, maturity_group=maturity_group, year=REFERENCE_YEAR
+        )
+        if result["status"] in (str(Status.COMPLETE), str(Status.PARTIAL)):
+            result["cross_calendar"] = {
+                "label": "different-calendar", "status": str(Status.UNAVAILABLE),
+                "reason": f"the full-season soybean plan could not be used: {why}",
+            }
+    status = Status(result["status"])
+    if status in (Status.COMPLETE, Status.PARTIAL):
+        return PlanComparison(
+            plan_id=plan.plan_id, label=plan.label, status=status,
+            reason=(result.get("catalog_state") or {}).get("reason"), plan=plan,
+            double_crop=result,
+        )
+    reason = result.get("reason") or "; ".join(
+        f"{i['field']}: {i['message']}" for i in result.get("issues", [])
+    )
+    return PlanComparison(
+        plan_id=plan.plan_id, label=plan.label, status=status, reason=reason or None, plan=plan,
+    )
+
+
 def analyze_plan(
-    plan: Plan, ctx: Context, ts: ThresholdSet
+    plan: Plan, ctx: Context, ts: ThresholdSet, *,
+    full_season_plan: Plan | None = None, maturity_group: Any = None,
 ) -> tuple[PlanComparison, dict[str, Indicator]]:
     """Run one plan over every planting year. Returns the result and its per-year indicators."""
     if plan.winter.kind == "winter_grain":
-        return PlanComparison(
-            plan_id=plan.plan_id, label=plan.label, status=Status.UNAVAILABLE,
-            reason="catalog_missing", plan=plan,
-        ), {}
+        return _analyze_wheat(plan, ctx, full_season_plan, maturity_group), {}
     checked = check_plan(plan, ctx.index, year=REFERENCE_YEAR)
     if checked.status == Status.UNSUPPORTED:
         return PlanComparison(
@@ -319,18 +362,34 @@ def analyze_plan(
 # --------------------------------------------------------------------------- several plans
 
 
+def _full_season_for(plans: list[Plan], default: Plan | None) -> Plan | None:
+    """The first full-season soybean plan in the request, else ``default``."""
+    for p in plans:
+        if p.next_crop_id == "soybean" and p.winter.kind != "winter_grain":
+            return p
+    return default
+
+
 def compare_plans(
-    plans: list[Plan], ctx: Context, *, meta_by_plan: dict[str, dict[str, Any]] | None = None
+    plans: list[Plan], ctx: Context, *, meta_by_plan: dict[str, dict[str, Any]] | None = None,
+    maturity_group: Any = None, full_season_default: Plan | None = None,
 ) -> tuple[list[PlanComparison], ThresholdSet, SharedYears]:
-    """Analyze every plan against ONE frozen ThresholdSet and the same weather rows."""
+    """Analyze every plan against ONE frozen ThresholdSet and the same weather rows.
+
+    A winter-wheat double-crop plan is shown next to the request's first full-season soybean plan
+    (or ``full_season_default``) as ``different-calendar``, raw totals only.
+    """
     if len(plans) > MAX_PLANS:
         raise ValueError(f"at most {MAX_PLANS} plans per comparison")
     for p in plans:
-        if p.winter.kind != "winter_grain":
-            _validate(p)
+        _validate(p)
     mds = [p.next_plant for p in plans]
     ts = threshold_set_for(ctx, mds)
-    analyses = [analyze_plan(p, ctx, ts) for p in plans]
+    full = _full_season_for(plans, full_season_default)
+    analyses = [
+        analyze_plan(p, ctx, ts, full_season_plan=full, maturity_group=maturity_group)
+        for p in plans
+    ]
     results = [a for a, _ in analyses]
     meta_by_plan = meta_by_plan or {}
     live = [(r, ind) for r, (_, ind) in zip(results, analyses, strict=True) if r.status == Status.COMPLETE]
@@ -348,6 +407,7 @@ def compare_plans(
         m = meta_by_plan.get(r.plan_id, {})
         r.rotation_id, r.leg = m.get("rotation_id"), m.get("leg")
         r.dates_assumed, r.editable = m.get("dates_assumed"), list(m.get("editable") or [])
+        r.dates_basis = m.get("dates_basis") or ("assumed" if m.get("dates_assumed") else None)
         if m.get("unavailable") and r.status == Status.UNAVAILABLE:
             r.reason = m["unavailable"].get("reason", r.reason)
     shared = _shared_years([r for r in results if r.status == Status.COMPLETE])
