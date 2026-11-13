@@ -11,6 +11,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import io
+import math
 import re
 from collections import Counter
 from collections.abc import Callable
@@ -109,7 +110,10 @@ class _RowParser:
         if s is None:
             return None
         try:
-            return float(s)
+            value = float(s)
+            if not math.isfinite(value):
+                raise ValueError(s)
+            return value
         except ValueError:
             self.issues.append(
                 ValidationIssue(
@@ -183,6 +187,15 @@ def _parse_rule(p: _RowParser) -> CropRule | None:
             exp_num = float(exp_text)
         except ValueError:
             exp_qual = exp_text
+        else:
+            if not math.isfinite(exp_num):  # "nan" / "inf" are not durations
+                p.issues.append(
+                    ValidationIssue(
+                        p.file, p.row, "exposure_duration", "error",
+                        f"'{exp_text}' is not a finite number", "not_a_number",
+                    )
+                )  # fmt: skip
+                exp_num = None
     return CropRule(
         rule_id=rid,
         crop_id=cid,
@@ -284,8 +297,12 @@ def load_catalog(directory: Path | str = DEFAULT_CATALOG_DIR) -> Catalog:
         directory / validate.FERTILIZERS_FILE, validate.FERTILIZERS_FILE, _parse_fertilizer, issues
     )
 
-    issues += validate.validate_crops(crops)
-    issues += validate.validate_rules(rules, {c.crop_id for _, c in crops})
+    crop_issues = validate.validate_crops(crops)
+    issues += crop_issues
+    # Rules may only reference crops that survived validation.
+    bad_crop_rows = {i.row for i in crop_issues if i.severity == "error"}
+    usable_crop_ids = {c.crop_id for r, c in crops if r not in bad_crop_rows}
+    issues += validate.validate_rules(rules, usable_crop_ids)
     issues += validate.validate_fertilizers(ferts)
 
     # Stable order: by file, then row, then field.

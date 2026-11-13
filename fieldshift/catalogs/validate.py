@@ -100,6 +100,14 @@ def check_header(file: str, header: Sequence[str]) -> tuple[list[ValidationIssue
     expected = EXPECTED_HEADERS[file]
     issues: list[ValidationIssue] = []
     got = [h.strip() for h in header]
+    dupes = sorted({c for c in got if got.count(c) > 1})
+    if dupes:
+        return [
+            ValidationIssue(
+                file, 1, "header", "error", f"duplicate column name '{c}'", "header_duplicate"
+            )
+            for c in dupes
+        ], False
     missing = [c for c in expected if c not in got]
     extra = [c for c in got if c not in expected]
     for col in missing:

@@ -221,3 +221,37 @@ def test_index_lookups():
         crop_id="cereal_rye", rule_type="termination_timing", next_crop_id="soybean"
     )
     assert [r.rule_id for r in both] == ["cr_tt_03", "cr_tt_04", "cr_tt_05"]
+
+
+# ------------------------------------------------------------------ review fixes (phase-0-B)
+
+
+def test_rule_referencing_a_rejected_crop_is_dangling(mutate):
+    # crop_b (row 3) fails validation, so fx_03 (cover crop rule on crop_b) must not stay usable.
+    cat = load_catalog(mutate(CROPS_FILE, 3, "crop_role", "weed"))
+    assert (CROPS_FILE, 3, "crop_role") in keys(cat)
+    assert (RULES_FILE, 4, "crop_id") in keys(cat)
+    assert "fx_03" not in {r.rule_id for r in cat.rules}
+    assert all(r.crop_id in {c.crop_id for c in cat.crops} for r in cat.rules)
+
+
+def test_nonfinite_numbers_are_rejected(mutate):
+    d = mutate(RULES_FILE, 3, "value_min", "nan")
+    d = mutate(RULES_FILE, 4, "value_max", "inf")
+    d = mutate(RULES_FILE, 4, "exposure_duration", "nan")
+    cat = load_catalog(d)
+    assert {
+        (RULES_FILE, 3, "value_min"),
+        (RULES_FILE, 4, "value_max"),
+        (RULES_FILE, 4, "exposure_duration"),
+    } <= keys(cat)
+    assert {r.rule_id for r in cat.rules} == {"fx_01", "fx_04"}
+
+
+def test_duplicate_header_columns_are_rejected(mutate):
+    d = mutate(CROPS_FILE, 2, "crop_id", "crop_a")
+    p = d / CROPS_FILE
+    p.write_text(p.read_text().replace("common_name,", "crop_id,", 1))
+    cat = load_catalog(d)
+    assert (CROPS_FILE, 1, "header") in keys(cat)
+    assert cat.crops == []
