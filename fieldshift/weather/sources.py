@@ -4,7 +4,8 @@ Everything here was checked against the live POWER Daily API on 2026-11-12:
 
 * ``header.api`` = POWER Daily API v2.10.3
 * ``header.sources`` = ``["MERRA2", "POWER"]`` for the six parameters below
-* ``header.fill_value`` = -999.0, ``header.time_standard`` = LST
+* ``header.fill_value`` = -999.0, ``header.time_standard`` = LST (Local Solar Time, per the
+  POWER time-standards documentation; a day is a solar day at the point's longitude)
 * The series starts 1981-01-01 (an earlier ``start`` is rejected with HTTP 422).
 * Units: PRECTOTCORR mm/day, T2M* degrees C, GWET* dimensionless 0..1.
 

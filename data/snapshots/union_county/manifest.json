@@ -74,7 +74,7 @@
   },
   "hashes": {
     "daily_canonical_csv_sha256": "9bab8453a321c0dd5991cb758d3125e92b283df717eec6c51c345dddfcc8ff1a",
-    "daily_parquet_sha256": "d81fadcf0b903a9f94a1ce43f21d8ff8997c3f5c14f78c39f3117115642daea8",
+    "daily_parquet_sha256": "11e6eac2ef44cbcdf50128381bb3d1966570612365e60ed9f15a106eae5ea92d",
     "raw_sha256": "966f7f4f4b7cb573049ecda474f2d59ee3dc274259e308fa8f7acac2265b0989",
     "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
   },
@@ -124,7 +124,7 @@
       "version": "v2.10.3"
     },
     "community": "AG",
-    "daily_boundary": "Local standard time day (time_standard=LST), as reported by the API header.",
+    "daily_boundary": "time_standard=LST = Local Solar Time (POWER docs): each day is a solar day at the point.",
     "fill_value": -999.0,
     "name": "NASA/POWER Source Native Resolution Daily Data",
     "parameter_notes": {

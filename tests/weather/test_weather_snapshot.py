@@ -112,3 +112,21 @@ def test_grid_cell_is_derived_not_api_stated():
     cell = derive_grid_cell(34.98, -80.55)
     assert cell["center_latitude"] == 35.0 and cell["center_longitude"] == -80.625
     assert "derived" in cell["basis"]
+
+
+def test_time_standard_is_documented_as_local_solar_time():
+    snap = load_snapshot()
+    assert snap.manifest["source"]["time_standard"] == "LST"
+    assert "Local Solar Time" in snap.manifest["source"]["daily_boundary"]
+
+
+def test_health_endpoint_reads_only_the_snapshot(no_network, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from fieldshift.api.app import create_app
+    from fieldshift.weather.power_client import OFFLINE_ENV
+
+    monkeypatch.setenv(OFFLINE_ENV, "1")
+    body = TestClient(create_app()).get("/health").json()
+    assert body["offline"] is True and body["weather"]["first_date"] == "1981-01-01"
+    assert body["snapshot_hash"] == load_snapshot().snapshot_hash

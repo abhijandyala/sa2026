@@ -23,6 +23,8 @@ from typing import Any
 
 import pandas as pd
 import pyarrow
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from fieldshift.weather.coverage import coverage_report, missing_dates
 from fieldshift.weather.normalize import NormalizeResult, normalize_power_response
@@ -59,8 +61,10 @@ def sha256_bytes(data: bytes) -> str:
 
 def daily_to_parquet_bytes(daily: pd.DataFrame) -> bytes:
     """Deterministic parquet serialization of the daily table."""
+    # Strip pandas' schema metadata so the bytes do not embed the pandas version.
+    table = pa.Table.from_pandas(daily, preserve_index=False).replace_schema_metadata(None)
     buffer = io.BytesIO()
-    daily.to_parquet(buffer, engine="pyarrow", compression="snappy", index=False)
+    pq.write_table(table, buffer, compression="snappy", use_dictionary=False)
     return buffer.getvalue()
 
 
@@ -120,7 +124,7 @@ def build_manifest(
             },
             "parameter_notes": PARAMETER_NOTES,
             "daily_boundary": (
-                "Local standard time day (time_standard=LST), as reported by the API header."
+                "time_standard=LST = Local Solar Time (POWER docs): each day is a solar day at the point."
             ),
         },
         "grid": {
@@ -177,17 +181,33 @@ def write_snapshot(
         "raw_sha256": sha256_bytes(fetch.body),
     }
     _write_json(out / "raw" / FETCH_META_NAME, fetch_meta)
-    result = normalize_power_response(fetch.body, start=start, end=end)
+    return _derive(out, fetch.body, fetch_meta, point, start, end)
+
+
+def rebuild_snapshot(directory: Path | str = DEFAULT_SNAPSHOT_DIR) -> dict[str, Any]:
+    """Re-derive ``daily.parquet`` and ``manifest.json`` from ``raw/`` alone (no network)."""
+    d = Path(directory)
+    old = json.loads((d / MANIFEST_NAME).read_text(encoding="utf-8"))
+    fetch_meta = json.loads((d / "raw" / FETCH_META_NAME).read_text(encoding="utf-8"))
+    ref = old["reference_point"]
+    point = ReferencePoint(
+        id=ref["id"], name=ref["name"], latitude=ref["requested_latitude"],
+        longitude=ref["requested_longitude"], basis=ref["basis"],
+    )
+    raw = (d / "raw" / RAW_NAME).read_bytes()
+    cov = old["coverage"]
+    return _derive(d, raw, fetch_meta, point, cov["requested_start"], cov["requested_end"])
+
+
+def _derive(
+    out: Path, raw: bytes, fetch_meta: dict[str, Any], point: ReferencePoint, start: str, end: str
+) -> dict[str, Any]:
+    result = normalize_power_response(raw, start=start, end=end)
     parquet = daily_to_parquet_bytes(result.daily)
     (out / PARQUET_NAME).write_bytes(parquet)
     manifest = build_manifest(
-        point=point,
-        fetch=fetch_meta,
-        raw_bytes=fetch.body,
-        result=result,
-        parquet_bytes=parquet,
-        start=start,
-        end=end,
+        point=point, fetch=fetch_meta, raw_bytes=raw, result=result,
+        parquet_bytes=parquet, start=start, end=end,
     )
     _write_json(out / MANIFEST_NAME, manifest)
     return manifest

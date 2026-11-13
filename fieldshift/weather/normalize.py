@@ -63,30 +63,62 @@ class PowerFormatError(ValueError):
     """The raw payload is not a POWER daily point response."""
 
 
+class _DupDict(dict):
+    """JSON object that remembers repeated keys (``json`` would silently keep the last)."""
+
+    def __init__(self, pairs):
+        super().__init__()
+        self.repeats: list[tuple[str, Any]] = []
+        for key, value in pairs:
+            if key in self:
+                self.repeats.append((key, value))
+            else:
+                self[key] = value
+
+
+def _clean(value: Any) -> float:
+    """float(value); ``None``, blank and non-numeric values become NaN (reason ``nan``)."""
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return np.nan
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return np.nan
+
+
 def parse_power_json(raw: bytes | str | dict[str, Any]) -> pd.DataFrame:
-    """Flatten a POWER response to one row per date with the raw (un-normalized) values.
+    """Flatten a POWER response to one row per date occurrence with raw (un-normalized) values.
 
     Returns columns ``date`` (string as found, e.g. ``19810101``) and one column per
-    normalized variable. A date present for some parameters but absent for others yields NaN
-    for the absent ones. JSON ``null`` becomes NaN.
+    normalized variable. Blank/``null``/non-numeric values become NaN. Repeated date keys in
+    the JSON are preserved as repeated rows so :func:`normalize_daily` can log them.
     """
-    payload = json.loads(raw) if isinstance(raw, (bytes, str)) else raw
+    if isinstance(raw, (bytes, str)):
+        payload = json.loads(raw, object_pairs_hook=_DupDict)
+    else:
+        payload = raw
     try:
         parameter_block = payload["properties"]["parameter"]
     except (KeyError, TypeError) as exc:
         raise PowerFormatError("response has no properties.parameter block") from exc
     frames = []
+    extras = []
     for parameter, column in PARAMETER_TO_COLUMN.items():
         series = parameter_block.get(parameter)
         if series is None:
             continue
-        values = [np.nan if v is None else float(v) for v in series.values()]
-        frames.append(pd.DataFrame({"date": list(series.keys()), column: values}))
+        frames.append(
+            pd.DataFrame({"date": list(series.keys()), column: [_clean(v) for v in series.values()]})
+        )
+        for key, value in getattr(series, "repeats", []):
+            extras.append({"date": key, column: _clean(value)})
     if not frames:
         raise PowerFormatError("none of the expected parameters are in the response")
     wide = frames[0]
     for frame in frames[1:]:
         wide = wide.merge(frame, on="date", how="outer")
+    if extras:
+        wide = pd.concat([wide, pd.DataFrame(extras)], ignore_index=True)
     for column in VARIABLES:
         if column not in wide:
             wide[column] = np.nan
@@ -127,7 +159,7 @@ def normalize_daily(
     if dup_mask.any():
         for day in sorted(frame.loc[dup_mask, "date"].unique()):
             rows = frame.loc[frame["date"] == day, VARIABLES]
-            conflicting = bool(len(rows.drop_duplicates()) > 1)
+            conflicting = any(rows[c].dropna().nunique() > 1 for c in VARIABLES)
             log.duplicates.append(
                 {
                     "date": pd.Timestamp(day).strftime("%Y-%m-%d"),
@@ -182,4 +214,4 @@ def normalize_power_response(
     """Parse and normalize a raw POWER response in one step."""
     payload = json.loads(raw) if isinstance(raw, (bytes, str)) else raw
     fill = float(payload.get("header", {}).get("fill_value", POWER_FILL_VALUE))
-    return normalize_daily(parse_power_json(payload), start=start, end=end, fill_value=fill)
+    return normalize_daily(parse_power_json(raw), start=start, end=end, fill_value=fill)

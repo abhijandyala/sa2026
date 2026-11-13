@@ -122,3 +122,22 @@ def test_parse_accepts_bytes_and_missing_parameter_column():
     wide = parse_power_json(json.dumps(payload).encode())
     assert wide["precip_mm"].tolist() == [1.5]
     assert wide["gwettop"].isna().all()
+
+
+def test_blank_and_non_numeric_values_are_missing_not_errors():
+    payload = _flat({"20240101": "", "20240102": "n/a", "20240103": 0.0})
+    daily = normalize_power_response(payload).daily
+    assert daily["precip_mm"].isna().tolist() == [True, True, False]
+    assert daily["precip_mm_reason"].tolist() == [REASON_NAN, REASON_NAN, None]
+    assert daily.loc[2, "precip_mm"] == 0.0  # genuine zero next to blanks stays 0
+
+
+def test_repeated_date_keys_in_raw_json_are_preserved_and_logged():
+    raw = (
+        '{"header":{"fill_value":-999.0},"properties":{"parameter":{"PRECTOTCORR":'
+        '{"20240101":1.0,"20240102":2.0,"20240102":7.0}}}}'
+    )
+    result = normalize_power_response(raw)
+    assert result.daily["precip_mm"].tolist() == [1.0, 2.0]  # first occurrence wins
+    (dup,) = result.log.duplicates
+    assert dup["date"] == "2024-01-02" and dup["conflicting_values"] is True
