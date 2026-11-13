@@ -310,7 +310,7 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 - `planner/calendar.py`: produce dated actions (seed, terminate, plant, harvest, checks), each with its zone, trigger, evidence, and status. The dry scenario shows which decision could change; the wet scenario shows drainage or access checks when supported.
 - `planner/backup.py`: a default plan plus a fallback, with a switch condition, the next check date, and a decision deadline. The first release compares the two as fixed plans. An optional backtest may use only data available at the decision date, and its cutoffs are frozen in advance.
 - `report/audit.py`: every displayed number carries `{value, unit, derivation: nasa|usda|extension|grower|calculation, source_ref, inputs}`.
-- `report/field_note.py`: `GET /v1/plans/{id}/note` returns JSON plus a printable HTML/PDF. It includes the plan and alternatives, winter and spring results, eras, the calendar, unresolved checks, sources, and adviser note fields.
+- `report/field_note.py`: `GET /v1/plans/{id}/note` returns **structured JSON only**. The frontend (Abhi) owns rendering and printing, as agreed on 2026-11-12. The backend does not produce HTML or PDF. It includes the plan and alternatives, winter and spring results, eras, the calendar, unresolved checks, sources, and adviser note fields.
 - Wetness playback: aligned daily values in the replay (from Phase 6), labeled modeled.
 
 **Acceptance**

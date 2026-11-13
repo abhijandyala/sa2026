@@ -1,0 +1,21 @@
+{
+  "meta": {"plan_version": "pv_3f2a", "catalog_version": "v1", "snapshot_hash": "sha256:DRAFT", "request_id": "req_rep_2007", "draft": true},
+  "year": 2007,
+  "plan_id": "rye_12d",
+  "dates": {"prev_harvest": "2006-09-20", "seed": "2006-10-01", "terminate": "2007-04-30", "next_plant": "2007-05-12", "spring_window": {"start": "2007-04-12", "end": "2007-05-11"}},
+  "coverage": {"winter": "complete", "spring": "complete"},
+  "spring": {"total_mm": 38.4, "rank": 3, "of": 45, "percentile": 6.7, "is_dry": true, "status": "complete"},
+  "wetness": {"gwettop_window_mean": 0.41, "gwetroot_window_mean": 0.48, "unit": "fraction (0-1)", "label": "modeled", "status": "complete"},
+  "checks_triggered": [
+    {"check_id": "rye_soy_short_gap_moisture", "rule_ids": ["cr_tt_03"], "reason": "Gap 12 days < 14 and spring window ranked dry (38.4 mm <= 61.2 mm cutoff)"}
+  ],
+  "key_rain_days": [
+    {"date": "2006-09-28", "precip_mm": 31.0, "segment": "before_establishment", "heavy": null}
+  ],
+  "daily": [
+    {"date": "2006-09-20", "precip_mm": 0.0, "tmax_c": 27.1, "tmin_c": 14.2, "gwettop": 0.52, "gwetroot": 0.55, "cover_status": "no_planned_cover", "segment": "before_establishment"},
+    {"date": "2006-10-01", "precip_mm": 2.3, "tmax_c": 24.0, "tmin_c": 11.8, "gwettop": 0.55, "gwetroot": 0.56, "cover_status": "planned_living_cover", "segment": "living_cover"},
+    {"date": "2007-04-30", "precip_mm": 0.0, "tmax_c": 25.4, "tmin_c": 10.1, "gwettop": 0.40, "gwetroot": 0.47, "cover_status": "terminated", "segment": "after_termination"}
+  ],
+  "_note": "Real response has every day from prev_harvest through next_plant - 1. A null value carries a per-day status (e.g. 'missing')."
+}

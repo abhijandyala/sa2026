@@ -1,0 +1,13 @@
+{
+  "meta": {"plan_version": null, "catalog_version": "v1", "snapshot_hash": "sha256:DRAFT", "request_id": "req_years_001", "draft": true},
+  "location": {"id": "union_county_sample", "label": "Union County, NC (sample)", "grid": {"lat": 35.0, "lon": -80.5, "source": "NASA POWER daily", "note": "Historical NASA estimates for the regional grid near the field"}},
+  "years": [
+    {"year": 1981, "spring": "complete", "winter": "unavailable", "full_season": "partial", "reason": "Series starts 1981-01-01; prior fall not covered"},
+    {"year": 1982, "spring": "complete", "winter": "complete", "full_season": "complete", "reason": null},
+    {"year": 2007, "spring": "complete", "winter": "complete", "full_season": "complete", "reason": null},
+    {"year": 2025, "spring": "complete", "winter": "complete", "full_season": "complete", "reason": null}
+  ],
+  "_note": "Real response lists all 45 years 1981-2025; trimmed here.",
+  "shortcuts": {"typical": 1996, "dry": 2007, "wet": 2003},
+  "eras": {"earlier": {"start": 1981, "end": 2000}, "recent": {"start": 2006, "end": 2025}, "excluded_from_eras": [2001, 2002, 2003, 2004, 2005]}
+}

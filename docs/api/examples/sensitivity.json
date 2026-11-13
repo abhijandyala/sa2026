@@ -1,0 +1,16 @@
+{
+  "meta": {"plan_version": "pv_3f2a", "catalog_version": "v1", "snapshot_hash": "sha256:DRAFT", "request_id": "req_sens_001", "draft": true},
+  "base_plan_id": "rye_12d",
+  "varied": "terminate",
+  "fixed": {"next_plant": "05-12", "seed": "10-01"},
+  "check_id": "rye_soy_short_gap_moisture",
+  "denominator": 45,
+  "points": [
+    {"terminate": "04-21", "gap_days": 21, "living_cover_days_planned": 202, "rain_mm_without_cover_median": 61.0, "checks_count": 0},
+    {"terminate": "04-28", "gap_days": 14, "living_cover_days_planned": 209, "rain_mm_without_cover_median": 51.5, "checks_count": 0},
+    {"terminate": "04-29", "gap_days": 13, "living_cover_days_planned": 210, "rain_mm_without_cover_median": 50.0, "checks_count": 9},
+    {"terminate": "04-30", "gap_days": 12, "living_cover_days_planned": 211, "rain_mm_without_cover_median": 48.0, "checks_count": 9},
+    {"terminate": "05-11", "gap_days": 1, "living_cover_days_planned": 222, "rain_mm_without_cover_median": 30.0, "checks_count": 9}
+  ],
+  "_note": "Real response has one point per valid termination date. Step at 14 days equals the dry-year count."
+}
