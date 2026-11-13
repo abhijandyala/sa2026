@@ -72,6 +72,7 @@ TRANSITION_STAGES = frozenset(
         "emergence",
         "season",
         "at corn planting",
+        "harvest",  # winter-grain harvest timing (double-crop path)
     }
 )
 
@@ -87,6 +88,7 @@ SYSTEM_REQUIREMENTS: dict[str, tuple[str, ...]] = {
     "grain": ("grain",),
     "winter cover crop": ("winter cover crop",),
     "winter annual": ("winter cover crop",),
+    "organic_grain": ("organic", "grain"),  # v2 wheat rows: organic wheat grown for grain
 }
 #: Tags derived from the crop sequence rather than declared by the grower.
 DERIVED_TAGS = frozenset({"winter cover crop", "double_crop", "full season", "grain"})
@@ -99,6 +101,20 @@ GATES: dict[str, str] = {
 }
 #: Rules surfaced as optional checks (shown only when their gate is on).
 OPTIONAL_RULES = frozenset({"cr_tt_04"})
+
+#: Rows whose numbers were studied at one planting-date context. ``(start, end)`` is MM-DD,
+#: inclusive; "mid-month" is read as the 15th plus or minus one week (an assumption, documented
+#: here). A planting date outside the context is ``manual_check``, never silently evaluated.
+PLANTING_CONTEXT: dict[str, tuple[str, str]] = {
+    "sb_v2_mg_mid_june": ("06-08", "06-22"),  # "Mid-June double-crop planting"
+    "sb_v2_mg_mid_july": ("07-08", "07-22"),  # "Mid-July planting"
+}
+#: The catalog leaves ``suitability`` blank on these trial rows; the source wording is mapped to a
+#: verdict here and the reason says so. ``(verdict when inside the range, when outside)``.
+VERDICT_OVERRIDES: dict[str, tuple[Verdict, Verdict]] = {
+    "sb_v2_mg_mid_june": ("acceptable", "caution"),  # MG4-7 yields within 5 bu/acre
+    "sb_v2_mg_mid_july": ("preferred", "caution"),  # MG5-7 had the highest yields
+}
 
 #: condition_key -> (name of the numeric input in ``inputs``, expected rule unit).
 NUMERIC_INPUTS: dict[str, tuple[str, str]] = {
@@ -437,6 +453,20 @@ def _eval_gap(rule: CropRule, view: SeasonView) -> _Outcome:
 
 def _eval_numeric(rule: CropRule, view: SeasonView) -> _Outcome:
     name, unit = NUMERIC_INPUTS[rule.condition_key or ""]
+    context = PLANTING_CONTEXT.get(rule.rule_id)
+    if context is not None:
+        plant = view.dates.get("plant")
+        if plant is None:
+            return _Outcome("unknown", "plant date is not available", missing=["dates.plant"])
+        start, end = parse_mm_dd(context[0]), parse_mm_dd(context[1])
+        assert start and end
+        if not start <= (plant.month, plant.day) <= end:
+            return _Outcome(
+                "manual_check",
+                f"this row was studied at a planting date of {context[0]} to {context[1]}; "
+                f"the plan plants on {plant.isoformat()}, so apply judgment",
+                inputs={"dates.plant": plant.isoformat()},
+            )
     if rule.unit != unit:
         return _Outcome(
             "invalid_input", f"rule unit '{rule.unit}' does not match expected '{unit}'"
@@ -637,6 +667,9 @@ def _check(rule: CropRule, status: Status, reason: str, **kw: Any) -> RuleCheck:
 
 
 def _verdict(rule: CropRule, met: bool) -> tuple[Verdict | None, bool]:
+    if rule.rule_id in VERDICT_OVERRIDES:
+        inside, outside = VERDICT_OVERRIDES[rule.rule_id]
+        return (inside, False) if met else (outside, True)
     suit = rule.suitability
     if rule.management_action == "seed_after_harvest":
         # cc_rc_01/02: "seeding must follow harvest and fall within the window" is a requirement
@@ -741,6 +774,11 @@ def evaluate_rule(
             )  # fmt: skip
 
     verdict, flagged = _verdict(rule, out.met)
+    if rule.rule_id in VERDICT_OVERRIDES:
+        reason += (
+            "; the catalog row has no suitability, so this verdict is mapped from the trial "
+            "wording in the guidance"
+        )
     if out.chronology_conflict:
         verdict, flagged = "caution", True
     return _check(

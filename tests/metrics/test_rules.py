@@ -460,3 +460,76 @@ def test_non_finite_gap_is_invalid_input(index, gap):
 def test_real_zero_gap_stays_zero(index):
     c = ck(evaluate_season(season_facts(gap_days=0, is_dry=True), index), "cr_tt_03")
     assert c.flagged and c.inputs_used["termination_gap_days"] == 0
+
+
+# ---------------------------------------------------------------- catalog v2 wheat / double-crop rows
+
+WHEAT_DC = ("field_corn", "winter_wheat", "soybean")
+
+
+def wheat_facts(plant=date(2010, 6, 15), system="conventional", **kw):
+    return season_facts(
+        sequence=WHEAT_DC, plant=plant, gap_days=None, production_system=system, **kw
+    )
+
+
+def test_organic_grain_rows_are_inapplicable_to_conventional_plans(index):
+    ev = evaluate_season(wheat_facts(), index)
+    for rid in ("ww_v2_pw_freeze_reference", "ww_v2_pw_hessian_fly", "ww_v2_seed_drilled"):
+        c = ck(ev, rid)
+        assert c.status == "inapplicable" and "organic" in c.reason and "conventional" in c.reason
+    organic = evaluate_season(wheat_facts(system="organic"), index)
+    assert ck(organic, "ww_v2_pw_hessian_fly").status == "manual_check"
+    assert ck(organic, "ww_v2_pw_hessian_fly").suitability == "caution"
+    assert ck(organic, "ww_v2_seed_drilled").reference["value_min"] == 30.0
+
+
+def test_unspecified_production_system_leaves_organic_rows_unknown_not_inapplicable(index):
+    c = ck(evaluate_season(wheat_facts(system=None), index), "ww_v2_pw_hessian_fly")
+    assert c.status == "unknown" and c.missing_inputs == ["production_system"]
+
+
+def test_grain_wheat_rows_apply_to_conventional_and_are_manual_when_qualitative(index):
+    ev = evaluate_season(wheat_facts(), index)
+    assert ck(ev, "ww_v2_pw_local_map").status == "manual_check"  # map-relative window
+    assert ck(ev, "ww_v2_gd_harvest_context").status == "manual_check"
+    assert ck(ev, "ww_v2_rc_after_soybean").status == "inapplicable"  # needs soybean before wheat
+    soy_wheat = evaluate_season(
+        season_facts(sequence=("soybean", "winter_wheat", "field_corn"), gap_days=None), index
+    )
+    assert ck(soy_wheat, "ww_v2_rc_after_soybean").verdict == "preferred"
+
+
+def test_mid_june_and_mid_july_mg_rows_follow_their_planting_date_context(index):
+    june = evaluate_season(
+        wheat_facts(plant=date(2010, 6, 15)), index, inputs={"maturity_group": 4}
+    )
+    assert ck(june, "sb_v2_mg_mid_june").verdict == "acceptable"  # MG4 is inside 4-7
+    assert ck(june, "sb_v2_mg_mid_july").status == "manual_check"  # not the July context
+    assert "07-08 to 07-22" in ck(june, "sb_v2_mg_mid_july").reason
+    july = evaluate_season(
+        wheat_facts(plant=date(2010, 7, 15)), index, inputs={"maturity_group": 4}
+    )
+    c = ck(july, "sb_v2_mg_mid_july")
+    assert (c.verdict, c.flagged, c.condition_met) == ("caution", True, False)  # MG4 < 5
+    assert ck(july, "sb_v2_mg_mid_june").status == "manual_check"
+    assert "no suitability" in c.reason
+    good = evaluate_season(
+        wheat_facts(plant=date(2010, 7, 15)), index, inputs={"maturity_group": 6}
+    )
+    assert ck(good, "sb_v2_mg_mid_july").verdict == "preferred"
+
+
+def test_between_the_two_contexts_both_mg_rows_are_manual_but_sb_rc_03_still_checks(index):
+    ev = evaluate_season(wheat_facts(plant=date(2010, 6, 30)), index, inputs={"maturity_group": 3})
+    assert ck(ev, "sb_v2_mg_mid_june").status == "manual_check"
+    assert ck(ev, "sb_v2_mg_mid_july").status == "manual_check"
+    assert ck(ev, "sb_rc_03").flagged  # MG 3 < 4
+    unknown = evaluate_season(wheat_facts(plant=date(2010, 6, 15)), index)
+    assert ck(unknown, "sb_v2_mg_mid_june").status == "unknown"  # no MG entered
+
+
+def test_double_crop_rows_do_not_apply_to_full_season_soybean(index):
+    ev = evaluate_season(season_facts(sequence=("field_corn", "soybean"), gap_days=None), index)
+    for rid in ("sb_v2_mg_mid_june", "sb_v2_pw_after_wheat_context", "sb_v2_pw_delay_yield"):
+        assert ck(ev, rid).status == "inapplicable"
