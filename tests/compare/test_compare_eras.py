@@ -164,3 +164,19 @@ def test_real_snapshot_spring_and_winter_indicators_flow_into_era_comparison():
     assert heavy.earlier.evaluable == 19 and heavy.recent.evaluable == 20  # winter 1981 partial
     assert heavy.earlier.not_evaluable[0].year == 1981
     assert heavy.status == Status.COMPLETE
+
+
+def test_any_of_with_sparse_years_does_not_crash():
+    a = {1990: YearOutcome(False), 1991: YearOutcome(False)}
+    b = {1990: YearOutcome(False)}  # no 1991 entry
+    out = any_of([a, b])
+    assert out[1990].event is False
+    assert out[1991].event is None and out[1991].reason == "no_result_for_year"
+
+
+def test_generator_threshold_names_apply_to_every_plan():
+    out = compare_plans_eras(
+        "x", {"a": indicator(), "b": indicator()}, tset(),
+        threshold_names=(n for n in ["spring_dry_mm@05-12"]),
+    )
+    assert out["a"].thresholds == out["b"].thresholds == {"spring_dry_mm@05-12": 61.2}

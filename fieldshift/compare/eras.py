@@ -140,7 +140,7 @@ def compare_eras(
     example the heavy-rain value or the spring dry cutoff). They are reported once and echoed
     in both eras, proving both used the same frozen value.
     """
-    used = {n: thresholds.get(n).value for n in threshold_names}
+    used = {n: thresholds.get(n).value for n in list(threshold_names)}
     single = next(iter(used.values())) if len(used) == 1 else None
     earlier, e_exact = _era(indicator, EARLIER, single)
     recent, r_exact = _era(indicator, RECENT, single)
@@ -217,8 +217,15 @@ def any_of(indicators: Iterable[Indicator]) -> dict[int, YearOutcome]:
         elif all(o is not None and o.event is False for o in outcomes):
             out[y] = YearOutcome(False)
         else:
-            reason = next((o.reason for o in outcomes if o is None or o.event is None), None)
-            out[y] = YearOutcome(None, (reason if reason else "component_not_evaluable"))
+            reason = next(
+                (
+                    "no_result_for_year" if o is None else o.reason
+                    for o in outcomes
+                    if o is None or o.event is None
+                ),
+                None,
+            )
+            out[y] = YearOutcome(None, reason or "component_not_evaluable")
     return out
 
 
@@ -258,10 +265,11 @@ def compare_plans_eras(
     was narrowed to the years every plan could be evaluated for.
     """
     years = shared_years(indicators)
+    names = list(threshold_names)  # a generator must survive more than one plan
     return {
         pid: compare_eras(
             name, restrict_to_years(ind, years), thresholds,
-            threshold_names=threshold_names, basis="shared_evaluable_seasons",
+            threshold_names=names, basis="shared_evaluable_seasons",
         )
         for pid, ind in indicators.items()
     }
