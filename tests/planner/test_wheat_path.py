@@ -417,3 +417,51 @@ def test_median_total_uses_the_true_median_for_an_even_number_of_seasons(ctx):
     totals = list(engine.reference_for(ctx, "07-15").totals.values())
     assert len(totals) % 2 == 0  # the record ends 06-30, so 2025 is not eligible: 44 seasons
     assert r["spring"]["median_total_mm"] == pytest.approx(statistics.median(totals), abs=1e-3)
+
+
+# ------------------------------------------------------------------ review fixes (phase-12-B r2)
+
+
+def test_comparison_plan_crops_and_roles_are_validated(client):
+    base = load_samples().plans["corn_soy__no_cover"].plan.model_dump(mode="json")
+    for patch, text in (
+        ({"next_crop_id": "quinoa"}, "quinoa"),
+        ({"previous_crop_id": "cereal_rye"}, "cereal_rye"),
+        ({"region": "Iowa"}, "outside North Carolina"),
+    ):
+        r = client.post(
+            "/v1/plans/wheat", json={**FLAT, "year": YEAR, "compare_to_plan": {**base, **patch}}
+        )
+        assert r.status_code == 400, patch
+        i = r.json()["issues"][0]
+        assert (
+            i["field"] == "compare_to_plan" and i["code"] == "unsupported" and text in i["message"]
+        )
+    cover_wheat = load_samples().plans["corn_soy__rye"].plan.model_dump(mode="json")
+    cover_wheat["winter"]["crop_id"] = "winter_wheat"  # a cash crop in the cover slot
+    r = client.post("/v1/plans/wheat", json={**FLAT, "year": YEAR, "compare_to_plan": cover_wheat})
+    assert r.status_code == 400 and "cover_crop" in r.json()["issues"][0]["message"]
+
+
+def test_omitting_the_production_system_lists_the_undecided_checks_with_missing_inputs(ctx):
+    p = plan_from_dates(
+        prev_harvest="09-20",
+        wheat_plant="10-25",
+        wheat_harvest="06-05",
+        soybean_plant="06-12",
+        production_system=None,
+    )
+    r = run(ctx, p, maturity_group=5)
+    unknown = {x["rule_id"]: x for x in r["rule_checks"]["unknown"]}
+    assert {"ww_v2_pw_freeze_reference", "ww_v2_pw_hessian_fly", "ww_v2_seed_drilled"} <= set(
+        unknown
+    )
+    assert all(
+        unknown[k]["missing_inputs"] == ["production_system"]
+        for k in ("ww_v2_pw_hessian_fly", "ww_v2_seed_drilled")
+    )
+    assert r["rule_checks"]["inapplicable_to_this_production_system"] == []
+    conventional = run(ctx, maturity_group=5)  # the demo plan states conventional
+    assert not {"ww_v2_pw_hessian_fly"} & {
+        x["rule_id"] for x in conventional["rule_checks"]["unknown"]
+    }

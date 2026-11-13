@@ -174,7 +174,7 @@ def evaluate_wheat_double_crop(
     if year_issues:
         return {**base, "status": str(Status.INVALID_INPUT), "issues": year_issues}
     if full_season_plan is not None:
-        bad = _comparison_issues(full_season_plan, YEARS)
+        bad = _comparison_issues(full_season_plan, YEARS, index)
         if bad:
             return {**base, "status": str(Status.INVALID_INPUT), "issues": bad}
 
@@ -239,6 +239,9 @@ def evaluate_wheat_double_crop(
         "rule_checks": {
             "manual_check": manual,
             "inapplicable_to_this_production_system": inapplicable_system,
+            # checks that cannot be decided yet, with what is missing (for example the
+            # production system, which decides whether the organic_grain rows apply)
+            "unknown": [_rule_line(c) for c in live if c.status == "unknown"],
             "flagged": [r for r in (_rule_line(c) for c in live) if r["flagged"]],
         },
         "spring": sp,
@@ -261,10 +264,15 @@ def evaluate_wheat_double_crop(
     return out
 
 
-def _comparison_issues(full: Plan, years: Any) -> list[dict[str, str]]:
-    """The comparison plan must be a valid full-season soybean plan in every replay year."""
+def _comparison_issues(full: Plan, years: Any, index: CatalogIndex) -> list[dict[str, str]]:
+    """The comparison plan must be a supported, valid full-season soybean plan in every year."""
     from fieldshift.planner.calendar import plan_year_issues
 
+    unsupported = _unsupported(full, index)  # unknown crops, wrong crop roles, non-NC region
+    if unsupported:
+        return [
+            {"field": "compare_to_plan", "code": "unsupported", "message": m} for m in unsupported
+        ]
     if full.next_crop_id != "soybean" or full.winter.kind == "winter_grain":
         return [{"field": "compare_to_plan", "code": "not_full_season_soybean",
                  "message": "the comparison plan must be a full-season soybean plan"}]  # fmt: skip
