@@ -304,12 +304,14 @@
             "rule_id": "cr_tt_03",
             "source": {
               "locator": "Soil Moisture Considerations",
+              "snapshot_hash": null,
               "title": "NC State Soybean Production Guide: Rotational Considerations",
               "url": "https://content.ces.ncsu.edu/north-carolina-soybean-production-guide/rotational-considerations",
               "verified_date": "2026-11-12"
             }
           }
         ],
+        "drainage_access_checks": null,
         "replay": "/v1/seasons/1986/replay",
         "spring": {
           "cutoff_mm": 64.18,
@@ -331,8 +333,12 @@
         },
         "year": 1986
       },
+      "reason": null,
       "status": "complete",
       "typical": {
+        "decisions_note": null,
+        "decisions_that_could_change": null,
+        "drainage_access_checks": null,
         "replay": "/v1/seasons/2007/replay",
         "spring": {
           "cutoff_mm": 64.18,
@@ -355,6 +361,8 @@
         "year": 2007
       },
       "wet": {
+        "decisions_note": null,
+        "decisions_that_could_change": null,
         "drainage_access_checks": {
           "basis": "zone terrain and drainage (sample zones)",
           "heavy_rain_days_outside_cover": 0,
@@ -368,6 +376,7 @@
               "zone": "zone_ne"
             }
           ],
+          "reason": null,
           "status": "complete"
         },
         "replay": "/v1/seasons/2020/replay",
@@ -405,8 +414,16 @@
         "action_id": "check:cr_soil_01",
         "change": "added",
         "date": "2024-10-01",
+        "date_after": null,
+        "date_before": null,
+        "days_moved": null,
+        "flagged_after": null,
+        "flagged_before": null,
         "label": "Prefers light loams or sands; tolerant of poor drainage.",
+        "label_after": null,
         "status": "manual_check",
+        "status_after": null,
+        "status_before": null,
         "why": [
           "winter.kind: none -> cover",
           "winter.crop_id: None -> cereal_rye",
@@ -418,8 +435,16 @@
         "action_id": "check:cr_tt_03",
         "change": "added",
         "date": "2025-04-30",
+        "date_after": null,
+        "date_before": null,
+        "days_moved": null,
+        "flagged_after": null,
+        "flagged_before": null,
         "label": "Consider ending rye at least 14 days before soybean planting when low soil moisture is a concern.",
+        "label_after": null,
         "status": "unknown",
+        "status_after": null,
+        "status_before": null,
         "why": [
           "winter.kind: none -> cover",
           "winter.crop_id: None -> cereal_rye",
@@ -431,8 +456,16 @@
         "action_id": "seed",
         "change": "added",
         "date": "2024-10-01",
+        "date_after": null,
+        "date_before": null,
+        "days_moved": null,
+        "flagged_after": null,
+        "flagged_before": null,
         "label": "Seed cereal_rye",
+        "label_after": null,
         "status": "complete",
+        "status_after": null,
+        "status_before": null,
         "why": [
           "winter.seed: None -> 10-01",
           "winter.crop_id: None -> cereal_rye",
@@ -443,8 +476,16 @@
         "action_id": "terminate",
         "change": "added",
         "date": "2025-04-30",
+        "date_after": null,
+        "date_before": null,
+        "days_moved": null,
+        "flagged_after": null,
+        "flagged_before": null,
         "label": "Terminate cereal_rye",
+        "label_after": null,
         "status": "complete",
+        "status_after": null,
+        "status_before": null,
         "why": [
           "winter.terminate: None -> 04-30",
           "winter.crop_id: None -> cereal_rye",

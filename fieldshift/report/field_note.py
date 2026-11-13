@@ -18,6 +18,7 @@ from typing import Any
 from fieldshift.compare import engine
 from fieldshift.compare.context import Context
 from fieldshift.contracts import Plan, Status
+from fieldshift.metrics.spring import SPRING_DRY_PREFIX
 from fieldshift.planner.backup import (
     BackupPlan,
     build_backup_plan,
@@ -123,7 +124,20 @@ def _plan_section(plan: Plan, n: _Nums, cal: ActionCalendar, label: str | None) 
         "grower_inputs": plan.grower.model_dump(mode="json"),
         "planting_year": str(cal.year),
     }
-    if c is not None:
+    if c is not None and c.grain is not None:
+        # a harvested winter grain is not a living cover: cover metrics are null, not 0
+        out["calendar"] = {
+            "winter_days": n.plan_calc(c.winter_days, "days", "previous harvest to next planting"),
+            "wheat_season_days": n.plan_calc(
+                c.grain.days, "days", "winter grain planting to harvest"
+            ),
+            "living_cover_days_planned": None,
+            "days_without_planned_cover": None,
+            "termination_gap_days": None,
+            "establishment": "inapplicable",
+            "cover_label": None,
+        }
+    elif c is not None:
         cover_days = c.cover.days if c.cover else 0
         out["calendar"] = {
             "winter_days": n.plan_calc(
@@ -178,18 +192,11 @@ def _spring_section(res: Any, n: _Nums, ts: Any, plan: Plan) -> dict[str, Any]:
     s = res.spring
     if s is None:
         return {"status": str(res.status), "reason": res.reason}
-    name = f"spring_dry_cutoff:{plan.next_plant}"
-    th = ts.thresholds.get(f"spring_dry_cutoff:{plan.next_plant}")
-    tref = source_ref("threshold", th.name if th else name, threshold_set_id=ts.threshold_set_id)
+    n.ts = n.ts or ts
     return {
         "status": str(s.status),
         "window_days": n.plan_calc(s.window_days, "days", "30 days before next_plant, inclusive"),
-        "dry_cutoff_mm": n.calc(
-            s.cutoff_mm,
-            "mm",
-            "bottom 20% of the full 1981-2025 record for this window (frozen)",
-            ref=tref,
-        ),
+        "dry_cutoff_mm": n.threshold(f"{SPRING_DRY_PREFIX}{plan.next_plant}", s.cutoff_mm),
         "eligible_seasons": n.calc(
             s.eligible_seasons, "seasons", "seasons with a complete spring window"
         ),
@@ -472,6 +479,65 @@ def _alternative_section(
     return block
 
 
+def _cross_calendar_alternative(
+    default: Plan,
+    alt: Plan,
+    backup: BackupPlan,
+    n: _Nums,
+    ctx: Context,
+    index: Any,
+    year: int,
+    inputs: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """An alternative that plants in a different calendar window (e.g. wheat then double-crop).
+
+    Each plan keeps its own baseline; only raw 30-day totals are shown side by side.
+    """
+    acal = build_action_calendar(alt, index, year=year, inputs=inputs)
+    cmp = backup.comparison or {}
+    d, f = cmp.get("default"), cmp.get("fallback")
+
+    def side(b: dict[str, Any] | None, plan: Plan) -> dict[str, Any] | None:
+        if b is None:
+            return None
+        nums = _Nums(n.book, ctx, plan, n.dates_basis)
+        nums.ts = engine.threshold_set_for(ctx, [plan.next_plant])
+        return {
+            "plan_id": b["plan_id"], "next_plant": b["next_plant"], "plant_date": b["plant_date"],
+            "window": {"plant_md": b["window"]["plant_md"], "example": b["window"]["example"]},
+            "median_total_mm": nums.calc(b["median_total_mm"], "mm", "median 30-day precipitation, own window", ref=nums.snapshot),
+            "eligible_seasons": nums.calc(b["eligible_seasons"], "seasons", "seasons with a complete window"),
+        }  # fmt: skip
+
+    diff = (cmp.get("fallback_minus_default") or {}).get("median_total_mm")
+    return {
+        "kind": "fixed_alternative",
+        "comparison_label": cmp.get("label", "different-calendar"),
+        "plan": _plan_section(alt, n, acal, alt.label),
+        "status": str(backup.status),
+        "fallback_source": backup.fallback_source,
+        "divergence": backup.divergence.model_dump(mode="json") if backup.divergence else None,
+        "switch_condition": backup.switch_condition.model_dump(mode="json")
+        if backup.switch_condition
+        else None,
+        "decision_deadline": backup.decision_deadline.isoformat()
+        if backup.decision_deadline
+        else None,
+        "next_check_date": backup.next_check_date.isoformat() if backup.next_check_date else None,
+        "timing": backup.timing,
+        "backtest": backup.backtest,
+        "assumptions": backup.assumptions,
+        "raw_totals": {
+            "default": side(d, default),
+            "alternative": side(f, alt),
+            "median_total_mm_difference": n.calc(
+                diff, "mm", "alternative minus default raw median totals", ref=n.snapshot
+            ),
+            "note": cmp.get("note"),
+        },
+    }
+
+
 def _collect_sources(note: dict[str, Any], ctx: Context) -> list[dict[str, Any]]:
     seen: dict[tuple[str, str], dict[str, Any]] = {}
 
@@ -513,13 +579,28 @@ def build_field_note(
     inputs: dict[str, Any] | None = None,
     dates_assumed: bool = False,
     alt_dates_assumed: bool | None = None,
+    maturity_group: Any = None,
+    compare_to_plan: Plan | None = None,
 ) -> dict[str, Any]:
-    """Build the field note JSON for ``plan`` (and one fixed ``alternative``)."""
+    """Build the field note JSON for ``plan`` (and one fixed ``alternative``).
+
+    A ``winter_grain`` (wheat) plan gets the wheat note (``report.wheat_note``); the maturity group
+    and a full-season ``compare_to_plan`` only apply to it.
+    """
     index = ctx.index
     year = year or default_planting_year()
+    if plan.winter.kind == "winter_grain":
+        from fieldshift.report.wheat_note import build_wheat_note
+
+        return build_wheat_note(
+            plan, ctx, year=year, as_of=as_of, inputs=inputs, maturity_group=maturity_group,
+            dates_assumed=dates_assumed, alternative=alternative,
+            alt_dates_assumed=alt_dates_assumed, compare_to_plan=compare_to_plan,
+        )  # fmt: skip
     if alternative is not None:
         alternative = distinct_ids(plan, alternative)  # results are keyed by plan_id
-    plans = [plan] + ([alternative] if alternative is not None else [])
+    cross_alt = alternative is not None and alternative.winter.kind == "winter_grain"
+    plans = [plan] + ([alternative] if alternative is not None and not cross_alt else [])
     results, ts, _shared = engine.compare_plans(plans, ctx)
     base = results[0]
     version = plan_version(plan, year, inputs)
@@ -563,7 +644,12 @@ def build_field_note(
         acal = build_action_calendar(alternative, index, year=year, inputs=inputs)
         backup = build_backup_plan(plan, alternative, index, year=year, as_of=as_of, inputs=inputs)
         backup = compare_fixed_plans(backup, plan, alternative, ctx)
-        alts.append(_alternative_section(alternative, acal, backup, results[1], base, an, ts))
+        if cross_alt:
+            alts.append(
+                _cross_calendar_alternative(plan, alternative, backup, an, ctx, index, year, inputs)
+            )
+        else:
+            alts.append(_alternative_section(alternative, acal, backup, results[1], base, an, ts))
     note["alternatives"] = alts
     note["sources"] = _collect_sources(note, ctx)
     note["adviser_note"] = _adviser()

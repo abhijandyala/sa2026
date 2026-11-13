@@ -296,6 +296,9 @@ def compare_fixed_plans(backup: BackupPlan, default: Plan, fallback: Plan, ctx: 
     if backup.status != Status.COMPLETE:
         return backup
     fallback = distinct_ids(default, fallback)
+    if "winter_grain" in (default.winter.kind, fallback.winter.kind):
+        backup.comparison = _cross_calendar_comparison(default, fallback, ctx, backup.year)
+        return backup
     results, ts, shared = engine.compare_plans([default, fallback], ctx)
     plans = {r.plan_id: r for r in results}
     year = backup.year or default_planting_year()
@@ -363,3 +366,53 @@ def compare_fixed_plans(backup: BackupPlan, default: Plan, fallback: Plan, ctx: 
         "is a descriptive comparison of fixed plans, not a forecast of which will do better.",
     }
     return backup
+
+
+def _plan_brief_cross(plan: Plan, ctx: Any, year: int) -> dict[str, Any]:
+    """One plan's own-window spring numbers and dates (used when the calendars differ)."""
+    from fieldshift.compare import engine
+    from fieldshift.planner.wheat_path import _spring_block
+    from fieldshift.seasons.align import build_calendar
+
+    cal = build_calendar(plan, year)
+    ts = engine.threshold_set_for(ctx, [plan.next_plant])
+    sp = _spring_block(plan, ctx, ts, f"{plan.plan_id} spring window (own baseline)")
+    sp.pop("bundles")
+    return {
+        "plan_id": plan.plan_id,
+        "winter_kind": plan.winter.kind,
+        "calendar_year": year,
+        "next_plant": plan.next_plant,
+        "plant_date": cal.plant.isoformat(),
+        "window": sp["window"],
+        "median_total_mm": sp["median_total_mm"],
+        "eligible_seasons": sp["eligible_seasons"],
+    }
+
+
+def _cross_calendar_comparison(
+    default: Plan, fallback: Plan, ctx: Any, year: int | None
+) -> dict[str, Any]:
+    """Compare plans that plant in different calendar windows (a winter-grain path vs another).
+
+    Each plan keeps its own baseline, so ranks, percentiles, dry labels and era results are NOT
+    compared. Only raw 30-day totals (mm) are shown side by side.
+    """
+    year = year or default_planting_year()
+    d, f = _plan_brief_cross(default, ctx, year), _plan_brief_cross(fallback, ctx, year)
+    same_window = d["next_plant"] == f["next_plant"]
+    diff = None
+    if d["median_total_mm"] is not None and f["median_total_mm"] is not None:
+        diff = round(f["median_total_mm"] - d["median_total_mm"], 3)
+    return {
+        "basis": "different_calendar" if not same_window else "fixed_plans",
+        "label": "different-calendar",
+        "default": d,
+        "fallback": f,
+        "fallback_minus_default": {"median_total_mm": diff},
+        "note": (
+            "These plans plant in different calendar windows. Each has its own baseline, so ranks, "
+            "percentiles, dry labels and era results are NOT comparable; only raw 30-day totals "
+            "(mm) are shown. This is not a forecast of which plan will do better."
+        ),
+    }

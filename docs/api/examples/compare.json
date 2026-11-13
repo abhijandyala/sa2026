@@ -5383,7 +5383,6 @@
           "difference_label": "double-crop minus full-season, raw millimetres of rain in each plan's own 30-day window",
           "double_crop": {
             "baseline": "own_window_baseline",
-            "cutoff_mm": 58.06,
             "eligible_seasons": 45,
             "label": "Double-crop soybean spring window (own baseline)",
             "median_total_mm": 92.5,
@@ -5400,7 +5399,6 @@
           },
           "full_season": {
             "baseline": "own_window_baseline",
-            "cutoff_mm": 64.18,
             "eligible_seasons": 45,
             "label": "Full-season soybean spring window (own baseline)",
             "median_total_mm": 82.9,

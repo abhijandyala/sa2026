@@ -342,6 +342,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 
 
 **Status (B, 2026-11-13): done (JSON-only note).** `planner/calendar.py` (actions with zone/trigger/evidence/status, typical/dry/wet scenarios, edit diff with reasons), `planner/backup.py` (default + fallback, switch condition by the rule's own gate, deadline, next check, fixed-plan comparison; backtest `unavailable`), `report/audit.py`, `report/field_note.py`, `report/routes.py` (`POST /v1/plans/calendar|backup|note`, `GET /v1/plans/{id}/note`). A test walks every number in the note to an audit entry. Codex r1 (3 high, 4 medium) and r2 (2 medium) fixed with tests; no r3. Assumption labeled: next check = deadline - 7 days. Wetness playback is the replay's (A) with the modeled label; the note carries window means.
+
+**Status (B, 2026-11-13, follow-up): done.** The note, calendar and backup now cover `winter_grain` (wheat double-crop) plans: `report/wheat_note.py` (grower dates with `dates_basis`, maturity-group checks, manual_check rows under `unresolved_checks`, `organic_grain` rows under `inapplicable_checks`, spring numbers from the plan's own window, different-calendar comparisons with raw totals only; catalog v1 gives `unavailable` and no numbers). Typed Pydantic response models (`report/models.py`) give calendar, backup and the note field-level OpenAPI schemas. Codex r3 (5 medium: wheat-only input guards on every route, wheat plan calendar metrics null not 0, no dry cutoffs in comparisons, typed scenarios and backup comparison) fixed with tests; no r4. `docs/api/*` regenerated.
 ---
 
 ## Phase 10 — API contract and reliability (Abhi handoff)

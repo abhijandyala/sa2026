@@ -23,6 +23,8 @@ from pydantic import ValidationError
 
 from fieldshift.api.samples import load_samples
 from fieldshift.compare.context import Context, get_context
+from fieldshift.compare.engine import YEARS
+from fieldshift.compare.models import Meta
 from fieldshift.contracts import FieldIssue, Plan
 from fieldshift.planner.backup import build_backup_plan, compare_fixed_plans
 from fieldshift.planner.calendar import (
@@ -32,9 +34,18 @@ from fieldshift.planner.calendar import (
     plan_year_issues,
 )
 from fieldshift.planner.checker import default_planting_year, plan_version
+from fieldshift.planner.wheat_path import _comparison_issues, _effective_inputs
 from fieldshift.report.field_note import build_field_note
 from fieldshift.report.http import invalid, issue, read_object
 from fieldshift.report.meta import response_meta
+from fieldshift.report.models import (
+    ActionCalendarOut,
+    BackupPlanOut,
+    BackupResponse,
+    CalendarDiff,
+    CalendarResponse,
+    FieldNote,
+)
 
 router = APIRouter(prefix="/v1", tags=["decision-tools"])
 MIN_YEAR, MAX_YEAR = 1900, 2200
@@ -135,6 +146,38 @@ def _finite(v: Any) -> bool:
         return False
 
 
+def _wheat_inputs(
+    plans: list[Plan | None], inputs: dict[str, Any] | None, top_mg: Any = None
+) -> tuple[dict[str, Any] | None, list[dict[str, str]]]:
+    """Validate the wheat-only ``maturity_group`` (top level or ``inputs.maturity_group``).
+
+    It is accepted only when some plan in the request is a ``winter_grain`` plan, and then it
+    must be a number from 0 to 10 (blank = not entered). Returns the inputs with the effective
+    (validated, numeric) maturity group, or typed issues.
+    """
+
+    def given(v: Any) -> bool:
+        return v is not None and not (isinstance(v, str) and not v.strip())
+
+    has_grain = any(p is not None and p.winter.kind == "winter_grain" for p in plans)
+    nested = (inputs or {}).get("maturity_group")
+    if not has_grain:
+        for field, v in (("maturity_group", top_mg), ("inputs.maturity_group", nested)):
+            if given(v):
+                return inputs, [
+                    issue(
+                        field,
+                        "wheat_only_input",
+                        "maturity_group applies only to winter_grain (wheat) plans",
+                    )
+                ]
+        return inputs, []
+    effective, problems = _effective_inputs(top_mg, inputs)
+    if problems:
+        return inputs, [issue(i["field"], i["code"], i["message"]) for i in problems]
+    return (effective or None), []
+
+
 def _check_plan_errors(plan: Plan, field: str, year: int, ctx: Context) -> list[dict[str, str]]:
     """Typed issues for the requested year AND every historical planting year (the replay runs
     them all, and a Feb 28/29 window can be valid in one year and impossible in another)."""
@@ -144,7 +187,7 @@ def _check_plan_errors(plan: Plan, field: str, year: int, ctx: Context) -> list[
     return [issue(f"{field}.{i['field']}", i["code"], i["message"]) for i in found]
 
 
-@router.post("/plans/calendar")
+@router.post("/plans/calendar", response_model=CalendarResponse)
 async def post_calendar(request: Request, ctx: Annotated[Context, Depends(get_context)]) -> Any:
     """Body: ``{plan | plan_id, previous_plan?, year?, inputs?, scenarios?: bool}``."""
     body, err = await read_object(request)
@@ -161,27 +204,28 @@ async def post_calendar(request: Request, ctx: Annotated[Context, Depends(get_co
     if issues or plan is None:
         return invalid(issues)
     year = common["year"] or default_planting_year()
-    problems = (
-        _check_plan_errors(plan, "plan", year, ctx) if plan.winter.kind != "winter_grain" else []
-    )
-    if prev is not None and prev.winter.kind != "winter_grain":
+    problems = _check_plan_errors(plan, "plan", year, ctx)
+    if prev is not None:
         problems += _check_plan_errors(prev, "previous_plan", year, ctx)
+    common["inputs"], wheat_issues = _wheat_inputs([plan, prev], common["inputs"])
+    problems += wheat_issues
     if problems:
         return invalid(problems)
     cal = build_action_calendar(plan, ctx.index, year=year, inputs=common["inputs"])
     if want_scen:
         cal = add_scenarios(cal, plan, ctx)
-    out: dict[str, Any] = {
-        "meta": response_meta(plan_version(plan, year, common["inputs"])),
-        "calendar": cal.model_dump(mode="json"),
-    }
+    diff = None
     if prev is not None:
         pcal = build_action_calendar(prev, ctx.index, year=year, inputs=common["inputs"])
-        out["diff"] = diff_calendars(pcal, cal, prev, plan)
-    return out
+        diff = CalendarDiff.model_validate(diff_calendars(pcal, cal, prev, plan))
+    return CalendarResponse(
+        meta=Meta(**response_meta(plan_version(plan, year, common["inputs"]))),
+        calendar=ActionCalendarOut.model_validate(cal.model_dump(mode="json")),
+        diff=diff,
+    )
 
 
-@router.post("/plans/backup")
+@router.post("/plans/backup", response_model=BackupResponse)
 async def post_backup(request: Request, ctx: Annotated[Context, Depends(get_context)]) -> Any:
     """Body: ``{plan | plan_id, fallback? | fallback_id?, year?, as_of?, inputs?}``.
 
@@ -201,6 +245,8 @@ async def post_backup(request: Request, ctx: Annotated[Context, Depends(get_cont
     problems = _check_plan_errors(plan, "plan", year, ctx)
     if fb is not None:
         problems += _check_plan_errors(fb, "fallback", year, ctx)
+    common["inputs"], wheat_issues = _wheat_inputs([plan, fb], common["inputs"])
+    problems += wheat_issues
     if problems:
         return invalid(problems)
     backup = build_backup_plan(
@@ -210,10 +256,10 @@ async def post_backup(request: Request, ctx: Annotated[Context, Depends(get_cont
         used_fb = fb or _suggested(backup, plan, ctx, year)
         if used_fb is not None:
             backup = compare_fixed_plans(backup, plan, used_fb, ctx)
-    return {
-        "meta": response_meta(plan_version(plan, year, common["inputs"])),
-        "backup": backup.model_dump(mode="json"),
-    }
+    return BackupResponse(
+        meta=Meta(**response_meta(plan_version(plan, year, common["inputs"]))),
+        backup=BackupPlanOut.model_validate(backup.model_dump(mode="json")),
+    )
 
 
 def _suggested(backup: Any, plan: Plan, ctx: Context, year: int) -> Plan | None:
@@ -234,23 +280,44 @@ def _note(body: dict[str, Any], ctx: Context, alt_id: str | None) -> Any:
     if issues or plan is None:
         return invalid(issues)
     year = common["year"] or default_planting_year()
-    problems = (
-        _check_plan_errors(plan, "plan", year, ctx) if plan.winter.kind != "winter_grain" else []
-    )
-    if alt is not None and alt.winter.kind != "winter_grain":
+    problems = _check_plan_errors(plan, "plan", year, ctx)
+    if alt is not None:
         problems += _check_plan_errors(alt, "alternative", year, ctx)
+    mg = body.get("maturity_group")
+    full = None
+    _eff, mg_issues = _wheat_inputs([plan, alt], common["inputs"], mg)
+    problems += mg_issues
+    if plan.winter.kind == "winter_grain":
+        # wheat-only: a full-season soybean comparison plan
+        full, _fm, full_issues = _resolve_plan(
+            body, "compare_to_plan", "compare_to_plan_id", required=False
+        )
+        problems += full_issues
+        if full is not None:
+            problems += [
+                issue(i["field"], i["code"], i["message"])
+                for i in _comparison_issues(full, [year, *YEARS], ctx.index)
+            ]
+    elif body.get("compare_to_plan") is not None or body.get("compare_to_plan_id") is not None:
+        problems.append(issue("compare_to_plan", "wheat_only_input",
+                              "compare_to_plan applies only to winter_grain (wheat) plans"))  # fmt: skip
     if problems:
         return invalid(problems)
     return build_field_note(
         plan, ctx, alternative=alt, year=year, as_of=common["as_of"], inputs=common["inputs"],
         dates_assumed=bool(meta.get("dates_assumed")),
         alt_dates_assumed=bool(ameta.get("dates_assumed")) if alt is not None else None,
+        maturity_group=mg, compare_to_plan=full,
     )  # fmt: skip
 
 
-@router.post("/plans/note")
+@router.post("/plans/note", response_model=FieldNote)
 async def post_note(request: Request, ctx: Annotated[Context, Depends(get_context)]) -> Any:
-    """Body: ``{plan | plan_id, alternative? | alternative_id?, year?, as_of?, inputs?}``."""
+    """Body: ``{plan | plan_id, alternative? | alternative_id?, year?, as_of?, inputs?}``.
+
+    For a ``winter_grain`` (wheat) plan also ``maturity_group?`` and ``compare_to_plan? |
+    compare_to_plan_id?`` (a full-season soybean plan, shown as different-calendar).
+    """
     body, err = await read_object(request)
     if err is not None:
         return err
@@ -258,7 +325,7 @@ async def post_note(request: Request, ctx: Annotated[Context, Depends(get_contex
     return _note(body, ctx, None)
 
 
-@router.get("/plans/{plan_id}/note")
+@router.get("/plans/{plan_id}/note", response_model=FieldNote)
 def get_note(
     plan_id: str,
     ctx: Annotated[Context, Depends(get_context)],

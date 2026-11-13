@@ -191,9 +191,9 @@ def test_double_crop_spring_dryness_uses_its_own_window_baseline(ctx):
         year=YEAR,
         full_season_plan=load_samples().plans["corn_soy__no_cover"].plan,
     )
-    assert (
-        full["cross_calendar"]["full_season"]["cutoff_mm"] != sp["cutoff_mm"]
-    )  # different baselines
+    # the comparison itself carries raw totals only; each plan keeps its own cutoff in its own block
+    assert "cutoff_mm" not in full["cross_calendar"]["full_season"]
+    assert full["spring"]["cutoff_mm"] == sp["cutoff_mm"]  # own baseline for the 06-12 window
     assert sp["eligible_seasons"] == 45 and sp["cutoff_mm"] is not None
 
 

@@ -376,7 +376,8 @@ def _cross_calendar(
     ts = engine.threshold_set_for(ctx, [full.next_plant])
     fs = _spring_block(full, ctx, ts, "Full-season soybean spring window (own baseline)")
     fs.pop("bundles")
-    keep = ("label", "baseline", "window", "cutoff_mm", "median_total_mm", "eligible_seasons")
+    # raw totals only: dry cutoffs belong to each plan's own spring section, not the comparison
+    keep = ("label", "baseline", "window", "median_total_mm", "eligible_seasons")
     return {
         "label": "different-calendar",
         "status": str(Status.COMPLETE),

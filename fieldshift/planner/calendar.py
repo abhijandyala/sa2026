@@ -27,7 +27,7 @@ from pydantic import BaseModel, Field
 from fieldshift.catalogs.index import CatalogIndex
 from fieldshift.contracts import Plan, SeasonCalendar, Status
 from fieldshift.field.zones import ZoneSet, collection_assessment, load_zones
-from fieldshift.metrics.rules import GATES, RuleCheck
+from fieldshift.metrics.rules import GATES, VERDICT_OVERRIDES, RuleCheck
 from fieldshift.planner.checker import CheckResult, check_plan, default_planting_year
 from fieldshift.seasons.align import build_calendar
 
@@ -119,7 +119,11 @@ def _check_actions(check: CheckResult, cal: SeasonCalendar, index: CatalogIndex)
         needs_person = (
             c.status in ("manual_check", "unknown")
             and not in_season_watch
-            and (c.suitability in _SUITABILITY_WITH_ACTION or c.reference is not None)
+            and (
+                c.suitability in _SUITABILITY_WITH_ACTION
+                or c.reference is not None
+                or c.rule_id in VERDICT_OVERRIDES  # maturity-group rows: the grower picks the MG
+            )
             and not (c.reference is not None and c.rule_type != "nutrient_guidance"
                      and c.suitability is None)
         )  # fmt: skip
@@ -270,13 +274,6 @@ def add_scenarios(
     from fieldshift.compare.years import years_payload
 
     if calendar.status != Status.COMPLETE:
-        return calendar
-    if plan.winter.kind == "winter_grain":
-        calendar.scenarios = {
-            "status": Status.UNAVAILABLE.value,
-            "reason": "dry/wet scenarios are not computed for winter-grain plans; "
-            "use the wheat double-crop path (POST /v1/plans/wheat)",
-        }
         return calendar
     ts = engine.threshold_set_for(ctx, [plan.next_plant])
     ref = engine.reference_for(ctx, plan.next_plant)

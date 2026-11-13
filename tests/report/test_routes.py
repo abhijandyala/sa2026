@@ -53,7 +53,6 @@ def test_post_note_with_an_edited_plan_drops_the_assumed_label(client):
      ("/v1/plans/note", {"plan_id": "corn_soy__rye", "alternative_id": "nope"}, "alternative_id"),
      ("/v1/plans/note", {"plan_id": "corn_soy__rye", "plan": {}}, "plan"),
      ("/v1/plans/calendar", {"plan_id": "corn_soy__rye", "scenarios": "yes"}, "scenarios"),
-     ("/v1/plans/calendar", {"plan_id": "corn_soy__wheat_dc"}, "plan_id"),
      ("/v1/plans/backup", {"plan_id": "corn_soy__rye", "fallback_id": "nope"}, "fallback_id")],
 )  # fmt: skip
 def test_bad_requests_are_400_with_typed_issues_and_metadata(client, path, json_body, field):
@@ -99,7 +98,7 @@ def test_calendar_route_with_diff(client):
     no_scen = client.post(
         "/v1/plans/calendar", json={"plan_id": "corn_soy__rye", "year": YEAR, "scenarios": False}
     ).json()
-    assert no_scen["calendar"]["scenarios"] == {} and "diff" not in no_scen
+    assert no_scen["calendar"]["scenarios"] is None and no_scen["diff"] is None
 
 
 def test_backup_route_suggests_a_fallback_and_compares_fixed_plans(client):

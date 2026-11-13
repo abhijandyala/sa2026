@@ -18,6 +18,7 @@
         "living_cover_days_planned": 0,
         "plan_id": "corn_soy__no_cover",
         "rain_mm_outside_cover_median": 682.22,
+        "reason": null,
         "spring_checks": [],
         "status": "complete",
         "termination_gap_days": null
@@ -30,6 +31,7 @@
         "living_cover_days_planned": 211,
         "plan_id": "corn_soy__rye",
         "rain_mm_outside_cover_median": 78.14,
+        "reason": null,
         "spring_checks": [
           {
             "check_id": "rye_soy_short_gap_moisture",
@@ -43,10 +45,13 @@
       },
       "fallback_minus_default": {
         "heavy_rain_days_outside_cover_median": 0.0,
-        "living_cover_days_planned": 211,
+        "living_cover_days_planned": 211.0,
+        "median_total_mm": null,
         "rain_mm_outside_cover_median": -604.08,
-        "spring_check_counts": {}
+        "spring_check_counts": {},
+        "termination_gap_days": null
       },
+      "label": null,
       "note": "Both plans were run over the same seasons with the same frozen thresholds. This is a descriptive comparison of fixed plans, not a forecast of which will do better.",
       "shared_eligible_years": {
         "full_season": [
