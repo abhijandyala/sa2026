@@ -4,7 +4,11 @@ import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/components.css";
 import "./styles/layout.css";
+import "./styles/fieldback.css";
 import { App } from "./App";
+import { trackInputMode } from "./ui/inputMode";
+
+trackInputMode();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

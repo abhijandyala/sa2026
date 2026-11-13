@@ -126,8 +126,8 @@ export function validateForm(f: FarmForm): FormErrors {
 /** The plans the form describes, in the backend's request shape (presets.md IDs). */
 export function toPlanInputs(f: FarmForm): PlanInput[] {
   const concern = { low_moisture_concern: f.moistureConcern };
-  const leg1 = { ...concern, prev_harvest: toMd(f.cornHarvest) };
-  const leg2 = { ...concern, prev_harvest: toMd(f.soyHarvest) };
+  const leg1 = { ...concern, previous_crop_id: "field_corn", next_crop_id: "soybean", prev_harvest: toMd(f.cornHarvest) };
+  const leg2 = { ...concern, previous_crop_id: "soybean", next_crop_id: "field_corn", prev_harvest: toMd(f.soyHarvest) };
   return [
     { ...leg1, plan_id: "corn_soy__no_cover", winter: { type: "none" }, next_plant: toMd(f.soyPlant) },
     {

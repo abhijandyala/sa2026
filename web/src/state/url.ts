@@ -1,9 +1,10 @@
 import type { CardKey, Leg } from "../content/strategies";
-import type { AppState, Emphasis, Priority } from "./model";
+import { placeById } from "../content/locations";
+import { PAGES, type AppState, type Emphasis, type Page, type Priority } from "./model";
 
 /*
   Shareable links (cards 0.7 and 8.2). The hash holds view choices only: card, year,
-  priorities, emphasis. Never farm details. Invalid parts are ignored, so an old or
+  winter, rye date, priorities, emphasis and the summary. Never farm details. Invalid parts are ignored, so an old or
   broken link opens the sample (handbook p.14).
 */
 
@@ -14,6 +15,9 @@ export interface UrlView {
   ryeEnd?: string;
   priorities?: Priority[];
   emphasis?: Emphasis;
+  summary?: boolean;
+  placeId?: string;
+  page?: Page;
 }
 
 const CARDS: CardKey[] = ["current", "cover", "grain"];
@@ -27,6 +31,10 @@ export function toHash(s: AppState): string {
   if (s.ryeEnd !== null) p.set("r", s.ryeEnd);
   if (s.priorities.length) p.set("p", s.priorities.join(","));
   if (s.emphasis !== "buffer") p.set("e", s.emphasis);
+  if (s.summaryOpen) p.set("v", "summary");
+  if (s.page !== "overview") p.set("pg", s.page);
+  // Listed places only; typed coordinates stay out of links (they can point at a real field).
+  if (s.placeId !== "union" && placeById(s.placeId)) p.set("loc", s.placeId);
   return "#" + p.toString();
 }
 
@@ -44,6 +52,11 @@ export function fromHash(hash: string, validYears: ReadonlySet<number>, validRye
   if (pr.length) out.priorities = [...new Set(pr)].slice(0, 2);
   const e = p.get("e");
   if (e === "cover" || e === "buffer") out.emphasis = e;
+  if (p.get("v") === "summary") out.summary = true;
+  const loc = p.get("loc");
+  if (loc && placeById(loc)) out.placeId = loc;
+  const pg = p.get("pg");
+  if (pg && (PAGES as string[]).includes(pg)) out.page = pg as Page;
   return out;
 }
 
@@ -56,5 +69,9 @@ export function applyUrlView(state: AppState, view: UrlView): AppState {
     ryeEnd: view.ryeEnd ?? state.ryeEnd,
     priorities: view.priorities ?? state.priorities,
     emphasis: view.emphasis ?? state.emphasis,
+    summaryOpen: view.summary ?? state.summaryOpen,
+    placeId: view.placeId ?? state.placeId,
+    page: view.page ?? state.page,
+    ryeOpen: view.page ? view.page === "rye" : state.ryeOpen,
   };
 }

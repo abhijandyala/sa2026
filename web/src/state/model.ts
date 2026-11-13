@@ -12,6 +12,9 @@ import type { FarmForm } from "./form";
 
 export type { Priority };
 export type Emphasis = "cover" | "buffer";
+/** One question per page (design strategy, Nov 13): the sidebar switches pages, it does not scroll. */
+export type Page = "overview" | "springs" | "compare" | "plan" | "rye" | "calendar";
+export const PAGES: Page[] = ["overview", "springs", "compare", "plan", "rye", "calendar"];
 
 export interface AppState {
   sample: FarmForm;
@@ -28,6 +31,12 @@ export interface AppState {
   emphasis: Emphasis;
   evidenceOpen: boolean;
   formOpen: boolean;
+  /** The printable Extension summary (Phase 8) is showing instead of the planner. */
+  summaryOpen: boolean;
+  /** Which place's weather to use (Phase 9): a place ID, or "custom" for typed coordinates. */
+  placeId: string;
+  locationOpen: boolean;
+  page: Page;
 }
 
 export type Action =
@@ -46,7 +55,26 @@ export type Action =
   | { type: "setEmphasis"; emphasis: Emphasis }
   | { type: "openEvidence" }
   | { type: "closeEvidence" }
-  | { type: "applyLink"; view: { card?: CardKey; year?: number; leg?: Leg; ryeEnd?: string; priorities?: Priority[]; emphasis?: Emphasis } }
+  | { type: "setPage"; page: Page }
+  | { type: "setPlace"; placeId: string }
+  | { type: "openLocation" }
+  | { type: "closeLocation" }
+  | { type: "openSummary" }
+  | { type: "closeSummary" }
+  | {
+      type: "applyLink";
+      view: {
+        card?: CardKey;
+        year?: number;
+        leg?: Leg;
+        ryeEnd?: string;
+        priorities?: Priority[];
+        emphasis?: Emphasis;
+        summary?: boolean;
+        placeId?: string;
+        page?: Page;
+      };
+    }
   | { type: "reset" };
 
 export const MAX_PRIORITIES = 2;
@@ -65,6 +93,10 @@ export function initialState(sample: FarmForm): AppState {
     emphasis: "buffer",
     evidenceOpen: false,
     formOpen: false,
+    summaryOpen: false,
+    placeId: "union",
+    locationOpen: false,
+    page: "overview",
   };
 }
 
@@ -83,9 +115,14 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, ryeEnd: action.md };
     case "openRye":
       // The rye slider is for the winter before soybeans (leg 1).
-      return { ...state, ryeOpen: true, card: "cover", leg: 1, year: state.card === "cover" && state.leg === 1 ? state.year : null };
+      return { ...state, ryeOpen: true, page: "rye", card: "cover", leg: 1, year: state.card === "cover" && state.leg === 1 ? state.year : null };
     case "closeRye":
-      return { ...state, ryeOpen: false };
+      return { ...state, ryeOpen: false, page: state.page === "rye" ? "plan" : state.page };
+    case "setPage":
+      // The rye page is the rye slider: it looks at winter cover in the winter before soybeans.
+      return action.page === "rye"
+        ? { ...state, page: "rye", ryeOpen: true, card: "cover", leg: 1, year: state.card === "cover" && state.leg === 1 ? state.year : null }
+        : { ...state, page: action.page, ryeOpen: false };
     case "openForm":
       return { ...state, formOpen: true, draft: state.draft ?? state.applied };
     case "closeForm":
@@ -109,6 +146,18 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, evidenceOpen: true };
     case "closeEvidence":
       return { ...state, evidenceOpen: false };
+    case "setPlace":
+      // A new place has its own weather record, so the year and rye date return to its defaults.
+      return { ...state, placeId: action.placeId, locationOpen: false, year: null, ryeEnd: null, ryeOpen: false };
+    case "openLocation":
+      return { ...state, locationOpen: true };
+    case "closeLocation":
+      return { ...state, locationOpen: false };
+    case "openSummary":
+      // The summary shows the applied plan; drawers close so nothing hides it.
+      return { ...state, summaryOpen: true, evidenceOpen: false, formOpen: false, ryeOpen: false };
+    case "closeSummary":
+      return { ...state, summaryOpen: false };
     case "applyLink": {
       // A shared link or Back/Forward: view choices only, never dates. A missing part means the default.
       const v = action.view;
@@ -120,6 +169,10 @@ export function reducer(state: AppState, action: Action): AppState {
         ryeEnd: v.ryeEnd ?? null,
         priorities: v.priorities ?? [],
         emphasis: v.emphasis ?? "buffer",
+        summaryOpen: v.summary ?? false,
+        placeId: v.placeId ?? "union",
+        page: v.page ?? "overview",
+        ryeOpen: v.page === "rye",
       };
     }
     case "reset":

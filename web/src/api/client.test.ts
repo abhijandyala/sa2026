@@ -2,17 +2,21 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { createClient, latestOnly } from "./client";
+import { SAMPLE_PLACE as UNION } from "../content/locations";
 import { CompareResponse, SensitivityResponse, YearsResponse } from "./schema";
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), "../../public/data/sample");
 const file = (n: string) => readFileSync(join(dir, `${n}.json`), "utf8");
 const ok = (body: string) => ({ ok: true, status: 200, text: async () => body, headers: { get: () => "application/json" } });
 
+// The saved NASA record: Rahul's real responses, as the site loads them.
+const nasa = join(dirname(fileURLToPath(import.meta.url)), "../../public/data/nasa");
+const real = (rel: string) => readFileSync(join(nasa, rel), "utf8");
+
 function sampleFetch(overrides: Record<string, () => Promise<unknown>> = {}) {
   return async (url: string) => {
     for (const [k, f] of Object.entries(overrides)) if (url.includes(k)) return f() as never;
-    const name = url.split("/").pop()!.replace(".json", "");
-    return ok(file(name));
+    return ok(real(url.replace(/^\/s\//, "")));
   };
 }
 
@@ -23,20 +27,25 @@ describe("saved sample", () => {
     expect(r.years).toMatchObject({ ok: true, origin: "saved" });
     expect(r.compare).toMatchObject({ ok: true, origin: "saved" });
     expect(r.sensitivity).toMatchObject({ ok: true, origin: "saved" });
+    // Read through the adapter: the backend's own values, under the names the screens use.
+    const rye = r.compare.ok ? r.compare.data.plans.find((p) => p.plan_id === "corn_soy__rye") : undefined;
+    const raw = JSON.parse(real("compare.json")).plans.find((p: { plan_id: string }) => p.plan_id === "corn_soy__rye");
+    expect(rye?.winter?.per_season_median.rain_mm_without_cover).toBe(raw.winter.per_season_median.rain_mm_outside_cover);
+    expect(rye?.sequence?.winter).toEqual({ type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-30" });
   });
 
   it("treats a host's HTML fallback page as not found", async () => {
     const c = createClient({
       sampleBase: "/s",
       timeoutMs: 1000,
-      fetchImpl: sampleFetch({ years: async () => ({ ok: true, status: 200, text: async () => "<!doctype html>", headers: { get: () => "text/html" } }) }),
+      fetchImpl: sampleFetch({ "years/": async () => ({ ok: true, status: 200, text: async () => "<!doctype html>", headers: { get: () => "text/html" } }) }),
     });
     expect((await c.loadSample()).years).toMatchObject({ ok: false, kind: "not-found" });
   });
 
   it("reports a format mismatch with the field that failed", async () => {
-    const broken = JSON.stringify({ ...JSON.parse(file("compare")), plans: [] });
-    const c = createClient({ sampleBase: "/s", timeoutMs: 1000, fetchImpl: sampleFetch({ compare: async () => ok(broken) }) });
+    const broken = JSON.stringify({ ...JSON.parse(real("compare.json")), plans: [] });
+    const c = createClient({ sampleBase: "/s", timeoutMs: 1000, fetchImpl: sampleFetch({ "compare.json": async () => ok(broken) }) });
     const r = (await c.loadSample()).compare;
     expect(r).toMatchObject({ ok: false, kind: "schema" });
     expect(!r.ok && r.detail).toMatch(/^plans/);
@@ -54,19 +63,70 @@ describe("live recompute", () => {
   it("says plainly when no live service is configured", async () => {
     const c = createClient({ sampleBase: "/s", timeoutMs: 1000, fetchImpl: sampleFetch() });
     expect(c.hasLiveApi).toBe(false);
-    expect(await c.compare([], "union_county_sample")).toMatchObject({ ok: false, kind: "offline" });
+    expect(await c.compare([], UNION)).toMatchObject({ ok: false, kind: "offline" });
+    expect(await c.resolveLocation(UNION)).toMatchObject({ ok: false, kind: "offline" });
   });
 
   it("posts plans and marks the answer live", async () => {
     let body = "";
-    const f = async (_u: string, init?: { body?: string }) => {
+    const f = async (u: string, init?: { body?: string }) => {
+      if (u.includes("/v1/years")) return ok(real(`years/${new URL(u).searchParams.get("plan")}.json`));
       body = init?.body ?? "";
-      return ok(file("compare"));
+      return ok(real("compare.json"));
     };
     const c = createClient({ sampleBase: "/s", apiBase: "https://api.example", timeoutMs: 1000, fetchImpl: f });
-    const r = await c.compare([], "union_county_sample");
+    const plan = {
+      plan_id: "corn_soy__rye",
+      previous_crop_id: "field_corn",
+      next_crop_id: "soybean",
+      prev_harvest: "09-20",
+      next_plant: "05-12",
+      winter: { type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-23" },
+      low_moisture_concern: "unknown",
+    } as const;
+    const r = await c.compare([plan], UNION);
     expect(r).toMatchObject({ ok: true, origin: "live" });
-    expect(JSON.parse(body)).toEqual({ location_id: "union_county_sample", plans: [] });
+    // The backend's CompareRequest: {location: {latitude, longitude}, plans} with its own plan fields.
+    expect(JSON.parse(body)).toEqual({
+      location: { latitude: 34.98, longitude: -80.55 },
+      plans: [
+        {
+          plan_id: "corn_soy__rye",
+          previous_crop_id: "field_corn",
+          prev_harvest: "09-20",
+          next_crop_id: "soybean",
+          next_plant: "05-12",
+          winter: { kind: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-23" },
+          grower: { low_moisture_concern: null },
+        },
+      ],
+    });
+  });
+
+  it("resolves a place with the backend's lat/lon body and reads weather and guidance support", async () => {
+    let body = "";
+    const answer = {
+      meta: {},
+      location: {
+        status: "partial",
+        latitude: 35.52,
+        longitude: -78.37,
+        bounds: { in_nc: true },
+        cell_id: "cell_+35.500_-78.125",
+        weather: { supported: false, status: "unavailable", source: "none", freshness: "unavailable", reason: "offline mode" },
+        guidance: { supported: true, status: "complete", region: "coastal_plain" },
+        notes: [],
+      },
+    };
+    const f = async (_u: string, init?: { body?: string }) => {
+      body = init?.body ?? "";
+      return ok(JSON.stringify(answer));
+    };
+    const c = createClient({ sampleBase: "/s", apiBase: "https://api.example", timeoutMs: 1000, fetchImpl: f });
+    const r = await c.resolveLocation({ latitude: 35.52, longitude: -78.37 });
+    expect(JSON.parse(body)).toEqual({ lat: 35.52, lon: -78.37, fetch_history: true });
+    expect(r.ok && r.data.location.weather.supported).toBe(false);
+    expect(r.ok && r.data.location.guidance.region).toBe("coastal_plain");
   });
 
   it("keeps only the newest answer", () => {

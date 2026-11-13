@@ -1,5 +1,6 @@
 import type { CompareResponse, Era, OtherCheck, Plan, SensitivityResponse, SpringWindow, SpringYear, YearsResponse } from "../api/schema";
 import type { Origin } from "../api/client";
+import { reasonText } from "../data/format";
 import {
   CARDS,
   PRIORITY_FIT,
@@ -123,6 +124,14 @@ export interface LegSummaryVM {
   check: { applies: boolean; count: number | null; denominator: number | null };
   /** Days between ending the cover and planting, from the backend's calendar. */
   gapDays: number | null;
+  /** Planned days with living cover (rye or wheat), from the backend's calendar. */
+  livingDays: number | null;
+  /** This winter's plan, for drawing its calendar. */
+  plan: Plan | null;
+  /** Every spring in this winter's planting window, for the one-dot-per-spring grid. */
+  springs: Array<{ year: number; complete: boolean; dry: boolean | null }>;
+  /** Springs where the backend says the moisture check applies. Empty when it does not apply. */
+  checkYears: number[];
   selected: boolean;
 }
 
@@ -147,6 +156,8 @@ export interface CardVM {
   checks: OtherCheck[];
   priorityFits: PriorityFitVM[];
   observations: ObservationVM[];
+  /** One plain sentence that reads the card's two winters (backend values, no comparison between plans). */
+  verdict: string;
 }
 
 /** One bar in the rainfall chart (card 3.3). Values straight from the backend. */
@@ -250,7 +261,7 @@ function withheld(w: SpringWindow | null): boolean {
 
 const CROP: Record<string, string> = { soybean: "soybean", field_corn: "corn" };
 export const LEG_TITLE: Record<Leg, string> = { 1: "Corn → soybeans", 2: "Soybeans → corn" };
-const cleanReason = (r: string | undefined) => (r ? r.replace(/^[a-z_]+:\s*/, "").replace(/^./, (c) => c.toUpperCase()) : null);
+const cleanReason = (r: string | undefined) => reasonText(r);
 
 function plantedLabel(plan: Plan): string {
   const w = plan.sequence?.winter;
@@ -345,7 +356,7 @@ export function buildView(
     : null;
 
   // ---------------------------------------------------------------- one leg's details
-  type LegDetail = Omit<CardVM, "key" | "content" | "leg" | "legs" | "priorityFits" | "observations">;
+  type LegDetail = Omit<CardVM, "key" | "content" | "leg" | "legs" | "priorityFits" | "observations" | "verdict">;
 
   function legDetail(plan: Plan | null): LegDetail {
     if (!plan) {
@@ -410,6 +421,12 @@ export function buildView(
     };
   }
 
+  function legSprings(d: LegDetail): LegSummaryVM["springs"] {
+    if (!d.plan || d.missing) return [];
+    const w = windowFor(compare, d.plan);
+    return (w?.years ?? []).map((yy) => ({ year: yy.year, complete: yy.status === "complete", dry: withheld(w) ? null : yy.is_dry }));
+  }
+
   function summary(l: Leg, planId: string, d: LegDetail): LegSummaryVM {
     return {
       leg: l,
@@ -422,6 +439,10 @@ export function buildView(
       soilMm: d.soil.mm,
       check: d.check,
       gapDays: d.plan?.calendar?.termination_gap_days ?? null,
+      livingDays: d.missing ? null : (d.plan?.calendar?.living_cover_days_planned ?? null),
+      plan: d.plan,
+      springs: legSprings(d),
+      checkYears: d.check.applies ? (d.plan?.spring_checks.find((c) => c.check_id === "rye_soy_short_gap_moisture")?.qualifying_years ?? []) : [],
       selected: l === leg,
     };
   }
@@ -439,6 +460,7 @@ export function buildView(
       ...details[leg],
       priorityFits: [],
       observations: [],
+      verdict: "",
     };
   });
 
@@ -494,6 +516,9 @@ export function buildView(
               soilMm: chosen.rain_mm_without_cover_median,
               check: { applies: true, count: chosen.checks_count, denominator: sens.denominator },
               gapDays: chosen.gap_days,
+              livingDays: chosen.living_cover_days_planned,
+              plan: moved,
+              checkYears: chosen.qualifying_years ?? [],
             }
           : l,
       );
@@ -563,7 +588,7 @@ export function buildView(
         observations.push({ kind: "context", text: "Irrigation noted as context. It does not change the moisture check.", source: null });
       }
     }
-    cards[i] = { ...card, priorityFits, observations };
+    cards[i] = { ...card, priorityFits, observations, verdict: verdictFor(card.legs) };
   }
 
   return {
@@ -608,7 +633,8 @@ export function buildView(
     chart,
     wetness,
     cards,
-    thresholds: compare.thresholds,
+    // Each planting date has its own dry cutoff; the screens read the selected window's.
+    thresholds: { ...compare.thresholds, dry_spring: window?.threshold ?? compare.thresholds.dry_spring },
     eraSpans: spans,
   };
 }
@@ -618,4 +644,28 @@ export function validYears(compare: CompareResponse): Set<number> {
   const out = new Set<number>();
   for (const w of Object.values(compare.spring_windows ?? {})) for (const y of w.years) out.add(y.year);
   return out;
+}
+
+/** A plain reading of one card's two winters. Wording only: every number is the backend's. */
+export function verdictFor(legs: LegSummaryVM[]): string {
+  const short = (l: LegSummaryVM) => l.short.toLowerCase();
+  const available = legs.filter((l) => l.available);
+  const living = available.filter((l) => (l.livingDays ?? 0) > 0);
+  const bare = available.filter((l) => l.livingDays === 0);
+  const parts: string[] = [];
+  if (living.length) {
+    parts.push(`Living cover is planned for ${living.map((l) => `${l.livingDays} days (${short(l)})`).join(" and ")}.`);
+  }
+  if (bare.length) {
+    parts.push(
+      bare.length === legs.length
+        ? "No living cover is planned in either winter."
+        : `No living cover is planned in the ${bare.map(short).join(" and ")} winter.`,
+    );
+  }
+  const checked = available.filter((l) => l.check.applies && l.check.count !== null);
+  for (const l of checked) parts.push(`Check field moisture in ${l.check.count} of ${l.check.denominator} springs (${short(l)}).`);
+  if (!checked.length && available.length === legs.length && !living.length) parts.push("The rye timing check does not apply.");
+  for (const l of legs.filter((x) => !x.available)) parts.push(`The ${short(l)} winter is not evaluated yet.`);
+  return parts.join(" ");
 }

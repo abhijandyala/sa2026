@@ -1,7 +1,7 @@
 import { useData } from "./state/useData";
 import { Planner } from "./screens/Planner";
 import { Gallery } from "./screens/Gallery";
-import { CreditsPage, MethodsPage } from "./screens/Pages";
+import { CreditsPage, MethodsPage, PrivacyPage } from "./screens/Pages";
 import { Banner, Button } from "./ui/components";
 import { APP_NAME } from "./config";
 
@@ -10,17 +10,33 @@ export function App() {
   if (view === "gallery") return <Gallery />;
   if (view === "methods") return <MethodsPage />;
   if (view === "credits") return <CreditsPage />;
+  if (view === "privacy") return <PrivacyPage />;
   return <PlannerRoute />;
 }
 
 function PlannerRoute() {
-  const { state, retry, apply, applying, hasLiveApi, client } = useData();
+  const { state, retry, apply, applying, hasLiveApi, client, place, chooseLocation } = useData();
 
   if (state.status === "loading") {
     return (
-      <main className="center-state" aria-busy="true">
-        <p className="marker">{APP_NAME}</p>
-        <p>Loading the saved NASA weather sample for Union County…</p>
+      <main className="skeleton-page" aria-busy="true">
+        <p className="skeleton-status" role="status">
+          {APP_NAME} · Loading the saved NASA weather sample for Union County…
+        </p>
+        {/* Placeholders in the planner's own layout, so nothing jumps when the data arrives. */}
+        <div className="skeleton-row" aria-hidden="true">
+          <span className="sk sk-title" />
+          <span className="sk sk-chip" />
+        </div>
+        <div className="skeleton-hero" aria-hidden="true">
+          <span className="sk sk-world" />
+          <span className="sk sk-almanac" />
+        </div>
+        <div className="skeleton-cards" aria-hidden="true">
+          <span className="sk sk-card" />
+          <span className="sk sk-card" />
+          <span className="sk sk-card" />
+        </div>
       </main>
     );
   }
@@ -41,5 +57,15 @@ function PlannerRoute() {
     );
   }
 
-  return <Planner data={state.data} apply={apply} applying={applying} hasLiveApi={hasLiveApi} client={client} />;
+  return (
+    <Planner
+      data={state.data}
+      apply={apply}
+      applying={applying}
+      hasLiveApi={hasLiveApi}
+      client={client}
+      place={place}
+      chooseLocation={chooseLocation}
+    />
+  );
 }

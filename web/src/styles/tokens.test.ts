@@ -56,6 +56,9 @@ const TEXT_PAIRS: Array<[string, string]> = [
   ["ink", "check-soft"],
   ["error", "surface"],
   ["error", "error-soft"],
+  ["action", "accent-soft"],
+  ["ink", "accent-soft"],
+  ["surface", "night"],
 ];
 
 const UI_PAIRS: Array<[string, string]> = [
@@ -66,26 +69,21 @@ const UI_PAIRS: Array<[string, string]> = [
 ];
 
 const light = block(":root {");
-const dark = { ...light, ...block(':root[data-theme="dark"]') };
 
-describe.each([
-  ["light", light],
-  ["dark", dark],
-])("%s theme contrast", (_name, t) => {
+describe("theme contrast", () => {
   it.each(TEXT_PAIRS)("text %s on %s is at least 4.5:1", (fg, bg) => {
-    expect(t[fg], `missing token ${fg}`).toBeDefined();
-    expect(t[bg], `missing token ${bg}`).toBeDefined();
-    expect(contrast(t[fg]!, t[bg]!)).toBeGreaterThanOrEqual(4.5);
+    expect(light[fg], `missing token ${fg}`).toBeDefined();
+    expect(light[bg], `missing token ${bg}`).toBeDefined();
+    expect(contrast(light[fg]!, light[bg]!)).toBeGreaterThanOrEqual(4.5);
   });
   it.each(UI_PAIRS)("UI edge %s on %s is at least 3:1", (fg, bg) => {
-    expect(contrast(t[fg]!, t[bg]!)).toBeGreaterThanOrEqual(3);
+    expect(contrast(light[fg]!, light[bg]!)).toBeGreaterThanOrEqual(3);
   });
-});
-
-it("dark media block matches the explicit dark block", () => {
-  const start = css.indexOf("@media (prefers-color-scheme: dark)");
-  const media = css.slice(start, css.indexOf(':root[data-theme="dark"]'));
-  const mediaTokens: Record<string, string> = {};
-  for (const m of media.matchAll(/--([\w-]+):\s*(#[0-9A-Fa-f]{6})\s*;/g)) mediaTokens[m[1]!] = m[2]!;
-  expect(mediaTokens).toEqual(block(':root[data-theme="dark"]'));
+  it("cyan fills carry dark text, never white", () => {
+    expect(contrast(light["accent-ink"]!, light["accent"]!)).toBeGreaterThanOrEqual(4.5);
+    expect(contrast(light["accent-ink"]!, light["accent-hover"]!)).toBeGreaterThanOrEqual(4.5);
+  });
+  it("is light only", () => {
+    expect(css).not.toMatch(/prefers-color-scheme|data-theme/);
+  });
 });

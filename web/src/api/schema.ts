@@ -1,12 +1,14 @@
 import { z } from "zod";
 
 /*
-  Types for Rahul's backend API (backend branch, docs/api/examples/, draft of Nov 12 2026).
-  Field names here are the contract: they match the draft examples exactly. Objects use
-  .passthrough() so a new backend field never breaks the page.
+  The model the screens read. It began as the types of Rahul's draft API examples (Nov 12
+  2026) and the screens, the view builder and their tests are written against it.
 
-  Frontend additions the drafts do not carry yet are marked "REQUESTED" and listed in
-  web/docs/api-requests.md. The UI treats each of them as optional.
+  Since Phase 12 the real backend responses are parsed and turned into this model in
+  adapt.ts, which is the only file that knows the backend's own field names. Objects use
+  .passthrough() so an extra field never breaks the page. Fields marked "REQUESTED" are
+  ones the real compare response still lacks; adapt.ts says where each comes from instead,
+  and web/docs/api-requests.md lists them for Rahul.
 */
 
 export const Status = z.enum([
@@ -336,6 +338,8 @@ export type ReplayResponse = z.infer<typeof ReplayResponse>;
 /** Plan input the farm form sends to POST /v1/plans/compare when the live API is available. */
 export interface PlanInput {
   plan_id: string;
+  previous_crop_id: string;
+  next_crop_id: string;
   prev_harvest: string;
   winter:
     | { type: "none" }
@@ -344,3 +348,35 @@ export interface PlanInput {
   next_plant: string;
   low_moisture_concern: "yes" | "no" | "unknown";
 }
+
+/* ------------------------------------------------------------------ POST /v1/locations/resolve (Phase 9)
+   Body {lat, lon, fetch_history}. Weather and guidance support are separate on purpose:
+   a point can have weather history while its guidance region is unknown, and the reverse. */
+export const LocationResolveResponse = z
+  .object({
+    location: z
+      .object({
+        status: z.string(),
+        latitude: z.number(),
+        longitude: z.number(),
+        code: z.string().nullable().optional(),
+        reason: z.string().nullable().optional(),
+        cell_id: z.string().nullable().optional(),
+        bounds: z.object({ in_nc: z.boolean() }).passthrough().optional(),
+        grid_cell: z
+          .object({ center_latitude: z.number(), center_longitude: z.number(), lat_step_deg: z.number(), lon_step_deg: z.number() })
+          .passthrough()
+          .nullable()
+          .optional(),
+        weather: z
+          .object({ supported: z.boolean(), status: z.string(), source: z.string(), freshness: z.string(), reason: z.string().nullable().optional() })
+          .passthrough(),
+        guidance: z
+          .object({ supported: z.boolean(), status: z.string(), region: z.string().nullable(), reason: z.string().nullable().optional() })
+          .passthrough(),
+        notes: z.array(z.string()).default([]),
+      })
+      .passthrough(),
+  })
+  .passthrough();
+export type LocationResolveResponse = z.infer<typeof LocationResolveResponse>;

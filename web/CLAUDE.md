@@ -19,18 +19,25 @@ Fieldback (NASA Space Apps 2026, Field Shift, Charlotte) compares three two-wint
 
 ## Layout and quality bars
 
-- Layout: header (title row, then winter switch and actions), a hero with the 3D farm (three fields side by side) on the left and the 45-spring almanac on the right, then three cards, then detail. At 1280×720 every card's numbers must end above the fold, even with the draft banner (measure it in the browser; 705 px on Nov 13).
-- WCAG AA contrast is tested in `src/styles/tokens.test.ts`; keyboard, light and dark must all work. Desktop and projector only: the app is not used on phones, so do not spend time on phone layouts.
-- The 3D view is an illustration of planned dates: label it so, and keep everything it shows available in 2D.
+- **Theme kit:** read `docs/theme-kit.md` before any UI work. Light only, one typeface (Hanken Grotesk), cyan accent with teal text, grey second heading lines, 6 to 8 px corners, no monospace or uppercase "terminal" labels, no colored stripes, gradients, emoji or decorative icons.
+- **Dashboard shell, edge to edge:** dark sidebar that switches pages, top bar (place, winter switch where it applies, Edit farm dates), white cards on a grey canvas. It must read as a dashboard, never a landing page.
+- **One question per page** (`state.page`, link param `pg`): Overview (three plan tiles + the 3D field), Past springs (bar chart + day by day), Compare plans (a rain glass and a side-view field picture per plan and winter, `planner/WinterPicture.tsx`; hover names each part, a click opens the large view `planner/WinterZoom.tsx`), Plan detail (both winters as field pictures, then three small cards: before you plant, about this plan, earlier and recent springs), Rye timing (one field picture with the rye end date as a stake you drag, three result tiles), Calendar (a full-width field strip per plan with each job as a dated chip under its month, `planner/FieldCalendar.tsx`). The Extension summary opens from the sidebar.
+- **No redundant text:** no subtitle under a clear title, no pill that only says something does not apply, one short caption per number. If the title, number or visual already says it, leave the words out.
+- **Show it, do not write it:** a blue bar is winter rain, one dot is one past spring, amber is a moisture check, a ring is a dry spring (`planner/WinterStat.tsx`). Each card gets a title, one visual, one short sentence and one action. Proof (sources, definitions, daily values) stays in the evidence drawer and the summary.
+- **One idea per section, less text.** A farmer should know where to look: one number with a plain sentence, details on request.
+- At 1280×720 the three plan tiles and the top of the field and springs cards must be above the fold (measure it in the browser).
+- WCAG AA contrast is tested in `src/styles/tokens.test.ts`; keyboard must work. Focus rings show for the keyboard only, never on a click (`ui/inputMode.ts`). Desktop and projector only: the app is not used on phones.
+- The 3D view is an illustration of planned dates: label it so, and keep everything it shows available in text.
 
 ## Code map
 
-- `src/api`: API types (zod) and client: saved sample in `public/data/sample/`, live API via `VITE_API_BASE`.
+- `src/api`: `adapt.ts` is the only file that knows the backend's field names; it turns Rahul's real responses into the model in `schema.ts` that the screens read. `client.ts` loads the saved NASA record in `public/data/nasa/` (his responses exactly as returned) or the live API via `VITE_API_BASE`, both through the adapter.
 - `src/view/build.ts`: the only place that turns responses into what screens show.
 - `src/content`: card names, sourced headings, glossary, credits.
 - `src/state`: selection (card, year, winter, rye date, priorities), form, links.
-- `src/screens`, `src/ui`, `src/scene` (3D), `src/styles`.
-- `scripts/make-sample.mjs`: synthetic draft sample in the API shape. Regenerate with `npm run sample`.
+- `src/screens`, `src/ui` (kit pieces: `Roll`, `Accordion`, `components`), `src/scene` (3D), `src/styles` (`tokens.css`, `fieldback.css` = the kit).
+- `scripts/fetch-backend.mjs`: saves the real responses from a running backend into `public/data/nasa/` (`npm run data`).
+- `scripts/make-sample.mjs` and `public/data/sample/`: the old synthetic draft, kept only as a fixture for the view-builder tests.
 
 ## Commands
 
@@ -39,7 +46,7 @@ npm run dev          # http://localhost:5173 (the backend's CORS allows this por
 npm test             # unit tests
 npm run typecheck
 npm run build
-npm run test:e2e     # browser tests; first run needs: npx playwright install chromium
+npm run data         # save real responses; needs the backend running (FIELDSHIFT_OFFLINE=1 uvicorn fieldshift.api.app:app)
 ```
 
 ## Git

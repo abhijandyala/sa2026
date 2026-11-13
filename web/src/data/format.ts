@@ -67,3 +67,21 @@ export function change(delta: number, more: string, fewer: string): string {
   if (delta === 0) return "No change";
   return `${Math.abs(delta)} ${delta > 0 ? more : fewer}`;
 }
+
+/**
+ * A backend reason as a sentence. The service sends short codes for some states
+ * ("catalog_missing"); known codes get plain words, anything else is shown as written.
+ */
+const REASON_TEXT: Record<string, string> = {
+  catalog_missing: "Wheat double-crop is not in the comparison yet. Its dates come from the grower, not the guidance catalog.",
+  record_starts_after_window_start: "NASA's record starts after this winter began.",
+  weather_history_not_available_for_location: "Weather history is not available for this place yet.",
+};
+export function reasonText(reason: string | null | undefined): string | null {
+  if (!reason) return null;
+  const known = REASON_TEXT[reason.trim()];
+  if (known) return known;
+  const text = reason.replace(/^[a-z_]+:\s*/, "");
+  const plain = /^[a-z_]+$/.test(text) ? text.replace(/_/g, " ") : text;
+  return plain.replace(/^./, (c) => c.toUpperCase());
+}

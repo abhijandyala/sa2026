@@ -242,3 +242,44 @@ export function CreditsPage() {
     </DocPage>
   );
 }
+
+export function PrivacyPage() {
+  return (
+    <DocPage
+      title="Privacy and terms"
+      lede="What Fieldback keeps, what it sends and to whom, and the terms for using what it shows."
+    >
+      <Section id="p-keep" title="What Fieldback keeps">
+        <p>
+          Nothing about you. There are no accounts, no cookies, no analytics and no browser storage. Your farm dates live only in
+          this page while it is open; closing the tab clears them.
+        </p>
+      </Section>
+      <Section id="p-send" title="What is sent, and where">
+        <ul>
+          <li>The Union County sample is stored with this site. Opening it sends nothing anywhere.</li>
+          <li>
+            When the live service is connected, applying dates sends your plan dates to it so it can replay them against past
+            springs. Choosing another place sends that place's coordinates so it can find the NASA POWER grid cell.
+          </li>
+          <li>The service asks NASA for the grid cell's center, not your exact point.</li>
+          <li>Shared links hold view choices only (plan, year, winter, priorities, listed place). Never your dates or typed coordinates.</li>
+        </ul>
+      </Section>
+      <Section id="p-terms" title="Terms of use">
+        <ul>
+          <li>
+            Fieldback replays past weather to support a conversation with your Extension agent. It is not a forecast, a field
+            measurement or professional advice, and it makes no promise about yields, costs or outcomes.
+          </li>
+          <li>It is provided as is, without warranty, as a NASA Space Apps Challenge 2026 project.</li>
+          <li>
+            NASA does not endorse Fieldback. NASA POWER data is used under NASA's open data terms; NC State Extension guidance is
+            linked to its source and summarized, not copied.
+          </li>
+          <li>Every source and library, with its license, is listed on the Credits page.</li>
+        </ul>
+      </Section>
+    </DocPage>
+  );
+}

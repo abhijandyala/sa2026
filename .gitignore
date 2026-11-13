@@ -7,3 +7,7 @@ test-results/
 playwright-report/
 *.log
 .env*
+
+# Screen recordings and other large reference media
+*.mov
+*.mp4

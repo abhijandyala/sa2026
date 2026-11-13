@@ -6,7 +6,7 @@ export const CHALLENGE_LABEL = "NASA Space Apps 2026 · Field Shift";
 
 // The saved Union County sample, shaped like the backend API (backend docs/api/examples).
 // Real generated output from the backend replaces these files with the same names.
-export const SAMPLE_BASE = "./data/sample";
+export const SAMPLE_BASE = "./data/nasa";
 export const SAMPLE_LOCATION_ID = "union_county_sample";
 
 // The live backend, used only when the grower applies new dates. Set VITE_API_BASE at

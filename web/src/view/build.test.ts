@@ -301,3 +301,26 @@ describe("priorities and field observations (Phase 7)", () => {
     expect(v.cards[1]!.observations).toEqual([expect.objectContaining({ kind: "context", text: expect.stringMatching(/does not change/) })]);
   });
 });
+
+describe("card verdicts", () => {
+  it("read each card's winters in plain words", () => {
+    const v = buildView(data, { card: "cover", year: 2014 });
+    expect(v.cards.map((c) => c.verdict)).toEqual([
+      "No living cover is planned in either winter. The rye timing check does not apply.",
+      "Living cover is planned for 211 days (corn → soy) and 167 days (soy → corn). Check field moisture in 9 of 45 springs (corn → soy).",
+      "No living cover is planned in the soy → corn winter. The corn → soy winter is not evaluated yet.",
+    ]);
+  });
+});
+
+describe("per-winter springs for the dot grid", () => {
+  it("gives every spring and the backend's check years, per winter", () => {
+    const v = buildView(data, { card: "cover", year: 2014 });
+    const cover = v.cards.find((c) => c.key === "cover")!;
+    expect(cover.legs[0]!.springs).toHaveLength(soy.years.length);
+    expect(cover.legs[0]!.checkYears).toHaveLength(cover.legs[0]!.check.count!);
+    expect(cover.legs[0]!.checkYears).toContain(2014);
+    expect(cover.legs[1]!.checkYears).toEqual([]);
+    expect(v.cards.find((c) => c.key === "grain")!.legs[0]!.springs).toEqual([]);
+  });
+});

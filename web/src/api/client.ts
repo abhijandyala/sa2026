@@ -1,10 +1,25 @@
 import type { ZodType, ZodTypeDef } from "zod";
-import { CompareResponse, ReplayResponse, SensitivityResponse, YearsResponse, type PlanInput } from "./schema";
+import {
+  adaptCompare,
+  adaptReplay,
+  adaptSensitivity,
+  BackendCompare,
+  BackendRotations,
+  BackendSensitivity,
+  BackendYears,
+  SavedWetness,
+  shortcutsByPlant,
+  toBackendPlan,
+  type CompareExtras,
+} from "./adapt";
+import { LocationResolveResponse, ReplayResponse, type CompareResponse, type PlanInput, type SensitivityResponse, type YearsResponse } from "./schema";
 
 /*
   Two ways to get data, one interface:
-  - the saved sample (public/data/sample/*.json), always available and offline;
+  - the saved NASA record (public/data/nasa/): Rahul's real responses for the Union County
+    sample, saved exactly as the service returned them, always available and offline;
   - the live backend (Render), used for date edits when VITE_API_BASE is set.
+  Both go through adapt.ts, so a saved answer and a live answer are read the same way.
   Playbook p.30 and p.45, handbook p.14: bounded waits, visible failures, and a
   slow or older response can never replace a newer one.
 */
@@ -89,43 +104,105 @@ export function createClient(opts: ClientOptions) {
     return r.ok ? { ok: true, data: r.data, origin: "saved" } : r;
   }
 
+  /** Turns a parsed backend response into the screens' model; a mismatch is a visible failure, not a crash. */
+  function adapted<T>(make: () => T, origin: Origin): Result<T> {
+    try {
+      return { ok: true, data: make(), origin };
+    } catch (err) {
+      const issue = (err as { issues?: Array<{ path: Array<string | number>; message: string }> }).issues?.[0];
+      return {
+        ok: false,
+        kind: "schema",
+        message: "The data does not match the agreed format.",
+        detail: issue ? `${issue.path.join(".")}: ${issue.message}` : String(err),
+      };
+    }
+  }
+
+  /** One plan per planting date: its /v1/years answer names that date's typical, dry and wet springs. */
+  const plansByPlant = (c: BackendCompare) => {
+    const seen = new Map<string, string>();
+    for (const p of c.plans) if (p.plan && p.status !== "unavailable" && !seen.has(p.plan.next_plant)) seen.set(p.plan.next_plant, p.plan_id);
+    return [...seen.values()];
+  };
+
   return {
     hasLiveApi: Boolean(opts.apiBase),
 
-    /** The saved Union County sample: the judge path. Never needs the network beyond the site itself. */
-    loadSample: async () => {
-      const [years, compare, sensitivity] = await Promise.all([
-        saved("years", YearsResponse),
-        saved("compare", CompareResponse),
-        saved("sensitivity", SensitivityResponse),
+    /** The saved Union County record: the judge path. Never needs the network beyond the site itself. */
+    loadSample: async (): Promise<{ years: Result<YearsResponse>; compare: Result<CompareResponse>; sensitivity: Result<SensitivityResponse> }> => {
+      const [raw, rotations, wetness, sweep] = await Promise.all([
+        saved("compare", BackendCompare),
+        saved("rotations", BackendRotations),
+        saved("wetness", SavedWetness),
+        saved("sensitivity", BackendSensitivity),
       ]);
-      return { years, compare, sensitivity };
+      const sensitivity: Result<SensitivityResponse> = sweep.ok ? adapted(() => adaptSensitivity(sweep.data), "saved") : sweep;
+      if (!raw.ok) return { years: raw, compare: raw, sensitivity };
+      const yearFiles = await Promise.all(plansByPlant(raw.data).map((id) => saved(`years/${id}`, BackendYears)));
+      const years: Result<YearsResponse> = yearFiles[0] ?? { ok: false, kind: "not-found", message: "That data file was not found." };
+      const extras: CompareExtras = {
+        rotations: rotations.ok ? rotations.data : null,
+        wetness: wetness.ok ? wetness.data : null,
+        shortcuts: shortcutsByPlant(yearFiles.map((y) => (y.ok ? y.data : null))),
+      };
+      return { years, compare: adapted(() => adaptCompare(raw.data, extras), "saved"), sensitivity };
     },
 
     /**
-     * Daily detail for one season. Saved sample by default; the live service when the
+     * Daily detail for one season. Saved record by default; the live service when the
      * results on screen came from it (edited dates), so the detail matches the cards.
      */
     replay: async (year: number, planId: string, origin: Origin): Promise<Result<ReplayResponse>> => {
       const url = origin === "live" ? api(`/v1/seasons/${year}/replay?plan=${encodeURIComponent(planId)}`) : null;
-      if (url) {
-        const r = await getJson(url, ReplayResponse, base);
-        return r.ok ? { ok: true, data: r.data, origin: "live" } : r;
-      }
-      return saved(`replay/${encodeURIComponent(planId)}/${year}`, ReplayResponse);
+      const r = url ? await getJson(url, ReplayResponse, base) : await saved(`replay/${encodeURIComponent(planId)}/${year}`, ReplayResponse);
+      return r.ok ? { ok: true, data: adaptReplay(r.data), origin: url ? "live" : "saved" } : r;
     },
 
-    /** Recompute for edited dates. Needs the live API; a failure keeps the saved sample on screen. */
-    compare: async (plans: PlanInput[], locationId: string): Promise<Result<CompareResponse>> => {
+    /**
+     * Recompute for edited dates or another place. Needs the live API; a failure keeps the
+     * saved record on screen. The body is the backend's own: {location: {latitude, longitude},
+     * plans: [{…, winter: {kind, …}, grower: {low_moisture_concern}}]}.
+     */
+    compare: async (plans: PlanInput[], location: LatLon): Promise<Result<CompareResponse>> => {
       const url = api("/v1/plans/compare");
       if (!url) return { ok: false, kind: "offline", message: "Editing dates needs the live service, which is not connected." };
-      const r = await getJson(url, CompareResponse, {
+      const r = await getJson(url, BackendCompare, {
         ...base,
-        init: { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ location_id: locationId, plans }) },
+        init: {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ location: { latitude: location.latitude, longitude: location.longitude }, plans: plans.map(toBackendPlan) }),
+        },
+      });
+      if (!r.ok) return r;
+      // Typical, dry and wet springs come from /v1/years, which answers for the sample's own
+      // dates. They are used only for a planting date that was not edited; a failure here is not fatal.
+      const yearCalls = await Promise.all(plansByPlant(r.data).map((id) => getJson(api(`/v1/years?plan=${encodeURIComponent(id)}`)!, BackendYears, base)));
+      const shortcuts = shortcutsByPlant(yearCalls.map((y) => (y.ok ? y.data : null)));
+      return adapted(() => adaptCompare(r.data, { shortcuts }), "live");
+    },
+
+    /** Which grid cell a point falls in and whether weather history and guidance exist there (Phase 9). */
+    resolveLocation: async (point: LatLon): Promise<Result<LocationResolveResponse>> => {
+      const url = api("/v1/locations/resolve");
+      if (!url) return { ok: false, kind: "offline", message: "Other places need the live service, which is not connected." };
+      const r = await getJson(url, LocationResolveResponse, {
+        ...base,
+        init: {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ lat: point.latitude, lon: point.longitude, fetch_history: true }),
+        },
       });
       return r.ok ? { ok: true, data: r.data, origin: "live" } : r;
     },
   };
+}
+
+export interface LatLon {
+  latitude: number;
+  longitude: number;
 }
 
 export type Client = ReturnType<typeof createClient>;

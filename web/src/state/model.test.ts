@@ -216,3 +216,55 @@ describe("rye end date", () => {
     expect(fromHash("#s=cover&r=12-25", validYears(compare), new Set(["04-23"])).ryeEnd).toBeUndefined();
   });
 });
+
+describe("Extension summary state (Phase 8)", () => {
+  it("opens over closed drawers, survives a link and resets", () => {
+    const s0 = { ...initialState(sampleForm(compare)), evidenceOpen: true };
+    const s1 = reducer(s0, { type: "openSummary" });
+    expect(s1).toMatchObject({ summaryOpen: true, evidenceOpen: false, formOpen: false });
+    expect(toHash(s1)).toMatch(/v=summary/);
+    expect(fromHash(toHash(s1), new Set())).toMatchObject({ summary: true });
+    expect(reducer(s1, { type: "closeSummary" }).summaryOpen).toBe(false);
+    expect(reducer(s1, { type: "reset" }).summaryOpen).toBe(false);
+  });
+});
+
+describe("place (Phase 9)", () => {
+  const base = initialState(sampleForm(compare));
+  it("defaults to the Union County sample and keeps it out of links", () => {
+    expect(base.placeId).toBe("union");
+    expect(toHash(base)).not.toMatch(/loc=/);
+  });
+
+  it("a listed county goes in the link; typed coordinates never do", () => {
+    const county = reducer({ ...base, year: 2014, ryeEnd: "04-23" }, { type: "setPlace", placeId: "johnston" });
+    expect(county).toMatchObject({ placeId: "johnston", year: null, ryeEnd: null, locationOpen: false });
+    expect(fromHash(toHash(county), new Set())).toMatchObject({ placeId: "johnston" });
+    const typed = reducer(base, { type: "setPlace", placeId: "custom" });
+    expect(toHash(typed)).not.toMatch(/loc=/);
+  });
+
+  it("ignores unknown places in a link and reset returns to the sample", () => {
+    expect(fromHash("#loc=atlantis", new Set()).placeId).toBeUndefined();
+    expect(reducer(reducer(base, { type: "setPlace", placeId: "pitt" }), { type: "reset" }).placeId).toBe("union");
+  });
+});
+
+describe("pages (one question per page)", () => {
+  const base = initialState(sampleForm(compare));
+  it("starts on the overview and keeps it out of links", () => {
+    expect(base.page).toBe("overview");
+    expect(toHash(base)).not.toMatch(/pg=/);
+  });
+  it("a page goes in the link and comes back from it", () => {
+    const s = reducer(base, { type: "setPage", page: "compare" });
+    expect(fromHash(toHash(s), new Set())).toMatchObject({ page: "compare" });
+    expect(fromHash("#pg=nowhere", new Set()).page).toBeUndefined();
+  });
+  it("the rye page is the rye slider: winter cover, the winter before soybeans", () => {
+    const s = reducer({ ...base, card: "current", leg: 2 }, { type: "setPage", page: "rye" });
+    expect(s).toMatchObject({ page: "rye", ryeOpen: true, card: "cover", leg: 1 });
+    expect(reducer(s, { type: "closeRye" })).toMatchObject({ page: "plan", ryeOpen: false });
+    expect(reducer(base, { type: "openRye" }).page).toBe("rye");
+  });
+});

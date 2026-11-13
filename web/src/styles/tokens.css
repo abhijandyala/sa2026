@@ -1,56 +1,66 @@
 /*
-  Fieldback design tokens.
-  Source: playbook p.33 and p.37, frontend handbook p.7.
-  Meanings are fixed: rain is blue everywhere, living cover is green, a check
-  is amber, red is only for a form error the user must correct.
+  Fieldback theme kit: tokens.
+  Light only. One typeface, near-black ink, white pages, soft grey panels, hairline
+  rules, one cyan accent with a deep teal partner, 6 px corners and calm 300 ms motion.
+  The look is modeled on tabs.com (measured Nov 13, 2026): its ink, cyan, teal, panel
+  grey, radius and easing. Its typeface is commercial, so Hanken Grotesk (OFL) stands in.
+  Meanings are fixed: cyan and teal are selection and rain, green is living cover, amber
+  is a check the grower can act on, red is only a form error.
   tokens.test.ts checks every text/background pair below for WCAG AA.
 */
 :root {
   /* Surfaces */
-  --bg: #F4F4EC;
+  --bg: #FFFFFF;
   --surface: #FFFFFF;
-  --surface-2: #EEF0E8;
-  --line: #D3D8CE;
-  --line-strong: #6F7C73;
+  --surface-2: #F6F7F8;
+  --line: #E6E8EA;
+  --line-strong: #7C858B;
 
   /* Text */
-  --ink: #172B25;
-  --ink-muted: #4A5B54;
+  --ink: #15191C;
+  --ink-muted: #5B6369;
+  --ink-faint: #9AA1A6;
 
-  /* Actions */
-  --action: #164B38;
-  --action-hover: #0F3A2B;
+  /* Accent: cyan fills carry dark text; teal is for text, links and focus */
+  --accent: #2ADCEB;
+  --accent-hover: #17CEDD;
+  --accent-ink: #0F1A1E;
+  --accent-soft: #E3FAFC;
+  --action: #004656;
+  --action-hover: #00323E;
   --action-ink: #FFFFFF;
-  --focus: #164B38;
+  --focus: #004656;
+  --night: #0E1518;
 
   /* Meanings */
-  --rain: #285A76;
-  --rain-soft: #E3EDF3;
-  --rain-strong: #1C4660;
-  --cover: #2F6B4B;
-  --cover-soft: #E1EEE6;
-  --fallow: #5F645D;
-  --fallow-soft: #ECECE6;
+  --rain: #0B6E86;
+  --rain-soft: #E3FAFC;
+  --rain-strong: #004656;
+  --cover: #1F7A4D;
+  --cover-soft: #EAF7F0;
+  --fallow: #5B6369;
+  --fallow-soft: #F1F2F3;
   --corn: #7E5512;
   --wheat: #7A5F12;
   --soy: #46632A;
-  --check: #794310;
-  --check-soft: #F7EAD9;
+  --check: #8A4A00;
+  --check-soft: #FFF3E0;
   --error: #A3262A;
   --error-soft: #FBE9E8;
 
-  /* Type */
-  --font-display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --font-body: "Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --fs-title: 32px;
+  /* Type: one family; weight and grey do the work */
+  --font-body: "Hanken Grotesk Variable", "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-body);
+  --font-mono: var(--font-body);
+  --fs-hero: 52px;
+  --fs-title: 36px;
   --fs-section: 22px;
   --fs-lead: 18px;
   --fs-body: 16px;
   --fs-small: 14px;
   --fs-marker: 12px;
-  --lh-tight: 1.2;
-  --lh-body: 1.55;
+  --lh-tight: 1.1;
+  --lh-body: 1.5;
 
   /* Space, shape, motion */
   --sp-1: 4px;
@@ -60,74 +70,18 @@
   --sp-5: 24px;
   --sp-6: 32px;
   --sp-7: 48px;
+  --sp-8: 72px;
+  --sp-9: 112px;
   --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
   --border: 1px solid var(--line);
   --dur-fast: 150ms;
-  --dur: 220ms;
-  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 300ms;
+  --dur-slow: 600ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
   --target: 44px;
+  --page: 1200px;
 
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0F1714;
-    --surface: #17221E;
-    --surface-2: #1E2B26;
-    --line: #2C3B35;
-    --line-strong: #7B8C84;
-    --ink: #E4ECE7;
-    --ink-muted: #A6B5AD;
-    --action: #86C9A6;
-    --action-hover: #A2D8BB;
-    --action-ink: #0C1F16;
-    --focus: #A2D8BB;
-    --rain: #8FC0DC;
-    --rain-soft: #16283A;
-    --rain-strong: #B5D6EA;
-    --cover: #86C9A6;
-    --cover-soft: #18302A;
-    --fallow: #B2B6AE;
-    --fallow-soft: #23292A;
-    --corn: #E0B064;
-    --wheat: #DCC06A;
-    --soy: #A9C77F;
-    --check: #EDB47B;
-    --check-soft: #35271A;
-    --error: #F29490;
-    --error-soft: #3A1D1D;
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"] {
-  --bg: #0F1714;
-  --surface: #17221E;
-  --surface-2: #1E2B26;
-  --line: #2C3B35;
-  --line-strong: #7B8C84;
-  --ink: #E4ECE7;
-  --ink-muted: #A6B5AD;
-  --action: #86C9A6;
-  --action-hover: #A2D8BB;
-  --action-ink: #0C1F16;
-  --focus: #A2D8BB;
-  --rain: #8FC0DC;
-  --rain-soft: #16283A;
-  --rain-strong: #B5D6EA;
-  --cover: #86C9A6;
-  --cover-soft: #18302A;
-  --fallow: #B2B6AE;
-  --fallow-soft: #23292A;
-  --corn: #E0B064;
-  --wheat: #DCC06A;
-  --soy: #A9C77F;
-  --check: #EDB47B;
-  --check-soft: #35271A;
-  --error: #F29490;
-  --error-soft: #3A1D1D;
-  color-scheme: dark;
 }
