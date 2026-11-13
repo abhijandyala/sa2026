@@ -270,3 +270,55 @@ def test_unknown_dryness_without_concern_is_not_flagged(index, union, years):
         update={"is_dry": None, "status": Status.UNAVAILABLE})})
     fired, check = flagged(index, unknown)
     assert fired is False and check.gate_active is not True
+
+
+# --- Phase 4a review fixes ---------------------------------------------------------------------
+
+
+def test_baseline_is_fixed_to_1981_2025_even_with_a_longer_record():
+    totals = dict(LINEAR)
+    totals.update({2026: 1.0, 2027: 2.0})  # would be the driest if they joined the baseline
+    series = synthetic(totals, end="2028-12-31")
+    ref = spring_reference(series, "05-12")
+    assert ref.n_eligible == 45 and 2026 not in ref.totals and 2027 not in ref.totals
+    res, ts = run(series, year=2026)
+    assert ts.get(f"{SPRING_DRY_PREFIX}05-12").value == 18.0  # unchanged by 2026-2027
+    assert res.total_mm == 1.0 and res.rank is None and res.is_dry is None
+    assert "outside_baseline_years" in res.reasons and res.classification_status != Status.COMPLETE
+
+
+def test_stale_reference_for_another_planting_date_is_rejected():
+    series = synthetic(LINEAR)
+    ts = build_threshold_set(series, HASH, ["05-12", "05-19"])
+    p = plan(plant="05-19", terminate="05-05")
+    with pytest.raises(ValueError, match="spring reference is for planting date 05-12"):
+        compute_spring(p, build_calendar(p, 2000), series, ts, HASH,
+                       reference=spring_reference(series, "05-12"))
+
+
+def test_missing_cutoff_is_reported_as_insufficient_data_in_season_facts():
+    series = synthetic({y: 10.0 + y for y in range(2015, 2021)}, start="2015-01-01",
+                       end="2020-12-31")
+    p = plan()
+    ts = build_threshold_set(series, HASH, ["05-12"])
+    cal = build_calendar(p, 2018)
+    spring = compute_spring(p, cal, series, ts, HASH)
+    assert spring.status == Status.COMPLETE and spring.classification_status == Status.INSUFFICIENT_DATA
+    facts = build_season_facts(p, cal, spring, season_coverage(cal, series))
+    assert facts.spring.status == Status.INSUFFICIENT_DATA and facts.spring.is_dry is None
+    assert facts.coverage["spring"] == Status.COMPLETE  # coverage kept separately
+
+
+def test_planting_date_edit_changes_rank_not_just_window():
+    totals = dict(LINEAR)
+    series = synthetic(totals)
+    frame = series.frame.reset_index()
+    # 1981 is driest for the 05-12 window; a big May 15 storm lands only in the 05-19 window
+    frame.loc[frame["date"] == pd.Timestamp(1981, 5, 15), "precip_mm"] = 500.0
+    series = DailySeries(frame)
+    ts = build_threshold_set(series, HASH, ["05-12", "05-19"])
+    a, b = plan(plant="05-12"), plan(terminate="05-05", plant="05-19", plan_id="b")
+    ra = compute_spring(a, build_calendar(a, 1981), series, ts, HASH)
+    rb = compute_spring(b, build_calendar(b, 1981), series, ts, HASH)
+    assert (ra.rank, rb.rank) == (1, 45)
+    assert ra.total_mm == 10.0 and rb.total_mm == 510.0

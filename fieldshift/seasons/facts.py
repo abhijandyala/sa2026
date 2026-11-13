@@ -45,7 +45,12 @@ def build_season_facts(
             rank=spring.rank,
             percentile=spring.percentile,
             is_dry=spring.is_dry,
-            status=spring.status,
+            # coverage problems win; otherwise report whether the dry label could be classified
+            status=(
+                spring.status
+                if spring.status != Status.COMPLETE
+                else spring.classification_status
+            ),
         ),
         wetness=WetnessFacts(
             gwettop=spring.wetness.gwettop,

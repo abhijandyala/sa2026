@@ -4,7 +4,8 @@ Window: ``[next_plant - 30 d, next_plant - 1 d]`` (see ``seasons.align``).
 
 Rules documented here and tested in ``tests/metrics/test_metrics_spring.py``:
 
-* **Reference set** = every planting year in the record whose spring window is *complete*
+* **Reference set** = every planting year 1981-2025 (``BASELINE_*``; later years in a longer
+  record are scored against it but never change it) whose spring window is *complete*
   (every day has a valid ``precip_mm``). Incomplete windows are excluded from the ranking and
   from the denominator and are listed with a reason.
 * **Rank**: 1 = driest. Ties share the lowest rank (rank = 1 + years strictly drier).
@@ -31,6 +32,8 @@ from fieldshift.seasons.coverage import planting_years, season_coverage
 from fieldshift.seasons.dates import resolve_md
 from fieldshift.weather.series import DailySeries
 
+BASELINE_FIRST_YEAR = 1981
+BASELINE_LAST_YEAR = 2025  # fixed reference record: planting years 1981-2025 only
 DRY_FRACTION = 0.20
 MIN_ELIGIBLE_YEARS = 10  # below this the fixed cutoff is not meaningful -> insufficient_data
 SPRING_DRY_PREFIX = "spring_dry_mm@"
@@ -77,6 +80,7 @@ class SpringResult(_M):
     total_mm: float | None
     rank: int | None  # 1 = driest
     percentile: float | None  # share of eligible years at or below this total
+    classification_status: Status  # complete | insufficient_data | unavailable (dry label)
     n_eligible: int  # denominator used for rank / percentile
     cutoff_mm: float | None
     is_dry: bool | None  # None unless the window is eligible and the cutoff exists
@@ -96,6 +100,8 @@ def spring_reference(series: DailySeries, plant_md: str) -> SpringReference:
     totals: dict[int, float] = {}
     excluded: list[ExcludedYear] = []
     for year in planting_years(series):
+        if not BASELINE_FIRST_YEAR <= year <= BASELINE_LAST_YEAR:
+            continue
         start, end = spring_window_for(year, plant_md)
         end_excl = end + timedelta(days=1)
         stats = series.stats(["precip_mm"], start, end_excl)
@@ -183,24 +189,40 @@ def compute_spring(
             "thresholds were frozen from a different snapshot than the one in use"
         )
     ref = reference or spring_reference(series, plan.next_plant)
+    if ref.plant_md != plan.next_plant:
+        raise ValueError(
+            f"spring reference is for planting date {ref.plant_md}, plan uses {plan.next_plant}"
+        )
     cov = season_coverage(cal, series).metrics["spring"]
     threshold = thresholds.thresholds.get(f"{SPRING_DRY_PREFIX}{plan.next_plant}")
     if threshold is None:
         raise KeyError(f"ThresholdSet has no spring dry cutoff for planting date {plan.next_plant}")
     cutoff = threshold.value
-    total = ref.totals.get(cal.year) if cov.eligible else None
-    if cov.eligible and total is None:  # pragma: no cover - reference/calendar disagree
-        raise ValueError("spring reference does not contain an eligible year")
+    total: float | None = None
+    if cov.eligible:
+        window = series.window(
+            ["precip_mm"], cal.spring_start, cal.spring_end + timedelta(days=1)
+        )["precip_mm"]
+        total = round(float(window.sum()), 3)
     rank = percentile = None
     is_dry: bool | None = None
-    if total is not None:
+    reasons = list(cov.reasons)
+    in_baseline = cal.year in ref.totals
+    if total is not None and in_baseline:
         values = list(ref.totals.values())
         rank = 1 + sum(v < total for v in values)
         percentile = round(sum(v <= total for v in values) / len(values), 4)
         is_dry = (total <= cutoff) if cutoff is not None else None
-    reasons = list(cov.reasons)
-    if total is not None and cutoff is None:
+    elif total is not None:
+        reasons.append("outside_baseline_years")
+    if total is not None and in_baseline and cutoff is None:
         reasons.append("dry_cutoff_unavailable")
+    if not cov.eligible:
+        classification = Status.UNAVAILABLE
+    elif is_dry is None:
+        classification = Status.INSUFFICIENT_DATA
+    else:
+        classification = Status.COMPLETE
     return SpringResult(
         plan_id=plan.plan_id,
         year=cal.year,
@@ -212,6 +234,7 @@ def compute_spring(
         total_mm=total,
         rank=rank,
         percentile=percentile,
+        classification_status=classification,
         n_eligible=ref.n_eligible,
         cutoff_mm=cutoff,
         is_dry=is_dry,
