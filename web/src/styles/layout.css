@@ -968,3 +968,199 @@
     min-width: 640px;
   }
 }
+
+/* ===================================================================== Phase 4: 3D farm view */
+.world-band {
+  height: auto;
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  overflow: visible;
+}
+.world-stage {
+  position: relative;
+  /* Layout B: shrinks on short screens so the cards' numbers stay above the fold. */
+  height: clamp(150px, calc(100vh - 660px), 460px);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: linear-gradient(180deg, #dfe9ee 0%, #e9efe2 70%);
+}
+.world-band.is-expanded .world-stage {
+  height: min(70vh, 640px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .world-stage {
+    background: linear-gradient(180deg, #1c2a33 0%, #1d2a22 70%);
+  }
+}
+:root[data-theme="dark"] .world-stage {
+  background: linear-gradient(180deg, #1c2a33 0%, #1d2a22 70%);
+}
+.world-canvas {
+  position: absolute !important;
+  inset: 0;
+}
+.world-fallback {
+  height: 100%;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  color: var(--ink-muted);
+  font-size: var(--fs-small);
+}
+.world-tag {
+  position: absolute;
+  bottom: var(--sp-2);
+  right: var(--sp-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-marker);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
+.world-labels {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: var(--sp-2);
+  margin: 0;
+  padding: 0 var(--sp-3);
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+  pointer-events: none;
+}
+.world-labels.preset-field,
+.world-labels.preset-cutaway {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+.world-labels li {
+  justify-self: center;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.3;
+  padding: 4px 10px;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  max-width: 100%;
+}
+.world-labels li.is-selected {
+  box-shadow: inset 0 0 0 2px var(--action);
+}
+.world-labels li span {
+  color: var(--ink-muted);
+}
+.world-labels .pill {
+  font-size: 12px;
+  padding: 1px 8px 1px 6px;
+}
+.world-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+}
+.scrubber {
+  flex: 1 1 260px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: var(--sp-3);
+  align-items: center;
+  min-width: 0;
+}
+.scrubber-label {
+  grid-row: 1 / span 2;
+  font-weight: 600;
+  font-size: var(--fs-small);
+  min-width: 52px;
+}
+.scrubber input[type="range"] {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--action);
+  min-height: 28px;
+}
+.scrubber-ticks {
+  position: relative;
+  height: 14px;
+}
+.scrubber-ticks span {
+  position: absolute;
+  top: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-muted);
+  transform: translateX(-2px);
+}
+.world-jumps {
+  display: flex;
+  gap: var(--sp-1);
+}
+.world-controls .segmented-option {
+  min-height: 32px;
+}
+.world-legend {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+@media (max-height: 800px) and (min-width: 861px) {
+  .world-legend {
+    display: none;
+  }
+}
+@media (max-width: 860px) {
+  .world-stage {
+    height: 240px;
+  }
+  .world-labels {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-1);
+    padding: 0 var(--sp-1);
+  }
+  .world-labels li span {
+    display: none;
+  }
+}
+
+/* Strip footer: summary on one line, the key and the dry-window counts share the next. */
+.strip-foot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--sp-4);
+  align-items: baseline;
+}
+.strip-summary {
+  grid-column: 1 / -1;
+}
+.strip-dry {
+  grid-column: 1;
+  grid-row: 2;
+  order: 0;
+  flex-basis: auto;
+}
+.strip-legend {
+  grid-column: 2;
+  grid-row: 2;
+}
+@media (max-width: 860px) {
+  .strip-foot {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .strip-legend {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}

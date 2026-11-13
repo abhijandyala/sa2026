@@ -92,3 +92,8 @@ a {
     scroll-behavior: auto !important;
   }
 }
+
+/* The hidden attribute always wins over component display rules. */
+[hidden] {
+  display: none !important;
+}

@@ -14,6 +14,7 @@ import { StrategyCard } from "./planner/StrategyCard";
 import { Timeline } from "./planner/Timeline";
 import { YearStrip } from "./planner/YearStrip";
 import { WeatherDetail } from "./planner/WeatherDetail";
+import { FarmView } from "./planner/FarmView";
 
 /*
   Layout B (decided Nov 12): header, weather control (years strip), 3D band capped near
@@ -135,12 +136,7 @@ export function Planner({
 
       <YearStrip view={view} onSelect={(year) => dispatch({ type: "selectYear", year })} />
 
-      <section className="world-band" aria-label="Farm view">
-        <div className="world-placeholder">
-          <p className="marker">Illustration of your plan</p>
-          <p>3D farm view goes here (Phase 4): three field strips through the seasons, with the selected spring's weather.</p>
-        </div>
-      </section>
+      <FarmView strips={view.strips} onSelectCard={(card) => dispatch({ type: "selectCard", card })} />
 
       <section className="cards" aria-label="Three winter plans">
         {view.cards.map((c, i) => (

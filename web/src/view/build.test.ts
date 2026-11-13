@@ -157,3 +157,19 @@ describe("weather states", () => {
     expect(Math.max(...a.bars.map((x) => x.mm ?? 0))).toBeLessThanOrEqual(a.axisMax);
   });
 });
+
+describe("3D field strips", () => {
+  it("gives every field its own planting window's selected spring", () => {
+    const v = buildView(data, { card: "cover", year: 2014 });
+    expect(v.strips.map((s) => s.key)).toEqual(["current", "cover", "grain"]);
+    const june = compare.spring_windows!.soy_double_crop!.years.find((y) => y.year === 2014)!;
+    expect(v.strips[2]!.weather.totalMm).toBe(june.total_mm);
+    expect(v.strips[1]!.weather.totalMm).toBe(soy.years.find((y) => y.year === 2014)!.total_mm);
+    expect(v.strips[1]!.selected).toBe(true);
+  });
+  it("carries the card's status so the field flag matches the card", () => {
+    const flagged = rye12.spring_checks[0]!.qualifying_years[0]!;
+    const v = buildView(data, { card: "cover", year: flagged });
+    expect(v.strips[1]!.status).toEqual(v.cards[1]!.status);
+  });
+});

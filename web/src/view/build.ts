@@ -90,6 +90,24 @@ export interface WetnessVM {
   missingYears: number[];
 }
 
+/** One field in the 3D view (Phase 4): the plan and the selected spring for its own window. */
+export interface StripVM {
+  key: CardKey;
+  name: string;
+  plan: Plan | null;
+  selected: boolean;
+  status: CardStatus;
+  /** Raw values from the backend; the scene maps them to visuals only. */
+  weather: {
+    year: number | null;
+    complete: boolean;
+    totalMm: number | null;
+    medianMm: number | null;
+    wetness: number | null;
+    wetnessRange: [number, number] | null;
+  };
+}
+
 /** Playbook p.23: show at least 15 complete years before relative labels. */
 export const MIN_COMPLETE_YEARS = 15;
 
@@ -111,6 +129,7 @@ export interface ViewModel {
   chart: ChartVM;
   wetness: WetnessVM;
   cards: CardVM[];
+  strips: StripVM[];
   thresholds: CompareResponse["thresholds"];
   eraSpans: { earlier: string; recent: string };
 }
@@ -300,6 +319,26 @@ export function buildView(
     windowEra: labelsWithheld ? null : eraVM(window?.eras.dry_spring, spans),
     tiles,
     selectedYear,
+    strips: cards.map((c) => {
+      const w = windowFor(compare, c.plan);
+      const yr = w?.years.find((r) => r.year === year) ?? null;
+      const wets = (w?.years ?? []).map((r) => r.gwetroot_window_mean).filter((v): v is number => v !== null);
+      return {
+        key: c.key,
+        name: c.content.name,
+        plan: c.plan,
+        selected: c.key === sel.card,
+        status: c.status,
+        weather: {
+          year: yr?.year ?? null,
+          complete: yr?.status === "complete",
+          totalMm: yr?.status === "complete" ? yr.total_mm : null,
+          medianMm: withheld(w) ? null : (w?.median_mm ?? null),
+          wetness: yr?.gwetroot_window_mean ?? null,
+          wetnessRange: wets.length ? [Math.min(...wets), Math.max(...wets)] : null,
+        },
+      };
+    }),
     shortcuts: { typical: typicalYear, dry: dryYear },
     labelsWithheld,
     contrastWithheld,
