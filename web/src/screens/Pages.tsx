@@ -57,14 +57,14 @@ function Section({ id, title, children }: { id: string; title: string; children:
 export function MethodsPage() {
   return (
     <DocPage
-      title="How Fieldback works"
-      lede="Fieldback replays a grower's planned winter dates against past springs recorded by NASA and checks them against NC State guidance. It compares plans; it does not forecast next spring or measure a field."
+      title="How A.C.R.E works"
+      lede="A.C.R.E replays a grower's planned winter dates against past springs recorded by NASA and checks them against NC State guidance. It compares plans; it does not forecast next spring or measure a field."
     >
       <Section id="m-question" title="The question it answers">
         <p>
           A corn grower in the North Carolina Piedmont is planning soybeans. Over winter they can leave no planted cover, plant cereal rye
           as a cover crop, or grow winter wheat for grain. Rye protects the soil but uses water while it grows, so in a dry spring ending
-          it too close to planting can leave the seedbed dry. Fieldback shows how each plan would have fared across every past spring on
+          it too close to planting can leave the seedbed dry. A.C.R.E shows how each plan would have fared across every past spring on
           record for this area.
         </p>
       </Section>
@@ -72,9 +72,11 @@ export function MethodsPage() {
       <Section id="m-data" title="The weather data">
         <ul>
           <li>
-            NASA POWER daily estimates for a reference point near Monroe, Union County, NC: corrected precipitation (PRECTOTCORR) and
-            root-zone soil wetness (GWETROOT, from the MERRA-2 model), 1981 to 2025.
+            NASA POWER daily estimates for a reference point in each of eight North Carolina counties (the sample is near Monroe,
+            Union County): corrected precipitation (PRECTOTCORR) and root-zone soil wetness (GWETROOT, from the MERRA-2 model), 1981
+            to 2025.
           </li>
+          <li>Each county is compared with its own past springs and its own dry cutoff. Wayne and Johnston share one NASA grid cell.</li>
           <li>Values describe a grid cell roughly 50 km across, not one farm. Local storms can make a field wetter or drier.</li>
           <li>The record is saved with the app, so the comparison works offline. The screen says when data is a saved record, live, or draft.</li>
           <li>A day with no rain counts as 0.0 mm. A missing day makes that spring incomplete; incomplete springs are left out and listed.</li>
@@ -96,7 +98,7 @@ export function MethodsPage() {
             The dry cutoff is the 20th percentile of complete springs for that window, computed once and shared by every plan. Springs at or
             below it are labeled among the driest 20%. Ties at the cutoff count as dry.
           </li>
-          <li>With fewer than 15 complete springs, Fieldback withholds the typical, dry and rank labels and shows only the record.</li>
+          <li>With fewer than 15 complete springs, A.C.R.E withholds the typical, dry and rank labels and shows only the record.</li>
           <li>This 20% line is a label for comparing past years, not a drought declaration.</li>
         </ul>
       </Section>
@@ -107,7 +109,7 @@ export function MethodsPage() {
           <a href={SOURCES["ncs-soy-4"].url} target="_blank" rel="noreferrer">
             NC Soybean Production Guide, ch. 4
           </a>
-          ). Fieldback flags a spring when the gap between ending rye and planting is under 14 days and either that spring was in the
+          ). A.C.R.E flags a spring when the gap between ending rye and planting is under 14 days and either that spring was in the
           driest 20% or the grower reported a moisture concern. The 20% line and the 14-day guidance are separate thresholds from
           separate sources.
         </p>
@@ -119,7 +121,7 @@ export function MethodsPage() {
 
       <Section id="m-winter" title="Rain on ground with no living cover">
         <p>
-          For each winter from corn harvest to planting, Fieldback adds up the rain that fell on days with no planned living cover, and
+          For each winter from corn harvest to planting, A.C.R.E adds up the rain that fell on days with no planned living cover, and
           shows the median across winters. It measures rain and calendar overlap, not erosion: crop residue may still cover the ground,
           and actual cover depends on how the crop established. A heavy-rain day count will be added once its definition is confirmed.
         </p>
@@ -143,18 +145,18 @@ export function MethodsPage() {
       <Section id="m-ground" title="Satellites and models vs. your field">
         <p>
           NASA's estimates show what the region around the grid point was like. A soil check in your own field tells you what your
-          seedbed is like this year. Fieldback keeps the two apart: your own report is labeled as yours, and it can trigger the NC State
+          seedbed is like this year. A.C.R.E keeps the two apart: your own report is labeled as yours, and it can trigger the NC State
           guidance on its own.
         </p>
       </Section>
 
-      <Section id="m-limits" title="What Fieldback does not claim">
+      <Section id="m-limits" title="What A.C.R.E does not claim">
         <ul>
           <li>It does not forecast next spring.</li>
           <li>It does not measure soil moisture, crop growth, erosion or yield on your field.</li>
           <li>It does not estimate water savings, costs or profit, and does not name a "best" rotation.</li>
-          <li>Wheat planting and harvest windows are not yet sourced, so that timing check shows unknown.</li>
-          <li>The second winter of each two-year rotation (soybeans to corn) is not evaluated yet.</li>
+          <li>The guidance catalog has no fixed Piedmont dates for wheat, so the wheat plan uses the dates entered for it.</li>
+          <li>The sample dates were assumed for the Piedmont. In a Coastal Plain county the planner says so; check them against local timing.</li>
         </ul>
         <p>
           <strong>It supports, not replaces, local advice.</strong> Take the comparison to your NC State Extension agent before changing a
@@ -180,7 +182,7 @@ export function CreditsPage() {
   return (
     <DocPage
       title="Credits and disclosures"
-      lede="Everything Fieldback uses, where it comes from, and what to know about how it was built."
+      lede="Everything A.C.R.E uses, where it comes from, and what to know about how it was built."
     >
       <Section id="c-data" title="Data and guidance">
         <ul className="st-doc-credits">
@@ -246,9 +248,9 @@ export function PrivacyPage() {
   return (
     <DocPage
       title="Privacy and terms"
-      lede="What Fieldback keeps, what it sends and to whom, and the terms for using what it shows."
+      lede="What A.C.R.E keeps, what it sends and to whom, and the terms for using what it shows."
     >
-      <Section id="p-keep" title="What Fieldback keeps">
+      <Section id="p-keep" title="What A.C.R.E keeps">
         <p>
           Nothing about you. There are no accounts, no cookies, no analytics and no browser storage. Your farm dates live only in
           this page while it is open; closing the tab clears them.
@@ -256,24 +258,24 @@ export function PrivacyPage() {
       </Section>
       <Section id="p-send" title="What is sent, and where">
         <ul>
-          <li>The Union County sample is stored with this site. Opening it sends nothing anywhere.</li>
+          <li>The record for each county in the place picker is stored with this site. Opening one sends nothing anywhere.</li>
           <li>
             When the live service is connected, applying dates sends your plan dates to it so it can replay them against past
-            springs. Choosing another place sends that place's coordinates so it can find the NASA POWER grid cell.
+            springs. Typing your own point sends its coordinates so it can find the NASA POWER grid cell.
           </li>
-          <li>The service asks NASA for the grid cell's center, not your exact point.</li>
+          <li>The service reads the NASA record it already holds for that grid cell. It does not pass your point on to NASA.</li>
           <li>Shared links hold view choices only (plan, year, winter, priorities, listed place). Never your dates or typed coordinates.</li>
         </ul>
       </Section>
       <Section id="p-terms" title="Terms of use">
         <ul>
           <li>
-            Fieldback replays past weather to support a conversation with your Extension agent. It is not a forecast, a field
+            A.C.R.E replays past weather to support a conversation with your Extension agent. It is not a forecast, a field
             measurement or professional advice, and it makes no promise about yields, costs or outcomes.
           </li>
           <li>It is provided as is, without warranty, as a NASA Space Apps Challenge 2026 project.</li>
           <li>
-            NASA does not endorse Fieldback. NASA POWER data is used under NASA's open data terms; NC State Extension guidance is
+            NASA does not endorse A.C.R.E. NASA POWER data is used under NASA's open data terms; NC State Extension guidance is
             linked to its source and summarized, not copied.
           </li>
           <li>Every source and library, with its license, is listed on the Credits page.</li>

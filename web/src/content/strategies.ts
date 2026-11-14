@@ -130,7 +130,7 @@ export const CARDS: CardContent[] = [
       ],
       benefits: [c("Wheat keeps the soil covered through the first winter.", "ncs-cover")],
       gaps: [
-        c("The wheat winter is not evaluated yet: wheat planting and harvest windows are not sourced."),
+        c("The guidance catalog has no fixed Piedmont dates for wheat, so this plan uses the wheat and soybean dates entered for it."),
         c("Prices, costs and profit are not part of this tool."),
       ],
       risks: [

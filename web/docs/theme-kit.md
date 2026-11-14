@@ -1,4 +1,4 @@
-# Fieldback theme kit (Nov 13, 2026)
+# A.C.R.E theme kit (Nov 13, 2026)
 
 The look is modeled on tabs.com, studied from Abhi's screen recording (frame by frame at 2 fps) and measured on the live site. We took its design language, not its assets: no logo, photos, illustrations or code. Its typeface (Beausite Classic) is commercial, so Hanken Grotesk (OFL) stands in.
 

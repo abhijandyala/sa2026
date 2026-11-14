@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { createClient, latestOnly } from "./client";
-import { SAMPLE_PLACE as UNION } from "../content/locations";
+import { PLACES, SAMPLE_PLACE as UNION } from "../content/locations";
 import { CompareResponse, SensitivityResponse, YearsResponse } from "./schema";
 
 const dir = join(dirname(fileURLToPath(import.meta.url)), "../../public/data/sample");
@@ -23,13 +23,13 @@ function sampleFetch(overrides: Record<string, () => Promise<unknown>> = {}) {
 describe("saved sample", () => {
   it("loads all three files as saved data", async () => {
     const c = createClient({ sampleBase: "/s", timeoutMs: 1000, fetchImpl: sampleFetch() });
-    const r = await c.loadSample();
+    const r = await c.loadSaved();
     expect(r.years).toMatchObject({ ok: true, origin: "saved" });
     expect(r.compare).toMatchObject({ ok: true, origin: "saved" });
     expect(r.sensitivity).toMatchObject({ ok: true, origin: "saved" });
     // Read through the adapter: the backend's own values, under the names the screens use.
     const rye = r.compare.ok ? r.compare.data.plans.find((p) => p.plan_id === "corn_soy__rye") : undefined;
-    const raw = JSON.parse(real("compare.json")).plans.find((p: { plan_id: string }) => p.plan_id === "corn_soy__rye");
+    const raw = JSON.parse(real("union/compare.json")).plans.find((p: { plan_id: string }) => p.plan_id === "corn_soy__rye");
     expect(rye?.winter?.per_season_median.rain_mm_without_cover).toBe(raw.winter.per_season_median.rain_mm_outside_cover);
     expect(rye?.sequence?.winter).toEqual({ type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-30" });
   });
@@ -40,13 +40,13 @@ describe("saved sample", () => {
       timeoutMs: 1000,
       fetchImpl: sampleFetch({ "years/": async () => ({ ok: true, status: 200, text: async () => "<!doctype html>", headers: { get: () => "text/html" } }) }),
     });
-    expect((await c.loadSample()).years).toMatchObject({ ok: false, kind: "not-found" });
+    expect((await c.loadSaved()).years).toMatchObject({ ok: false, kind: "not-found" });
   });
 
   it("reports a format mismatch with the field that failed", async () => {
-    const broken = JSON.stringify({ ...JSON.parse(real("compare.json")), plans: [] });
+    const broken = JSON.stringify({ ...JSON.parse(real("union/compare.json")), plans: [] });
     const c = createClient({ sampleBase: "/s", timeoutMs: 1000, fetchImpl: sampleFetch({ "compare.json": async () => ok(broken) }) });
-    const r = (await c.loadSample()).compare;
+    const r = (await c.loadSaved()).compare;
     expect(r).toMatchObject({ ok: false, kind: "schema" });
     expect(!r.ok && r.detail).toMatch(/^plans/);
   });
@@ -55,7 +55,72 @@ describe("saved sample", () => {
     const hang = (_u: string, init?: { signal?: AbortSignal }) =>
       new Promise<never>((_, reject) => init?.signal?.addEventListener("abort", () => reject(new Error("aborted"))));
     const c = createClient({ sampleBase: "/s", timeoutMs: 20, fetchImpl: hang });
-    expect((await c.loadSample()).years).toMatchObject({ ok: false, kind: "timeout" });
+    expect((await c.loadSaved()).years).toMatchObject({ ok: false, kind: "timeout" });
+  });
+});
+
+describe("places", () => {
+  const rye = {
+    plan_id: "corn_soy__rye",
+    previous_crop_id: "field_corn",
+    next_crop_id: "soybean",
+    prev_harvest: "09-20",
+    next_plant: "05-20",
+    winter: { type: "cover", crop_id: "cereal_rye", seed: "10-10", terminate: "05-01" },
+    low_moisture_concern: "unknown",
+  } as const;
+  const backendRye = {
+    plan_id: "corn_soy__rye",
+    previous_crop_id: "field_corn",
+    prev_harvest: "09-20",
+    next_crop_id: "soybean",
+    next_plant: "05-20",
+    winter: { kind: "cover", crop_id: "cereal_rye", seed: "10-10", terminate: "05-01" },
+    grower: { low_moisture_concern: null },
+  };
+
+  it("every county in the picker has its own saved record, with its own snapshot and cutoffs", async () => {
+    const c = createClient({ sampleBase: "/s", timeoutMs: 1000, fetchImpl: sampleFetch() });
+    const seen = new Map<string, string>();
+    for (const p of PLACES) {
+      const r = await c.loadSaved(p.id);
+      expect([p.id, r.years.ok, r.compare.ok, r.sensitivity.ok]).toEqual([p.id, true, true, true]);
+      if (!r.compare.ok || !r.years.ok) continue;
+      const raw = JSON.parse(real(`${p.id}/compare.json`));
+      expect(raw.weather_location.id).toBe(p.id);
+      expect(r.compare.data.meta.snapshot_hash).toBe(raw.weather_location.snapshot_hash);
+      expect(r.years.data.location.label).toContain(p.name);
+      seen.set(p.id, r.compare.data.meta.snapshot_hash);
+    }
+    // Wayne and Johnston share one NASA grid cell (the backend says so); every other county has its own.
+    expect(JSON.parse(real("wayne/compare.json")).weather_location.shares_snapshot_with).toBe("johnston");
+    expect(new Set(seen.values()).size).toBe(PLACES.length - 1);
+  });
+
+  it("reads a season's daily detail from the chosen county's folder", async () => {
+    const urls: string[] = [];
+    const c = createClient({ sampleBase: "/s", timeoutMs: 1000, fetchImpl: async (u: string) => (urls.push(u), ok(real(u.replace(/^\/s\//, "")))) });
+    const r = await c.replay(1986, "corn_soy__rye", { origin: "saved", placeId: "pitt" });
+    expect(urls).toEqual(["/s/pitt/replay/corn_soy__rye/1986.json"]);
+    expect(r).toMatchObject({ ok: true, origin: "saved" });
+    expect(r.ok && (r.data as { weather_location?: { id: string } }).weather_location?.id).toBe("pitt");
+  });
+
+  it("asks the live service for the edited plan itself at the chosen place, by id or by a point in the body", async () => {
+    const calls: Array<{ url: string; method?: string; body: unknown }> = [];
+    const f = async (u: string, init?: { method?: string; body?: string }) => {
+      calls.push({ url: u, method: init?.method, body: init?.body ? JSON.parse(init.body) : undefined });
+      return ok(real(u.includes("sensitivity") ? "pitt/sensitivity.json" : "pitt/replay/corn_soy__rye/1986.json"));
+    };
+    const c = createClient({ sampleBase: "/s", apiBase: "https://api.example/", timeoutMs: 1000, fetchImpl: f });
+    expect(await c.replay(1986, "corn_soy__rye", { origin: "live", plan: rye, place: { id: "pitt", latitude: 35.59, longitude: -77.37 } })).toMatchObject({ ok: true, origin: "live" });
+    expect(await c.sensitivity(rye, { latitude: 35.6, longitude: -77.4 })).toMatchObject({ ok: true, origin: "live" });
+    expect(calls).toEqual([
+      { url: "https://api.example/v1/seasons/1986/replay", method: "POST", body: { plan: backendRye, location_id: "pitt" } },
+      { url: "https://api.example/v1/plans/sensitivity", method: "POST", body: { plan: backendRye, location: { latitude: 35.6, longitude: -77.4 } } },
+    ]);
+    // A typed point never appears in a URL.
+    expect(calls.every((k) => !/35\.6|77\.4/.test(k.url))).toBe(true);
   });
 });
 
@@ -69,10 +134,11 @@ describe("live recompute", () => {
 
   it("posts plans and marks the answer live", async () => {
     let body = "";
+    const calls: string[] = [];
     const f = async (u: string, init?: { body?: string }) => {
-      if (u.includes("/v1/years")) return ok(real(`years/${new URL(u).searchParams.get("plan")}.json`));
+      calls.push(u);
       body = init?.body ?? "";
-      return ok(real("compare.json"));
+      return ok(real("union/compare.json"));
     };
     const c = createClient({ sampleBase: "/s", apiBase: "https://api.example", timeoutMs: 1000, fetchImpl: f });
     const plan = {
@@ -84,10 +150,14 @@ describe("live recompute", () => {
       winter: { type: "cover", crop_id: "cereal_rye", seed: "10-01", terminate: "04-23" },
       low_moisture_concern: "unknown",
     } as const;
-    const r = await c.compare([plan], UNION);
+    const r = await c.compare([plan], { latitude: 34.98, longitude: -80.55 });
     expect(r).toMatchObject({ ok: true, origin: "live" });
-    // The backend's CompareRequest: {location: {latitude, longitude}, plans} with its own plan fields.
+    // One call: the answer carries each planting date's typical, dry and wet springs itself.
+    expect(calls).toEqual(["https://api.example/v1/plans/compare"]);
+    // The backend's CompareRequest: {location: {latitude, longitude}, plans} with its own plan fields,
+    // and no soil lookup (an outside call the screens do not read).
     expect(JSON.parse(body)).toEqual({
+      include_soil: false,
       location: { latitude: 34.98, longitude: -80.55 },
       plans: [
         {
@@ -125,8 +195,16 @@ describe("live recompute", () => {
     const c = createClient({ sampleBase: "/s", apiBase: "https://api.example", timeoutMs: 1000, fetchImpl: f });
     const r = await c.resolveLocation({ latitude: 35.52, longitude: -78.37 });
     expect(JSON.parse(body)).toEqual({ lat: 35.52, lon: -78.37, fetch_history: true });
-    expect(r.ok && r.data.location.weather.supported).toBe(false);
-    expect(r.ok && r.data.location.guidance.region).toBe("coastal_plain");
+    expect(r.ok && r.data.location.weather?.supported).toBe(false);
+    expect(r.ok && r.data.location.guidance?.region).toBe("coastal_plain");
+  });
+
+  it("reads the backend's answer for a point outside North Carolina, where weather and guidance are null", async () => {
+    const answer = { location: { status: "unsupported", code: "unsupported_location", latitude: 40.7, longitude: -74, bounds: { in_nc: false }, grid_cell: null, cell_id: null, weather: null, guidance: null, notes: [] } };
+    const c = createClient({ sampleBase: "/s", apiBase: "https://api.example", timeoutMs: 1000, fetchImpl: async () => ok(JSON.stringify(answer)) });
+    const r = await c.resolveLocation({ latitude: 40.7, longitude: -74 });
+    expect(r.ok && r.data.location.bounds?.in_nc).toBe(false);
+    expect(r.ok && r.data.location.weather).toBeNull();
   });
 
   it("keeps only the newest answer", () => {

@@ -1,8 +1,7 @@
 {
-  "what": "Responses from the Field Shift backend, saved exactly as returned. wetness.json collects each replay's own wetness block.",
-  "saved_at": "2026-11-14T05:31:55.161Z",
+  "what": "Responses from the Field Shift backend, saved exactly as returned, one folder per place.",
+  "saved_at": "2026-11-14T16:38:22.699Z",
   "api": "http://localhost:8000",
-  "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
   "catalog_version": "v2:8eeb5bf961eb",
   "weather": {
     "reference_point": "union_county_nc",
@@ -10,16 +9,143 @@
     "last_date": "2025-06-30",
     "source": "NASA POWER Daily (snapshot)"
   },
-  "plans": [
-    "corn_soy__no_cover",
-    "soy_corn__no_cover",
-    "corn_soy__rye",
-    "soy_corn__rye",
-    "corn_soy__wheat_dc"
+  "places": [
+    {
+      "id": "union",
+      "name": "Union County",
+      "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
+      "region": "piedmont",
+      "plans": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover",
+        "corn_soy__rye",
+        "soy_corn__rye",
+        "corn_soy__wheat_dc"
+      ],
+      "years": [
+        1981,
+        2025
+      ]
+    },
+    {
+      "id": "iredell",
+      "name": "Iredell County",
+      "snapshot_hash": "d60e31a3855e79cc26c0f8d5efa3803f7570ceca718e494db9e42ff3aaae4dea",
+      "region": "piedmont",
+      "plans": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover",
+        "corn_soy__rye",
+        "soy_corn__rye",
+        "corn_soy__wheat_dc"
+      ],
+      "years": [
+        1981,
+        2025
+      ]
+    },
+    {
+      "id": "rowan",
+      "name": "Rowan County",
+      "snapshot_hash": "96644efb9f2325536560b52642c7f23c0daca4a849613101020a8ef316584df7",
+      "region": "piedmont",
+      "plans": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover",
+        "corn_soy__rye",
+        "soy_corn__rye",
+        "corn_soy__wheat_dc"
+      ],
+      "years": [
+        1981,
+        2025
+      ]
+    },
+    {
+      "id": "johnston",
+      "name": "Johnston County",
+      "snapshot_hash": "e81de61c9f44596eb9f8127bfed2ce361eb13a0eaa3fc3ca537d1b8e89aceb33",
+      "region": "coastal_plain",
+      "plans": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover",
+        "corn_soy__rye",
+        "soy_corn__rye",
+        "corn_soy__wheat_dc"
+      ],
+      "years": [
+        1981,
+        2025
+      ]
+    },
+    {
+      "id": "wayne",
+      "name": "Wayne County",
+      "snapshot_hash": "e81de61c9f44596eb9f8127bfed2ce361eb13a0eaa3fc3ca537d1b8e89aceb33",
+      "region": "coastal_plain",
+      "plans": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover",
+        "corn_soy__rye",
+        "soy_corn__rye",
+        "corn_soy__wheat_dc"
+      ],
+      "years": [
+        1981,
+        2025
+      ]
+    },
+    {
+      "id": "duplin",
+      "name": "Duplin County",
+      "snapshot_hash": "67fea7ef0991545ca09f79f804d37a5bc15be3e8a73e9284450adecfb0c6e075",
+      "region": "coastal_plain",
+      "plans": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover",
+        "corn_soy__rye",
+        "soy_corn__rye",
+        "corn_soy__wheat_dc"
+      ],
+      "years": [
+        1981,
+        2025
+      ]
+    },
+    {
+      "id": "pitt",
+      "name": "Pitt County",
+      "snapshot_hash": "4487fe57fe899337d3bab8a43f92702ad9d32357a72b76b573b41e865917f01d",
+      "region": "coastal_plain",
+      "plans": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover",
+        "corn_soy__rye",
+        "soy_corn__rye",
+        "corn_soy__wheat_dc"
+      ],
+      "years": [
+        1981,
+        2025
+      ]
+    },
+    {
+      "id": "robeson",
+      "name": "Robeson County",
+      "snapshot_hash": "c2611d968126dd972e868ad794a4978ae194e9acca5bf6957c943a3d485b1996",
+      "region": "coastal_plain",
+      "plans": [
+        "corn_soy__no_cover",
+        "soy_corn__no_cover",
+        "corn_soy__rye",
+        "soy_corn__rye",
+        "corn_soy__wheat_dc"
+      ],
+      "years": [
+        1981,
+        2025
+      ]
+    }
   ],
-  "years": [
-    1981,
-    2025
-  ],
-  "replays": 225
+  "replays": 1800
 }

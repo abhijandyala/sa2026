@@ -131,7 +131,7 @@ export function FarmFormDrawer({
 
         <fieldset className="form-group">
           <legend>Grain crop: winter wheat</legend>
-          <p className="form-note">Not evaluated yet: wheat windows are still being sourced. Your dates are kept for when they are.</p>
+          <p className="form-note">The guidance catalog has no fixed Piedmont dates for wheat, so this plan uses the dates you enter here.</p>
           {date("wheatPlant")}
           {date("wheatHarvest")}
           {date("soyDoubleCropPlant")}
@@ -193,7 +193,7 @@ export function FarmFormDrawer({
         {!hasLiveApi && !message ? (
           <p className="form-note">
             The live service is not connected in this build, so new dates can be checked here but results stay on the saved
-            Union County sample.
+            record.
           </p>
         ) : null}
 

@@ -14,7 +14,7 @@ export interface SiteData {
 let cached: Promise<SiteData | null> | null = null;
 function load(): Promise<SiteData | null> {
   cached ??= createClient({ sampleBase: SAMPLE_BASE, timeoutMs: LOAD_TIMEOUT_MS })
-    .loadSample()
+    .loadSaved()
     .then(({ years, compare, sensitivity }) =>
       years.ok && compare.ok ? { years: years.data, compare: compare.data, sensitivity: sensitivity.ok ? sensitivity.data : null, origin: "saved" as const } : null,
     )

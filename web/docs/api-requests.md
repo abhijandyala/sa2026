@@ -1,41 +1,69 @@
 # Frontend and backend: where things stand
 
-From Abhi (frontend) to Rahul (backend). Updated Nov 14 2026, checked against backend commit `d7d3367` (wheat winter exposure, flagged years per sweep point, shortcuts and wetness in compare, generated labels, `reason_text`, rule `text` and `print`).
+From Abhi (frontend) to Rahul (backend). Updated Nov 14 2026, checked against backend commit `b51c804` (weather for seven more NC counties, `locations/resolve` reading the snapshot index).
 
-## Status after your 00:15 push
+## Status after your 09:59 push
 
-Thank you: everything below marked done is now read by the frontend and shown.
+Every ask is now done and read by the frontend.
 
 | Ask | Status | What the frontend does with it |
 |---|---|---|
 | 0. Plain words for each rule | Done | Plan detail lists `text`; the printed summary lists the lines with `print: true` |
-| 1. Wetness for each spring in compare | Done | Read from `seasons[]`; `wetness.json` is only a fallback now |
-| 2. Typical, dry and wet springs for edited dates | Done | Read from `spring.shortcuts` |
+| 1. Wetness for each spring in compare | Done | Read from `seasons[]` |
+| 2. Typical, dry and wet springs for edited dates | Done | Read from `spring.shortcuts`; the extra `GET /v1/years` calls are gone |
 | 3. Flagged years on each sweep point | Done | The rye page lights the point's own `qualifying_years` |
 | 4. The grain plan in compare | Done | "Add a grain crop" shows its own winter rain (119 mm in winter 1) and its June window |
-| 5. Other places | Open | Any other cell is still `unsupported_location`; the picker's other counties show dates only |
+| 5. Other places | Done | All eight counties open with their own numbers and cutoffs; `region_note` is shown at Coastal Plain counties |
 | 6. Small things | Done | `label` and `reason_text` are used; `localhost:5174` is allowed |
 
-**Still open.**
-- **Other places (5).** Tell me if fetching a cell on demand is out for this weekend and I will cut the picker to Union County plus "enter coordinates".
-- **The service address.** Nothing is deployed yet, so the frontend has no `VITE_API_BASE` and runs on the saved record. Abhi has to create the Railway project (admin).
-- **`eras[].missing_years[].reason`** codes have no plain text; the frontend does not show them today, so this is low priority.
+## How places are connected
+
+- **Saved records.** `npm run data` reads `GET /health` `locations[]` and saves one folder per place under `web/public/data/nasa/<id>/` (compare, years, sensitivity, 225 replays), each response exactly as returned with `location_id`. So every county in the picker works with no live service.
+- **Live calls name the place.** Compare, replay and sensitivity send `location_id` for a county, or `location: {latitude, longitude}` in the body for a typed point. A point never goes in a URL.
+- **Edited dates.** Replay and sensitivity are now `POST` with the edited `plan` itself (`POST /v1/seasons/{year}/replay`, `POST /v1/plans/sensitivity`). Before, the frontend sent only the plan id, which answered for the sample dates.
+- **Typed point.** `POST /v1/locations/resolve`, then the saved record of `weather.location_id` (a Wayne point opens Johnston's record and says so). `weather: null` outside NC is read as "outside North Carolina".
+- **Compare sends `include_soil: false`.** No screen reads the soil block, and without it the service makes no USDA call (1.5 s instead of 4 s for one rotation on a laptop).
+
+## Railway: checked against your config
+
+I ran your `railway.json` start command the way Railway's builder (Railpack) would: `pip install -r requirements.txt` with only `requirements.txt` and `pyproject.toml` present, then the full source copied in, then `python -m uvicorn fieldshift.api.app:app --host 0.0.0.0 --port $PORT`. It installs, starts and answers `/health`, compare, replay, sensitivity and resolve. CORS answers for `https://abhijandyala.github.io`, and `FIELDSHIFT_CORS_ORIGINS` works for any other origin.
+
+Things to set on the Railway service (none need a code change):
+
+| Setting | Value | Why |
+|---|---|---|
+| Branch | `backend` | the service code is not on `main` |
+| Root directory | `/backend` | |
+| Config file path | `/backend/railway.json` | Railway's docs: the config file does not follow the root directory |
+| Variable `FIELDSHIFT_OFFLINE` | `1` | serve only from the committed snapshots; no outside provider can slow or fail a request |
+| Variable `FIELDSHIFT_CORS_ORIGINS` | only if the site is not on `abhijandyala.github.io` | setting it replaces the default list, so include every origin |
+| Networking | Generate Domain | no public address exists until this is clicked |
+| Serverless (sleep) | off | the first request to a sleeping service can return 502 |
+
+Two things worth a look on your side:
+
+- **Health check timeout.** The first start of a fresh install took 68 s on my Mac (2 s once warm); `healthcheckTimeout` is 120. Railway's default is 300. If a deploy ever fails its health check, raise it.
+- **Config as code.** Railway's docs page says `railway.json` is deprecated and existing files keep working until Dec 1 2026. The same start command and health check path can be typed into the service settings, which do not expire.
+
+The frontend reads the service address from `VITE_API_BASE` at build time. On GitHub it is the repository variable `VITE_API_BASE` (the workflow passes it to the build). Live answers get 45 s before the saved record is kept.
+
+**Still open (low priority).** `eras[].missing_years[].reason` codes have no plain text; the frontend does not show them. Sample plans keep `region: NC Piedmont` at Coastal Plain counties (your handoff item 4): the frontend shows your `region_note`, so either answer works.
 
 ## What is connected
 
-The frontend no longer uses the synthetic draft sample. It loads your real responses and reads them through one file, `web/src/api/adapt.ts`, which is the only place that knows the backend's field names. Saved data and live calls go through the same adapter.
+The frontend loads your real responses and reads them through one file, `web/src/api/adapt.ts`, which is the only place that knows the backend's field names. Saved data and live calls go through the same adapter.
 
 | Screen data | Endpoint | Status |
 |---|---|---|
-| Three plans, both winters | `POST /v1/plans/compare` | connected |
+| Three plans, both winters | `POST /v1/plans/compare` | connected, per place |
 | Plan names by leg | `GET /v1/rotations` | connected |
-| Typical, dry and wet springs | `GET /v1/years?plan=…` | connected, one call per planting date |
-| Rye end-date sweep | `POST /v1/plans/sensitivity` | connected |
-| Daily values for one spring | `GET /v1/seasons/{year}/replay?plan=…` | connected |
-| Another place | `POST /v1/locations/resolve` | connected; only the Union County cell has weather |
+| Year list, place label, eras | `GET /v1/years?plan=…&location_id=…` | connected, per place |
+| Rye end-date sweep | `POST /v1/plans/sensitivity` | connected, per place and for edited dates |
+| Daily values for one spring | `GET` (saved) and `POST` (edited) `/v1/seasons/{year}/replay` | connected, per place |
+| A typed point | `POST /v1/locations/resolve` | connected |
 | Edited dates | `POST /v1/plans/compare` with `plans` | connected; sends your plan fields (`winter.kind`, `grower.low_moisture_concern`) |
 
-The saved copy lives in `web/public/data/nasa/` and is your responses exactly as returned. Regenerate it with the backend running:
+Regenerate the saved copy with the backend running:
 
 ```bash
 npm run data
@@ -43,7 +71,7 @@ npm run data
 
 ## The original requests (kept for the record)
 
-All but "other places" are done as of `d7d3367`; the text below is what was asked on Nov 13.
+All are done as of `b51c804`; the text below is what was asked on Nov 13.
 
 ### 0. Plain words for each rule
 

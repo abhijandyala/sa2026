@@ -9,7 +9,7 @@ export const DATA_CREDITS = [
     name: "NASA POWER Daily API (Prediction Of Worldwide Energy Resources)",
     owner: "NASA Langley Research Center",
     url: "https://power.larc.nasa.gov/",
-    used: "Daily corrected precipitation (PRECTOTCORR) and root-zone soil wetness (GWETROOT) for a reference point near Monroe, Union County, NC, 1981–2025.",
+    used: "Daily corrected precipitation (PRECTOTCORR) and root-zone soil wetness (GWETROOT) for a reference point in each of eight NC counties (the sample is near Monroe, Union County), 1981–2025.",
     note: "These data were obtained from the NASA Langley Research Center (LaRC) POWER Project funded through the NASA Earth Science/Applied Science Program.",
   },
   {

@@ -155,6 +155,7 @@ export const Plan = z
     reason: z.string().optional(),
     editable: z.array(z.string()).optional(),
     dates_assumed: z.boolean().optional(),
+    region_note: z.string().optional(),
     sequence: Sequence.optional(),
     spring_window: z.object({ start: md, end: md }).passthrough().optional(),
     spring_window_id: z.string().optional(), // REQUESTED
@@ -372,12 +373,25 @@ export const LocationResolveResponse = z
           .passthrough()
           .nullable()
           .optional(),
+        // Both are null for a point outside North Carolina (status "unsupported").
         weather: z
-          .object({ supported: z.boolean(), status: z.string(), source: z.string(), freshness: z.string(), reason: z.string().nullable().optional() })
-          .passthrough(),
+          .object({
+            supported: z.boolean(),
+            status: z.string(),
+            source: z.string(),
+            freshness: z.string(),
+            reason: z.string().nullable().optional(),
+            // The place whose committed NASA record covers this point's grid cell.
+            location_id: z.string().nullable().optional(),
+          })
+          .passthrough()
+          .nullable()
+          .optional(),
         guidance: z
           .object({ supported: z.boolean(), status: z.string(), region: z.string().nullable(), reason: z.string().nullable().optional() })
-          .passthrough(),
+          .passthrough()
+          .nullable()
+          .optional(),
         notes: z.array(z.string()).default([]),
       })
       .passthrough(),

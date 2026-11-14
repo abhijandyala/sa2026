@@ -10,16 +10,42 @@ import { ReplayResponse } from "./schema";
   so the adapter can be shown to rename and select, never to compute.
 */
 const dir = join(dirname(fileURLToPath(import.meta.url)), "../../public/data/nasa");
-const read = (rel: string) => JSON.parse(readFileSync(join(dir, rel), "utf8"));
+const at = (place: string) => (rel: string) => JSON.parse(readFileSync(join(dir, place, rel), "utf8"));
+const read = at("union");
 const raw = BackendCompare.parse(read("compare.json"));
+// What an older service left out of compare, as the site used to collect it: each planting
+// date's shortcut years from GET /v1/years, and each season's wetness from its replay.
+const replayWetness = (plan: string, year: number) => read(`replay/${plan}/${year}.json`).wetness;
 const extras = {
-  rotations: BackendRotations.parse(read("rotations.json")),
-  wetness: SavedWetness.parse(read("wetness.json")),
+  rotations: BackendRotations.parse(at("")("rotations.json")),
+  wetness: SavedWetness.parse({ corn_soy__no_cover: { "2014": replayWetness("corn_soy__no_cover", 2014), "1986": replayWetness("corn_soy__no_cover", 1986) } }),
   shortcuts: shortcutsByPlant([BackendYears.parse(read("years/corn_soy__rye.json")), BackendYears.parse(read("years/soy_corn__rye.json"))]),
 };
 const view = adaptCompare(raw, extras);
 const rawPlan = (id: string) => raw.plans.find((p) => p.plan_id === id)!;
 const plan = (id: string) => view.plans.find((p) => p.plan_id === id)!;
+
+describe("another county", () => {
+  const rawJ = BackendCompare.parse(at("johnston")("compare.json"));
+  const j = adaptCompare(rawJ);
+
+  it("reads that county's own numbers and cutoffs, not Union County's", () => {
+    const rye = (c: typeof j) => c.plans.find((p) => p.plan_id === "corn_soy__rye")!;
+    const rawRye = rawJ.plans.find((p) => p.plan_id === "corn_soy__rye")!;
+    expect(rye(j).winter!.per_season_median.rain_mm_without_cover).toBe(rawRye.winter!.per_season_median.rain_mm_outside_cover);
+    expect(j.spring_windows![windowId("05-12")]!.threshold.value).toBe(rawJ.thresholds.dry_spring["05-12"]!.value);
+    expect(j.meta.snapshot_hash).not.toBe(view.meta.snapshot_hash);
+    expect(j.spring_windows![windowId("05-12")]!.threshold.value).not.toBe(view.spring_windows![windowId("05-12")]!.threshold.value);
+    expect(j.request_echo.location_id).toBe("johnston");
+  });
+
+  it("carries the backend's note that the sample dates were assumed for another region", () => {
+    for (const p of j.plans) expect(p.region_note).toBe(rawJ.plans.find((r) => r.plan_id === p.plan_id)!.region_note);
+    expect(j.plans[0]!.region_note).toMatch(/Johnston County is in the Coastal Plain/);
+    // Union County is in the region the dates were assumed for, so the backend adds no note.
+    expect(view.plans.every((p) => p.region_note === undefined)).toBe(true);
+  });
+});
 
 describe("compare, adapted", () => {
   it("keeps every plan and each winter's own median, never a sum", () => {
@@ -104,7 +130,7 @@ describe("compare, adapted", () => {
     expect(bare.years.every((y) => y.gwetroot_window_mean === null)).toBe(true);
     const withExtras = adaptCompare(older, extras).spring_windows![windowId("05-12")]!;
     expect(withExtras.shortcuts).toEqual(extras.shortcuts["05-12"]);
-    expect(withExtras.years.find((y) => y.year === 1986)!.gwetroot_window_mean).toBe(extras.wetness["corn_soy__rye"]!["1986"]!.gwetroot_window_mean);
+    expect(withExtras.years.find((y) => y.year === 1986)!.gwetroot_window_mean).toBe(extras.wetness["corn_soy__no_cover"]!["1986"]!.gwetroot_window_mean);
   });
 
   it("carries the moisture check and the two-period counts unchanged", () => {

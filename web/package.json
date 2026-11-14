@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Fieldback frontend: compare winter crop plans against past springs recorded by NASA (NASA Space Apps 2026, Field Shift, Charlotte).",
+  "description": "A.C.R.E frontend: compare winter crop plans against past springs recorded by NASA (NASA Space Apps 2026, Field Shift, Charlotte).",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

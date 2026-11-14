@@ -5,9 +5,12 @@
 // Run the backend first (backend branch):  FIELDSHIFT_OFFLINE=1 uvicorn fieldshift.api.app:app
 // Then:                                      npm run data            (or FIELDSHIFT_API=https://… npm run data)
 //
-// Nothing is computed here. The one assembled file, wetness.json, only collects the
-// `wetness` block each season's replay already carries, so the past-springs page can show
-// modeled soil wetness for every year without loading 45 replays.
+// Nothing is computed here: every file is one response, byte for byte.
+//
+// One folder per place the backend has a NASA record for (GET /health lists them), so every
+// county in the place picker opens with no live service:
+//   <place>/compare.json, <place>/sensitivity.json, <place>/years/<plan>.json,
+//   <place>/replay/<plan>/<year>.json, and rotations.json (the same for every place).
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -30,45 +33,56 @@ async function save(name, text) {
 
 await rm(OUT, { recursive: true, force: true });
 const health = await call("/health");
-const compare = await call("/v1/plans/compare", { rotation_ids: ROTATIONS });
-await save("compare.json", compare.text);
 await save("rotations.json", (await call("/v1/rotations")).text);
 
-const plans = compare.json.plans.filter((p) => p.status !== "unavailable" && p.plan);
-const years = plans.flatMap((p) => p.seasons.map((s) => s.year)).filter((y, i, a) => a.indexOf(y) === i).sort();
-const wetness = {};
+// The backend's own list of places with a committed NASA POWER snapshot.
+const places = health.json.locations ?? [{ id: "union", name: "Union County" }];
+const saved = [];
 let replays = 0;
-for (const p of plans) {
-  await save(`years/${p.plan_id}.json`, (await call(`/v1/years?plan=${encodeURIComponent(p.plan_id)}`)).text);
-  wetness[p.plan_id] = {};
-  for (const y of years) {
-    const r = await call(`/v1/seasons/${y}/replay?plan=${encodeURIComponent(p.plan_id)}`);
-    await save(`replay/${p.plan_id}/${y}.json`, r.text);
-    wetness[p.plan_id][y] = r.json.wetness ?? null;
-    replays++;
-  }
-}
-await save("wetness.json", JSON.stringify(wetness));
+for (const place of places) {
+  const at = `location_id=${encodeURIComponent(place.id)}`;
+  const compare = await call("/v1/plans/compare", { rotation_ids: ROTATIONS, location_id: place.id });
+  await save(`${place.id}/compare.json`, compare.text);
 
-const rye = plans.find((p) => p.plan.winter?.kind === "cover" && p.leg === 1);
-if (rye) await save("sensitivity.json", (await call("/v1/plans/sensitivity", { plan_id: rye.plan_id })).text);
+  const plans = compare.json.plans.filter((p) => p.status !== "unavailable" && p.plan);
+  const years = plans.flatMap((p) => p.seasons.map((s) => s.year)).filter((y, i, a) => a.indexOf(y) === i).sort();
+  for (const p of plans) {
+    const plan = encodeURIComponent(p.plan_id);
+    await save(`${place.id}/years/${p.plan_id}.json`, (await call(`/v1/years?plan=${plan}&${at}`)).text);
+    for (const y of years) {
+      await save(`${place.id}/replay/${p.plan_id}/${y}.json`, (await call(`/v1/seasons/${y}/replay?plan=${plan}&${at}`)).text);
+      replays++;
+    }
+  }
+
+  const rye = plans.find((p) => p.plan.winter?.kind === "cover" && p.leg === 1);
+  if (rye) await save(`${place.id}/sensitivity.json`, (await call("/v1/plans/sensitivity", { plan_id: rye.plan_id, location_id: place.id })).text);
+
+  saved.push({
+    id: place.id,
+    name: place.name ?? compare.json.weather_location?.name ?? place.id,
+    snapshot_hash: compare.json.meta.snapshot_hash,
+    region: compare.json.weather_location?.region ?? null,
+    plans: plans.map((p) => p.plan_id),
+    years: [years[0], years[years.length - 1]],
+  });
+  console.log(`  ${place.id}: ${plans.length} plans, snapshot ${String(compare.json.meta.snapshot_hash).slice(0, 12)}`);
+}
 
 await save(
   "manifest.json",
   JSON.stringify(
     {
-      what: "Responses from the Field Shift backend, saved exactly as returned. wetness.json collects each replay's own wetness block.",
+      what: "Responses from the Field Shift backend, saved exactly as returned, one folder per place.",
       saved_at: new Date().toISOString(),
       api: API,
-      snapshot_hash: compare.json.meta.snapshot_hash,
-      catalog_version: compare.json.meta.catalog_version,
+      catalog_version: health.json.meta?.catalog_version ?? null,
       weather: health.json.weather ?? null,
-      plans: plans.map((p) => p.plan_id),
-      years: [years[0], years[years.length - 1]],
+      places: saved,
       replays,
     },
     null,
     2,
   ),
 );
-console.log(`Saved ${plans.length} plans, ${replays} replays, snapshot ${compare.json.meta.snapshot_hash.slice(0, 12)} → ${OUT}`);
+console.log(`Saved ${saved.length} places, ${replays} replays → ${OUT}`);

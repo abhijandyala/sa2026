@@ -33,7 +33,12 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - run: npm test
+      # The live backend's public address (the Railway service). Set it once under
+      # Settings → Secrets and variables → Actions → Variables as VITE_API_BASE, for example
+      # https://<service>.up.railway.app. Unset, the site runs on the saved NASA records only.
       - run: npm run build
+        env:
+          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web/dist

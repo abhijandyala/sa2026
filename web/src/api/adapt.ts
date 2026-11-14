@@ -14,7 +14,7 @@ import {
 } from "./schema";
 
 /*
-  The boundary with Rahul's backend (Phase 12, backend branch at d7d3367, Nov 14 2026).
+  The boundary with Rahul's backend (Phase 12, backend branch at b51c804, Nov 14 2026).
 
   `Backend*` below are the real response shapes, field for field (docs/api/openapi.json and
   the generated examples). `adapt*` turns them into the model the screens were built on
@@ -27,6 +27,10 @@ import {
   a plain sentence for each rule (`other_checks[].text`, `print`) and for each reason code
   (`reason_text`). The older sources (GET /v1/years, the saved wetness.json, the sweep's
   `dry_years`) are read only when a response from an older service leaves a value out.
+
+  Since b51c804 every response is for one place (`location_id` or a point in the request,
+  `weather_location` and that place's own thresholds in the answer). A plan compared outside
+  the region its sample dates were assumed for carries a `region_note`.
 */
 
 const md = z.string().regex(/^\d{2}-\d{2}$/, "expected MM-DD");
@@ -87,6 +91,8 @@ const BackendPlan = z
     rotation_id: z.string().nullable().optional(),
     editable: z.array(z.string()).nullable().optional(),
     dates_assumed: z.boolean().nullable().optional(),
+    // At a place outside the region the sample dates were assumed for, the backend says so.
+    region_note: z.string().nullable().optional(),
     plan: BackendPlanDates.nullable().optional(),
     calendar: z
       .object({
@@ -277,6 +283,7 @@ function plan(p: BackendPlan): Plan {
     double_crop: p.double_crop ?? undefined,
     editable: p.editable ?? undefined,
     dates_assumed: p.dates_assumed ?? undefined,
+    region_note: p.region_note ?? undefined,
     sequence,
     spring_window: p.calendar ? { start: p.calendar.spring_window.start, end: p.calendar.spring_window.end } : undefined,
     spring_window_id: d ? windowId(d.next_plant) : undefined,

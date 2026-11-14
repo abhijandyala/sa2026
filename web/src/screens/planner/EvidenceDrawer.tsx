@@ -377,7 +377,7 @@ export function EvidenceDrawer({
               <Button
                 className="btn btn-secondary btn-small"
                 onClick={() =>
-                  downloadCsv(`fieldback-${daily.plan_id}-${daily.year}-spring.csv`, [
+                  downloadCsv(`acre-${daily.plan_id}-${daily.year}-spring.csv`, [
                     ["date", "precip_mm", "gwetroot", "status"],
                     ...daily.daily.map((d) => [d.date, d.precip_mm === null ? "" : String(d.precip_mm), d.gwetroot == null ? "" : String(d.gwetroot), d.status ?? ""]),
                   ])

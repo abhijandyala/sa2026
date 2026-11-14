@@ -5,7 +5,7 @@ import type { Client } from "../api/client";
 import { sameForm, sampleForm } from "../state/form";
 import { hasPendingEdits, initialState, reducer, type Page } from "../state/model";
 import { applyUrlView, fromHash, toHash } from "../state/url";
-import { useReplay, type ApplyOutcome, type Loaded } from "../state/useData";
+import { replaySource, useReplay, type ApplyOutcome, type Loaded } from "../state/useData";
 import { buildView, validYears } from "../view/build";
 import { Banner, Button, Segmented } from "../ui/components";
 import { G } from "../ui/Glossary";
@@ -45,7 +45,7 @@ export function Planner({
 }: {
   client: Client;
   place: PlaceState;
-  chooseLocation: (p: Place, form: ReturnType<typeof sampleForm>) => Promise<void>;
+  chooseLocation: (p: Place, form: ReturnType<typeof sampleForm>, edited?: boolean) => Promise<void>;
   data: Loaded;
   apply: (form: ReturnType<typeof sampleForm>) => Promise<ApplyOutcome>;
   applying: boolean;
@@ -71,7 +71,7 @@ export function Planner({
   const exportJson = () => {
     const payload = {
       exported_by: APP_NAME,
-      note: "Responses exactly as this page received them. Fieldback computes none of these values.",
+      note: "Responses exactly as this page received them. A.C.R.E computes none of these values.",
       origin: data.origin,
       place: { name: place.place.name, latitude: place.place.latitude, longitude: place.place.longitude, status: place.kind },
       view: { plan: state.card, winter: state.leg, spring: view.selectedYear?.year ?? null, rye_end: state.ryeEnd, priorities: state.priorities },
@@ -82,7 +82,7 @@ export function Planner({
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `fieldback-results-${data.compare.meta.request_id}.json`;
+    a.download = `acre-results-${data.compare.meta.request_id}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
   };
@@ -96,15 +96,15 @@ export function Planner({
   // Switch the data when the chosen place changes (a click, a shared link or Reset).
   const target: Place = state.placeId === CUSTOM_ID && custom ? customPlace(custom) : (placeById(state.placeId) ?? SAMPLE_PLACE);
   useEffect(() => {
-    if (target.sample && place.kind === "sample") return;
-    void chooseLocation(target, state.applied);
+    if (target.saved && place.kind === "saved" && place.place.id === target.id) return;
+    void chooseLocation(target, state.applied, !sameForm(state.applied, state.sample));
     // Only a change of place triggers this; dates go through Apply dates.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target.id, target.latitude, target.longitude]);
   const datesOnly = place.kind === "dates-only" || place.kind === "checking";
   const placeLabel = `${place.place.name}, NC`;
   const placeStatus =
-    place.kind === "sample"
+    place.kind === "saved"
       ? sameForm(state.applied, state.sample)
         ? "Sample field"
         : "Your dates"
@@ -156,7 +156,14 @@ export function Planner({
   // The grower's earlier rye date, read from the backend's sweep (same plan, edited date).
   const earlierPoint = view.rye && view.rye.earlierIndex !== null ? view.rye.points[view.rye.earlierIndex]! : null;
   const pending = hasPendingEdits(state);
-  const replay = useReplay(client, view.selectedYear?.year ?? null, cardByKey(state.card).legs[state.leg], data.origin);
+  // What the backend says about this place: whose NASA record answers for a typed point, and
+  // its own note when the sample dates were assumed for another region (first sentence).
+  const servedBy = place.kind === "saved" && !place.place.saved ? view.locationLabel : null;
+  const regionNote = place.kind === "saved" ? (data.compare.plans.find((p) => p.region_note)?.region_note?.match(/^.*?[.!?](?=\s|$)/)?.[0] ?? null) : null;
+  const placeNote = [servedBy ? `Weather from the NASA record for ${servedBy}, which shares this point's grid cell.` : null, regionNote].filter(Boolean).join(" ") || null;
+
+  const replayPlan = cardByKey(state.card).legs[state.leg];
+  const replay = useReplay(client, view.selectedYear?.year ?? null, replayPlan, replaySource(data, place, replayPlan));
 
   const onApply = async () => {
     const draft = state.draft ?? state.applied;
@@ -362,6 +369,8 @@ export function Planner({
               <strong>Supported example area: {placeLabel}.</strong> Weather from NASA POWER for this place's grid cell
               {place.cell ? `, centered ${place.cell.lat.toFixed(2)}, ${place.cell.lon.toFixed(2)}` : ""}, from the live service. {place.guidanceNote ?? ""}
             </Banner>
+          ) : placeNote ? (
+            <Banner kind="info">{placeNote}</Banner>
           ) : null}
 
           <div className="db-page" key={datesOnly ? "dates" : page}>
@@ -524,7 +533,7 @@ export function Planner({
         custom={custom}
         hasLiveApi={hasLiveApi}
         samplePoint={view.grid}
-        resolved={(place.kind === "live" || place.kind === "dates-only") && place.cell ? { placeId: state.placeId, cell: place.cell } : null}
+        resolved={place.kind !== "checking" && place.cell ? { placeId: state.placeId, cell: place.cell } : null}
         onChoose={(placeId, point) => {
           if (point) setCustom(point);
           dispatch({ type: "setPlace", placeId });

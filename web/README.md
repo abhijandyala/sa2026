@@ -1,6 +1,6 @@
-# Fieldback web
+# A.C.R.E web
 
-The frontend for Fieldback (NASA Space Apps 2026, Field Shift, Charlotte): compare three winter crop plans for a North Carolina corn and soybean farm against past springs recorded by NASA.
+The frontend for A.C.R.E (NASA Space Apps 2026, Field Shift, Charlotte): compare three winter crop plans for a North Carolina corn and soybean farm against past springs recorded by NASA.
 
 ## Run it
 
@@ -34,6 +34,6 @@ The API types are in `src/api/schema.ts`, matching the backend's draft examples.
 - `src/content`: card names and the sourced five headings for each plan
 - `src/data`: display formatting
 - `src/state`: what the user selected, the farm form, shareable links, data loading
-- `src/ui`: shared components (mirrored in the Fieldback Design System)
+- `src/ui`: shared components (mirrored in the A.C.R.E Design System)
 - `src/screens`: Planner and Gallery
 - `src/styles`: tokens (checked for WCAG AA contrast by `tokens.test.ts`), base, components, layout

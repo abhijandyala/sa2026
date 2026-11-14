@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { APP_NAME, CHALLENGE_LABEL } from "../config";
+import { APP_FULL_NAME, APP_NAME, CHALLENGE_LABEL } from "../config";
 import { buildView } from "../view/build";
 import { Roll } from "../ui/Roll";
 import type { SiteData } from "./useSiteData";
@@ -8,7 +8,7 @@ import type { SiteData } from "./useSiteData";
   Shared pieces of the marketing site (Nov 13). Its structure and motion follow the
   tabs.com pages Abhi recorded: announcement bar, slim nav with menus, two-line headings
   with a grey second line, hairline grids, a dark closing band and a dark footer.
-  The words, numbers and pictures are Fieldback's own; nothing of theirs is reused.
+  The words, numbers and pictures are A.C.R.E's own; nothing of theirs is reused.
 */
 
 export type SiteView = "home" | "product" | "growers" | "evidence" | "resources" | "about";
@@ -210,7 +210,7 @@ export function SiteNav({ current }: { current: SiteView }) {
     <div className={`st-head${away ? " is-away" : ""}`}>
       <a className="st-announce" href={to("evidence")}>
         <span className="st-announce-dot" aria-hidden="true" />
-        Now running on NASA POWER records for Union County, North Carolina
+        Now running on NASA POWER records for eight North Carolina counties
         <Chevron />
       </a>
       <header className={`st-nav${stuck ? " is-stuck" : ""}`}>
@@ -295,7 +295,7 @@ export function SiteFooter() {
           <p>
             <span className="fb-mark st-foot-mark" aria-hidden="true" /> {APP_NAME}
           </p>
-          <p className="st-foot-note">A replay of past weather for planning talks. Not a forecast, and not a field measurement.</p>
+          <p className="st-foot-note">{APP_FULL_NAME}. A replay of past weather for planning talks. Not a forecast, and not a field measurement.</p>
         </div>
         <div>
           <h3>Product</h3>

@@ -1,5 +1,5 @@
 import { useEffect, useState, type RefObject } from "react";
-import { PLACES, SAMPLE_PLACE, type Place } from "../../content/locations";
+import { PLACES, type Place } from "../../content/locations";
 import type { LatLon } from "../../api/client";
 import { Banner, Button, Drawer, Field } from "../../ui/components";
 import type { GridCell } from "../../state/useData";
@@ -87,11 +87,11 @@ export function LocationDrawer({
         }}
       >
         <p className="form-intro">
-          Union County is the saved sample and always loads. Another place shows results only if the live service has NASA
-          weather history for its grid cell; otherwise you see your dates only. Fieldback never borrows another place's weather.
+          Each county here has its own saved NASA record and always loads. A point you type shows results only if it falls in
+          one of those NASA grid cells; otherwise you see your dates only. A.C.R.E never borrows another place's weather.
         </p>
         {!hasLiveApi ? (
-          <Banner kind="info">The live service is not connected in this build, so places other than Union County show dates only.</Banner>
+          <Banner kind="info">The live service is not connected in this build, so a typed point shows dates only.</Banner>
         ) : null}
 
         <NcMap
@@ -101,11 +101,13 @@ export function LocationDrawer({
           onPick={setChoice}
         />
         <p className="loc-cell" aria-live="polite">
-          {choice === SAMPLE_PLACE.id
-            ? `Saved sample. NASA POWER point ${samplePoint.lat.toFixed(2)}, ${samplePoint.lon.toFixed(2)} (${samplePoint.source}).`
+          {choice === placeId && choice !== CUSTOM_ID
+            ? `Saved record. NASA POWER point ${samplePoint.lat.toFixed(2)}, ${samplePoint.lon.toFixed(2)} (${samplePoint.source}).`
             : resolved && resolved.placeId === choice
               ? `NASA POWER grid cell ${resolved.cell.id ?? ""} centered ${resolved.cell.lat.toFixed(2)}, ${resolved.cell.lon.toFixed(2)}, ${resolved.cell.latStep}° by ${resolved.cell.lonStep}°, named by the service.`
-              : "The service names the NASA POWER grid cell when you use this place."}
+              : choice === CUSTOM_ID
+                ? "The service names the NASA POWER grid cell when you use this point."
+                : "Saved record from NASA POWER for this county's grid cell."}
         </p>
 
         <fieldset className="form-group">
@@ -117,7 +119,7 @@ export function LocationDrawer({
                 <span>
                   <strong>{p.name}, NC</strong>
                   <span className="loc-note">
-                    {p.sample ? "Saved sample · always available" : `Approximate county center · ${p.latitude.toFixed(2)}, ${p.longitude.toFixed(2)}`}
+                    {p.sample ? "Sample field · saved NASA record" : `County center ${p.latitude.toFixed(2)}, ${p.longitude.toFixed(2)} · saved NASA record`}
                   </span>
                 </span>
               </label>
@@ -142,8 +144,8 @@ export function LocationDrawer({
               <input id="loc-lon" className="input" inputMode="decimal" value={lon} onChange={(e) => setLon(e.target.value)} />
             </Field>
             <p className="form-note">
-              The service finds the NASA grid cell for this point and asks NASA for the cell's center, not your exact point. Typed
-              points are not saved in shared links.
+              The service finds the NASA grid cell for this point and reads the record it holds for that cell. Typed points are
+              not saved in shared links.
             </p>
           </fieldset>
         ) : null}

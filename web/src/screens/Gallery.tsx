@@ -31,7 +31,7 @@ export function Gallery() {
   return (
     <main className="gallery">
       <header className="gallery-head">
-        <p className="marker">Fieldback · component gallery</p>
+        <p className="marker">A.C.R.E · component gallery</p>
         <h1>Components and states</h1>
         <p className="gallery-note">Illustrative values only. Check each section with the keyboard, on a phone, and in grayscale.</p>
       </header>

@@ -509,8 +509,15 @@ function Field({
     }
     const e = m.t <= 0 ? 0 : 1 - Math.pow(1 - m.t, 3);
     g.visible = m.t > 0;
-    g.position.y = (e - 1) * 1.6 + m.lift - m.dip * 0.45 - m.sink * 2.4;
-    if (outer.current) outer.current.visible = m.sink < 0.96;
+    // A field leaving the view (one-field and soil views) folds down into its own footprint:
+    // it shrinks as it settles, so it is already gone when it stops being drawn. Dropping it
+    // at full size and then hiding it left a block that vanished in plain sight.
+    const away = m.sink * m.sink * (3 - 2 * m.sink);
+    g.position.y = (e - 1) * 1.6 + m.lift - m.dip * 0.45 - away * 0.6;
+    if (outer.current) {
+      outer.current.scale.setScalar(Math.max(0.0001, 1 - away));
+      outer.current.visible = m.sink < 0.985;
+    }
     // The water plane is a unit square scaled to the modeled level.
     if (waterFill.current && waterLine.current) {
       const h = Math.max(0.001, m.water + SOIL_H);
