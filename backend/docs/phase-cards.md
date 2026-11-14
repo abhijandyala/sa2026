@@ -333,6 +333,7 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 
 **Status (B, 2026-11-13): done, except two items that are A's.** `field/location.py`, `soil.py`, `evidence.py`, `routes.py` (`POST /v1/locations/resolve`, `GET /v1/soil`). Union sample resolves offline; SDA failure gives `soil.status=unavailable`; outside NC gives `unsupported_location` (coarse offline outline, ~10 km at the border). Codex r1 (1 high, 7 medium) and r2 (4 medium) fixed with tests; no r3 run. **Left for A:** mount the router, and call `get_soil()` from plan comparison (handoff).
 
+**Status (B, 2026-11-14, follow-up): done.** `POST /v1/locations/resolve` reports `weather: {status complete|unavailable, location_id, snapshot_hash, ...}` from the committed snapshot index (no live POWER fetch; `fetch_history` is ignored). Region tests for the 8 county points. Codex r3 (1 medium: malformed index rows) fixed with tests; no r4.
 ---
 
 ## Phase 9 — Decision tools: action calendar, backup plan, field note, audit

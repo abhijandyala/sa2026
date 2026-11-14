@@ -6,10 +6,10 @@ and the reverse.
 
 * **Bounds.** The NC check is a coarse bounding box (no offline polygon data), so a point just over
   the border can pass. It is reported as ``bounds_basis: "bounding_box"``.
-* **Weather.** The Union County snapshot answers offline for its grid cell. Another cell uses a
-  cached history if present; otherwise it is fetched through the Phase 1 pipeline (only when asked
-  and the network is allowed). The fetch asks POWER for the grid-cell *centre*, never the exact
-  field point, so cells are shared and field coordinates are not sent for weather.
+* **Weather.** A point has weather when its POWER grid cell is in the committed snapshot index
+  (``data/snapshots/index.json``, owned by Agent A): ``complete`` with the place's ``location_id``
+  and ``snapshot_hash``. Any other cell is ``unavailable``. Nothing is fetched from POWER here,
+  and the answer is the same online and offline.
 * **Region.** A caller-provided region wins; the Union County snapshot cell is Piedmont; other
   points get a conservative, approximate region from coordinates (or ``None`` near boundaries).
 """
@@ -17,32 +17,18 @@ and the reverse.
 from __future__ import annotations
 
 import math
-from collections.abc import Callable
-from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from fieldshift.contracts import Status
 from fieldshift.field.regions import normalize_field_region, region_scope
-from fieldshift.weather.power_client import RawFetch, fetch_daily, is_offline
-from fieldshift.weather.snapshot import (
-    DEFAULT_SNAPSHOT_DIR,
-    Snapshot,
-    SnapshotError,
-    load_snapshot,
-    write_snapshot,
-)
-from fieldshift.weather.sources import (
-    SNAPSHOT_END,
-    SNAPSHOT_START,
-    ReferencePoint,
-    derive_grid_cell,
-)
+from fieldshift.weather.locations import LocationIndex, get_index
+from fieldshift.weather.snapshot import DEFAULT_SNAPSHOT_DIR
+from fieldshift.weather.sources import derive_grid_cell
 
 #: (south, north, west, east) in degrees. Coarse NC bounding box.
 NC_BOUNDS = (33.84, 36.59, -84.32, -75.46)
-DEFAULT_CACHE_DIR = Path(__file__).resolve().parents[2] / "data" / "cache" / "power"
 
 # Approximate Fall Line (Piedmont / Coastal Plain boundary) as (latitude, longitude) vertices.
 _FALL_LINE = [(34.9, -79.6), (35.05, -78.95), (35.8, -78.65), (36.5, -77.7)]
@@ -66,9 +52,10 @@ class Bounds(BaseModel):
 class WeatherSupport(BaseModel):
     supported: bool
     status: Status  # complete | unavailable
-    source: str  # snapshot | cache | fetched | none
-    freshness: str  # snapshot | cached(<time>) | fresh | unavailable
+    source: str  # snapshot | none
+    freshness: str  # snapshot | unavailable
     reason: str | None = None
+    location_id: str | None = None  # the index place that serves this grid cell
     snapshot_hash: str | None = None
     first_date: str | None = None
     last_date: str | None = None
@@ -157,54 +144,17 @@ def approximate_region(lat: float, lon: float) -> str | None:
     return None
 
 
-def _snapshot_cell(snapshot_dir: Path) -> tuple[Snapshot | None, dict[str, Any] | None]:
-    try:
-        snap = load_snapshot(snapshot_dir)
-    except (SnapshotError, OSError, ValueError):
-        return None, None
-    return snap, snap.manifest["grid"]["derived_cell"]
-
-
-def _safe_support(snap: Snapshot, source: str, freshness: str) -> WeatherSupport | None:
-    """:func:`_support_from`, or ``None`` when the manifest is malformed."""
-    try:
-        return _support_from(snap, source, freshness)
-    except (KeyError, TypeError, AttributeError, ValueError):
-        return None
-
-
-def _same_cell(a: dict[str, Any], b: dict[str, Any]) -> bool:
-    return math.isclose(a["center_latitude"], b["center_latitude"]) and math.isclose(
-        a["center_longitude"], b["center_longitude"]
-    )
-
-
-def _support_from(snap: Snapshot, source: str, freshness: str) -> WeatherSupport:
-    cov = snap.manifest["coverage"]
+def _support_from_entry(entry: Any) -> WeatherSupport:
+    """``complete`` weather from an index row; raises when the row lacks usable metadata."""
+    for name in ("id", "snapshot_hash", "first_date", "last_date"):
+        value = getattr(entry, name)
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"index row has no usable {name}")
     return WeatherSupport(
-        supported=True, status=Status.COMPLETE, source=source, freshness=freshness,
-        snapshot_hash=snap.snapshot_hash, first_date=cov["first_date"], last_date=cov["last_date"],
+        supported=True, status=Status.COMPLETE, source="snapshot", freshness="snapshot",
+        location_id=entry.id, snapshot_hash=entry.snapshot_hash,
+        first_date=entry.first_date, last_date=entry.last_date,
     )  # fmt: skip
-
-
-def fetch_cell_history(
-    cell: dict[str, Any],
-    cache_dir: Path,
-    fetch: Callable[..., RawFetch] = fetch_daily,
-) -> Snapshot:
-    """Fetch a cell's full history at the cell centre and write it to the cache."""
-    cid = cell_id(cell)
-    point = ReferencePoint(
-        id=cid,
-        name=f"POWER grid cell centred at {cell['center_latitude']}, {cell['center_longitude']}",
-        latitude=cell["center_latitude"],
-        longitude=cell["center_longitude"],
-        basis="grid-cell centre; field coordinates are never sent to POWER",
-    )
-    raw = fetch(point.latitude, point.longitude, SNAPSHOT_START, SNAPSHOT_END)
-    out = cache_dir / cid
-    write_snapshot(raw, out, point=point, start=SNAPSHOT_START, end=SNAPSHOT_END)
-    return load_snapshot(out)
 
 
 def resolve_location(
@@ -212,13 +162,12 @@ def resolve_location(
     lon: Any,
     *,
     region: str | None = None,
-    fetch_history: bool = False,
-    snapshot_dir: Path | str = DEFAULT_SNAPSHOT_DIR,
-    cache_dir: Path | str = DEFAULT_CACHE_DIR,
-    fetch: Callable[..., RawFetch] = fetch_daily,
-    offline: bool | None = None,
+    fetch_history: bool = False,  # accepted for old callers; nothing is fetched
+    index: LocationIndex | None = None,
 ) -> LocationResult:
-    """Resolve a point. Never raises for bad input: the status says what is wrong."""
+    """Resolve a point. Never raises for bad input: the status says what is wrong.
+
+    ``index`` is the weather snapshot index (default: the committed one)."""
     try:
         la, lo = float(lat), float(lon)
         if isinstance(lat, bool) or isinstance(lon, bool):
@@ -246,55 +195,29 @@ def resolve_location(
 
     cell = derive_grid_cell(la, lo)
     cid = cell_id(cell)
-    cache_root = Path(cache_dir)
-    offline = is_offline() if offline is None else offline
     notes: list[str] = []
 
-    snap, snap_cell = _snapshot_cell(Path(snapshot_dir))
-    at_reference = snap is not None and snap_cell is not None and _same_cell(cell, snap_cell)
-
-    # ---- weather
-    def unavailable_weather(why: str) -> WeatherSupport:
-        return WeatherSupport(
-            supported=False, status=Status.UNAVAILABLE, source="none",
-            freshness="unavailable", reason=why,
-        )  # fmt: skip
-
+    # ---- weather: only what the committed snapshot index serves
+    try:
+        entry = (index if index is not None else get_index()).by_cell(cid)
+    except Exception:  # noqa: BLE001 - a missing or malformed index is "no weather", not a 500
+        entry = None
+        notes.append("the weather snapshot index could not be read")
+    at_reference = entry is not None and entry.id == "union"
     weather: WeatherSupport | None = None
-    if at_reference:
-        assert snap is not None
-        weather = _safe_support(snap, "snapshot", "snapshot") or unavailable_weather(
-            "the committed snapshot manifest is malformed"
-        )
-    else:
-        cached: Snapshot | None = None
+    if entry is not None:
         try:
-            cached = load_snapshot(cache_root / cid)
-        except (SnapshotError, OSError, ValueError, KeyError, TypeError):
-            cached = None
-        if cached is not None:
-            try:
-                when = cached.manifest.get("retrieval", {}).get("retrieved_at", "unknown time")
-            except AttributeError:
-                when = "unknown time"
-            weather = _safe_support(cached, "cache", f"cached({when})")  # None if malformed
-        if weather is None:
-            if fetch_history and not offline:
-                try:
-                    fetched = fetch_cell_history(cell, cache_root, fetch)
-                    weather = _safe_support(fetched, "fetched", "fresh") or unavailable_weather(
-                        "the fetched history has a malformed manifest"
-                    )
-                except Exception as exc:  # noqa: BLE001 - any provider failure is unavailable
-                    weather = unavailable_weather(
-                        f"history fetch failed: {type(exc).__name__}: {exc}"
-                    )
-            else:
-                weather = unavailable_weather(
-                    "offline mode: no usable cached history for this grid cell"
-                    if offline
-                    else "no usable cached history for this grid cell; request it with fetch_history"
-                )
+            weather = _support_from_entry(entry)
+        except (ValueError, TypeError, AttributeError):  # pydantic ValidationError is a ValueError
+            weather = None
+            notes.append("the weather snapshot index row for this grid cell is malformed")
+    if weather is None:
+        weather = WeatherSupport(
+            supported=False, status=Status.UNAVAILABLE, source="none", freshness="unavailable",
+            reason="no committed weather snapshot covers this grid cell"
+            if entry is None
+            else "the snapshot index row for this grid cell is malformed",
+        )  # fmt: skip
 
     # ---- guidance region
     tag = normalize_field_region(region)
@@ -367,7 +290,6 @@ __all__ = [
     "LocationResult",
     "approximate_region",
     "cell_id",
-    "fetch_cell_history",
     "in_nc_bounds",
     "resolve_location",
 ]

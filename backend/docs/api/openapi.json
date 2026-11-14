@@ -7905,7 +7905,7 @@
     },
     "/v1/locations/resolve": {
       "post": {
-        "description": "Body: ``{\"lat\": float, \"lon\": float, \"region\": str?, \"fetch_history\": bool?}``.",
+        "description": "Body: ``{\"lat\": float, \"lon\": float, \"region\": str?}``.\n\n``location.weather`` says whether the point's grid cell has a committed weather snapshot:\n``{status: complete|unavailable, location_id, snapshot_hash, ...}`` from\n``data/snapshots/index.json``. Nothing is fetched from POWER. ``fetch_history`` is still\naccepted (it must be a boolean) and ignored.",
         "operationId": "post_resolve_v1_locations_resolve_post",
         "responses": {
           "200": {

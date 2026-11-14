@@ -44,7 +44,13 @@ def _coord(value: Any, name: str, lo: float, hi: float) -> tuple[float | None, d
 
 @router.post("/locations/resolve")
 async def post_resolve(request: Request) -> Any:
-    """Body: ``{"lat": float, "lon": float, "region": str?, "fetch_history": bool?}``."""
+    """Body: ``{"lat": float, "lon": float, "region": str?}``.
+
+    ``location.weather`` says whether the point's grid cell has a committed weather snapshot:
+    ``{status: complete|unavailable, location_id, snapshot_hash, ...}`` from
+    ``data/snapshots/index.json``. Nothing is fetched from POWER. ``fetch_history`` is still
+    accepted (it must be a boolean) and ignored.
+    """
     body, err = await read_object(request)
     if err is not None:
         return err
@@ -63,7 +69,7 @@ async def post_resolve(request: Request) -> Any:
         )
     if problems:
         return invalid(problems)
-    res = resolve_location(lat, lon, region=region, fetch_history=fetch)
+    res = resolve_location(lat, lon, region=region)
     return {"meta": response_meta(), "location": res.model_dump(mode="json")}
 
 

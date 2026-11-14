@@ -1,6 +1,3 @@
-import json
-import shutil
-
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -10,7 +7,7 @@ from fieldshift.field.evidence import EvidenceBundle, GrowerObservation, SoilTes
 from fieldshift.field.location import approximate_region, in_nc_bounds, resolve_location
 from fieldshift.field.routes import router
 from fieldshift.field.soil import unavailable
-from fieldshift.weather.power_client import RawFetch
+from fieldshift.weather.locations import get_index
 from fieldshift.weather.snapshot import DEFAULT_SNAPSHOT_DIR
 
 UNION = (34.98, -80.55)
@@ -24,13 +21,14 @@ def no_network(*a, **k):
 # ------------------------------------------------------------------ resolve
 
 
-def test_union_sample_resolves_offline_from_the_snapshot(tmp_path):
-    r = resolve_location(*UNION, cache_dir=tmp_path, fetch=no_network, offline=True)
+def test_union_sample_resolves_offline_from_the_snapshot():
+    r = resolve_location(*UNION)
     assert r.status == "complete"
     assert (
         r.weather.supported and r.weather.source == "snapshot" and r.weather.freshness == "snapshot"
     )
     assert r.weather.snapshot_hash and r.weather.first_date == "1981-01-01"
+    assert r.weather.location_id == "union"
     assert r.guidance.supported and r.guidance.region == "piedmont"
     assert r.grid_cell["center_latitude"] == 35.0 and r.cell_id == "cell_+35.000_-80.625"
 
@@ -51,11 +49,12 @@ def test_bad_coordinates_are_invalid_input(lat, lon):
     assert r.status == "invalid_input" and r.code is None
 
 
-def test_other_cell_without_cache_is_weather_unsupported_but_guidance_can_be_known(tmp_path):
-    r = resolve_location(35.8, -82.6, cache_dir=tmp_path, fetch=no_network)  # western NC
+def test_cell_outside_the_index_has_no_weather_but_guidance_can_be_known():
+    r = resolve_location(35.8, -82.6)  # western NC
     assert r.status == "partial"
     assert not r.weather.supported and r.weather.status == "unavailable"
-    assert "fetch_history" in r.weather.reason
+    assert "no committed weather snapshot" in r.weather.reason
+    assert r.weather.location_id is None and r.weather.snapshot_hash is None
     assert (
         r.guidance.supported
         and r.guidance.region == "mountains"
@@ -64,63 +63,8 @@ def test_other_cell_without_cache_is_weather_unsupported_but_guidance_can_be_kno
     assert r.guidance.status == "partial"  # inferred, not confirmed
 
 
-def test_fetch_history_goes_through_phase_1_pipeline_at_the_cell_centre_then_caches(tmp_path):
-    calls = []
-    raw_bytes = (
-        (RAW / "power_daily_response.json").read_bytes()
-        if (RAW / "power_daily_response.json").exists()
-        else None
-    )
-    if raw_bytes is None:  # use whatever the snapshot's raw file is called
-        raw_bytes = next(
-            p for p in RAW.iterdir() if p.suffix == ".json" and "fetch" not in p.name
-        ).read_bytes()
-
-    def fake_fetch(lat, lon, start, end):
-        calls.append((lat, lon, start, end))
-        return RawFetch(body=raw_bytes, url="https://example.test", params={}, status_code=200,
-                        retrieved_at="2026-11-12T00:00:00Z", elapsed_s=0.0)  # fmt: skip
-
-    field_point = (35.4321, -79.1234)
-    r = resolve_location(
-        *field_point, cache_dir=tmp_path, fetch=fake_fetch, fetch_history=True, offline=False
-    )
-    assert r.weather.supported and r.weather.source == "fetched" and r.weather.freshness == "fresh"
-    ((lat, lon, start, end),) = calls
-    assert (lat, lon) != field_point  # the exact field point is never sent to POWER
-    assert (lat, lon) == (r.grid_cell["center_latitude"], r.grid_cell["center_longitude"])
-    assert start == "1981-01-01"
-    again = resolve_location(*field_point, cache_dir=tmp_path, fetch=no_network, offline=False)
-    assert again.weather.source == "cache" and again.weather.freshness.startswith("cached(")
-    # a second point in the same cell reuses the cached history
-    same_cell = resolve_location(35.40, -79.20, cache_dir=tmp_path, fetch=no_network, offline=False)
-    assert same_cell.cell_id == r.cell_id and same_cell.weather.source == "cache"
-
-
-def test_fetch_failure_and_offline_leave_weather_unavailable(tmp_path):
-    def boom(*a, **k):
-        raise RuntimeError("POWER down")
-
-    r = resolve_location(
-        35.4, -79.2, cache_dir=tmp_path, fetch=boom, fetch_history=True, offline=False
-    )
-    assert not r.weather.supported and "POWER down" in r.weather.reason
-    off = resolve_location(
-        35.4, -79.2, cache_dir=tmp_path, fetch=no_network, fetch_history=True, offline=True
-    )
-    assert not off.weather.supported and "offline" in off.weather.reason
-
-
-def test_corrupt_cache_is_ignored_not_trusted(tmp_path):
-    d = tmp_path / "cell_+35.500_-79.375"
-    d.mkdir()
-    (d / "manifest.json").write_text("{}")
-    r = resolve_location(35.4, -79.2, cache_dir=tmp_path, fetch=no_network, offline=True)
-    assert not r.weather.supported
-
-
-def test_region_handling(tmp_path):
-    kw = dict(cache_dir=tmp_path, fetch=no_network, offline=True)
+def test_region_handling():
+    kw: dict = {}
     assert resolve_location(35.8, -82.6, region="NC Piedmont", **kw).guidance.region == "piedmont"
     assert resolve_location(35.8, -82.6, region="NC Piedmont", **kw).guidance.basis == "provided"
     bad = resolve_location(35.8, -82.6, region="Iowa", **kw)
@@ -155,11 +99,90 @@ COUNTY_POINTS = [
 
 
 @pytest.mark.parametrize("name,lat,lon,region", COUNTY_POINTS, ids=[c[0] for c in COUNTY_POINTS])
-def test_demo_county_points_get_the_right_region(name, lat, lon, region, tmp_path):
+def test_demo_county_points_get_the_right_region(name, lat, lon, region):
     assert in_nc_bounds(lat, lon)
     assert approximate_region(lat, lon) == region
-    res = resolve_location(lat, lon, cache_dir=tmp_path, fetch=no_network, offline=True)
+    res = resolve_location(lat, lon)
     assert res.guidance.region == region and res.guidance.supported
+
+
+def test_every_demo_county_has_weather_from_the_snapshot_index():
+    index = get_index()
+    assert [e.id for e in index.entries] == [c[0] for c in COUNTY_POINTS]
+    for name, lat, lon, _region in COUNTY_POINTS:
+        entry = index.by_id(name)
+        w = resolve_location(lat, lon).weather
+        assert w.supported and w.status == "complete" and w.source == "snapshot"
+        # the id and hash come from the index, never from the request or a live fetch
+        serving = index.by_cell(entry.cell_id)  # Wayne is served by Johnston's snapshot
+        assert w.location_id == serving.id and w.snapshot_hash == entry.snapshot_hash
+        assert (w.first_date, w.last_date) == (entry.first_date, entry.last_date)
+
+
+def test_johnston_and_wayne_share_one_cell_and_one_hash():
+    j = resolve_location(35.52, -78.37)
+    w = resolve_location(35.36, -77.99)
+    assert j.cell_id == w.cell_id
+    assert j.weather.snapshot_hash == w.weather.snapshot_hash
+    assert j.weather.location_id == w.weather.location_id == "johnston"  # the cell's first place
+
+
+def test_a_point_in_an_indexed_cell_is_served_by_that_cell():
+    # not the county point, but in Pitt's cell
+    w = resolve_location(35.6, -77.4).weather
+    assert w.status == "complete" and w.location_id == "pitt"
+
+
+def test_no_index_row_means_unavailable_and_nothing_is_fetched(monkeypatch):
+    from fieldshift.weather import power_client
+
+    monkeypatch.setattr(power_client, "fetch_daily", no_network)
+    r = resolve_location(35.4, -79.2, fetch_history=True)  # Hoke/Cumberland area, not indexed
+    assert r.weather.status == "unavailable" and not r.weather.supported
+    assert r.weather.location_id is None and r.weather.snapshot_hash is None
+    assert r.status == "partial" and r.notes
+
+
+def test_an_unreadable_index_is_unavailable_not_a_500():
+    class Broken:
+        def by_cell(self, cid):
+            raise RuntimeError("index unreadable")
+
+    r = resolve_location(*UNION, index=Broken())
+    assert r.weather.status == "unavailable" and r.weather.location_id is None
+    assert any("index" in n for n in r.notes)
+
+
+@pytest.mark.parametrize("bad", [[], None, "", "  ", 7])
+def test_a_malformed_index_row_is_unavailable_not_complete_or_a_500(bad):
+    from dataclasses import replace
+
+    row = get_index().by_id("union")
+
+    class OneRow:
+        def by_cell(self, cid):
+            return replace(row, snapshot_hash=bad)
+
+    r = resolve_location(*UNION, index=OneRow())
+    assert r.weather.status == "unavailable" and not r.weather.supported
+    assert r.weather.snapshot_hash is None and r.weather.location_id is None
+    assert "malformed" in r.weather.reason and r.notes
+
+
+def test_resolve_route_returns_the_weather_block(client):
+    union = client.post("/v1/locations/resolve", json={"lat": 34.98, "lon": -80.55}).json()
+    w = union["location"]["weather"]
+    assert w["status"] == "complete" and w["location_id"] == "union"
+    assert w["snapshot_hash"] == get_index().by_id("union").snapshot_hash
+    pitt = client.post(
+        "/v1/locations/resolve", json={"lat": 35.59, "lon": -77.37, "fetch_history": True}
+    ).json()["location"]
+    assert (
+        pitt["weather"]["location_id"] == "pitt" and pitt["guidance"]["region"] == "coastal_plain"
+    )
+    none = client.post("/v1/locations/resolve", json={"lat": 35.4, "lon": -79.2}).json()
+    assert none["location"]["weather"]["status"] == "unavailable"
+    assert none["location"]["weather"]["location_id"] is None
 
 
 # ------------------------------------------------------------------ evidence
@@ -211,8 +234,8 @@ def test_neighbouring_state_cities_are_outside_nc(lat, lon, inside):
         assert r.code == "unsupported_location"
 
 
-def test_explicit_unmapped_region_text_is_unknown_guidance(tmp_path):
-    kw = dict(cache_dir=tmp_path, fetch=no_network, offline=True)
+def test_explicit_unmapped_region_text_is_unknown_guidance():
+    kw: dict = {}
     for text in ("Atlantis NC", "Wake County NC", "somewhere"):
         g = resolve_location(35.8, -82.6, region=text, **kw).guidance
         assert (g.supported, g.status, g.region) == (False, "unknown", None), text
@@ -289,20 +312,6 @@ def test_soil_route_follows_offline_mode_without_touching_the_network(
     r = client.get("/v1/soil", params={"lat": UNION[0], "lon": UNION[1]})
     assert r.status_code == 200 and r.json()["soil"]["status"] == "unavailable"
     assert "offline" in r.json()["soil"]["reason"]
-
-
-def test_malformed_weather_cache_manifest_is_unavailable_not_a_500(tmp_path):
-    cid = "cell_+35.500_-79.375"
-    d = tmp_path / cid
-    d.mkdir()
-    # a valid parquet next to a manifest that parses but lacks required keys
-    snap_dir = DEFAULT_SNAPSHOT_DIR
-    shutil.copy(snap_dir / "daily.parquet", d / "daily.parquet")
-    good = json.loads((snap_dir / "manifest.json").read_text())
-    for broken in ({}, {**good, "coverage": {}}, {**good, "retrieval": "oops"}):
-        (d / "manifest.json").write_text(json.dumps(broken))
-        r = resolve_location(35.4, -79.2, cache_dir=tmp_path, fetch=no_network, offline=True)
-        assert r.status in ("partial", "complete") and r.weather is not None
 
 
 def test_evidence_units_are_converted_or_rejected():
