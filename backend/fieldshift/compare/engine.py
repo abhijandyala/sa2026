@@ -33,6 +33,7 @@ from fieldshift.compare.models import (
     RuleLine,
     SeasonRow,
     SharedYears,
+    SpringShortcuts,
     SpringSummary,
     ThresholdsView,
     WinterSummary,
@@ -138,9 +139,7 @@ def season_bundle(
     winter = compute_winter(plan, cal, ctx.series, ts, ctx.snapshot_hash)
     spring = compute_spring(plan, cal, ctx.series, ts, ctx.snapshot_hash, ref)
     facts = build_season_facts(plan, cal, spring, cov)
-    return SeasonBundle(
-        year, cal, cov, winter, spring, facts, evaluate_season(facts, ctx.index)
-    )
+    return SeasonBundle(year, cal, cov, winter, spring, facts, evaluate_season(facts, ctx.index))
 
 
 def season_bundles(
@@ -163,14 +162,16 @@ def _source(src: Any) -> dict[str, Any] | None:
 
 def _calendar_summary(plan: Plan) -> CalendarSummary:
     cal = build_calendar(plan, REFERENCE_YEAR)
-    cover_days = cal.cover.days if cal.cover else 0
+    living = cal.cover or cal.grain  # a cover crop, or growing winter wheat
+    cover_days = living.days if living else 0
     return CalendarSummary(
         reference_year=REFERENCE_YEAR,
         winter_days=cal.winter_days,
         living_cover_days_planned=cover_days,
         days_without_planned_cover=cal.winter_days - cover_days,
         termination_gap_days=cal.termination_gap_days,
-        establishment="uncertain" if cal.cover else "inapplicable",
+        establishment="uncertain" if living else "inapplicable",
+        living_cover_kind=("cover_crop" if cal.cover else "winter_grain" if cal.grain else None),
         spring_window={
             "start": cal.spring_start.strftime("%m-%d"),
             "end": cal.spring_end.strftime("%m-%d"),
@@ -187,10 +188,16 @@ def _check_out(index_rules: dict[str, Any], s: Any) -> CheckSummaryOut:
     if s.rule_id not in CHECK_META and rule is not None:
         fires = rule.applies_when or rule.guidance or fires
     return CheckSummaryOut(
-        check_id=cid, rule_ids=[s.rule_id], label=label, fires_when=fires, optional=s.optional,
-        count=s.count, denominator=s.denominator,
+        check_id=cid,
+        rule_ids=[s.rule_id],
+        label=label,
+        fires_when=fires,
+        optional=s.optional,
+        count=s.count,
+        denominator=s.denominator,
         pct=round(100 * s.count / s.denominator, 1) if s.denominator else None,
-        qualifying_years=s.qualifying_years, clear_years=s.clear_years,
+        qualifying_years=s.qualifying_years,
+        clear_years=s.clear_years,
         skipped_years=[k.model_dump(mode="json") for k in s.skipped_years],
         source=_source(s.source),
     )
@@ -199,20 +206,135 @@ def _check_out(index_rules: dict[str, Any], s: Any) -> CheckSummaryOut:
 def _rule_lines(res: Any, exclude: set[str]) -> tuple[list[RuleLine], list, list]:
     lines = [
         RuleLine(
-            rule_id=r.rule_id, status=r.status, verdict=str(r.verdict) if r.verdict else None,
-            flagged=r.flagged, reason=r.reason, conflict=r.conflict,
-            conflicts_with=list(r.conflicts_with), source=_source(r.source),
+            rule_id=r.rule_id,
+            status=r.status,
+            verdict=str(r.verdict) if r.verdict else None,
+            flagged=r.flagged,
+            reason=r.reason,
+            text=r.text,
+            print=r.print,
+            conflict=r.conflict,
+            conflicts_with=list(r.conflicts_with),
+            source=_source(r.source),
             reference=r.reference,
         )
         for r in res.rules
         if r.status != Status.INAPPLICABLE and r.rule_id not in exclude
     ]
     lines.sort(key=lambda x: (not x.flagged, x.rule_id))
-    return lines, [c.rule_ids for c in res.conflicts], [n.model_dump(mode="json") for n in res.path_notes]
+    return (
+        lines,
+        [c.rule_ids for c in res.conflicts],
+        [n.model_dump(mode="json") for n in res.path_notes],
+    )
+
+
+def _summaries(
+    plan: Plan,
+    winters: dict[int, WinterExposure],
+    springs: dict[int, SpringResult],
+    ts: ThresholdSet,
+    dry_name: str,
+) -> tuple[WinterSummary, SpringSummary]:
+    """Winter and spring summaries over the plan's OWN windows (shared by every plan kind)."""
+    eligible_w = [w for w in winters.values() if w.eligible]
+    eligible_s = [s for s in springs.values() if s.eligible]
+    dry_years = [s.year for s in springs.values() if s.is_dry]
+    heavy_known = [w for w in eligible_w if w.heavy_rain_days_outside_cover is not None]
+    w_status = (
+        Status.UNAVAILABLE
+        if not eligible_w
+        else Status.COMPLETE
+        if len(eligible_w) == len(winters)
+        else Status.PARTIAL
+    )
+    w_reasons = sorted({r for w in winters.values() if not w.eligible for r in w.reasons})
+    winter_summary = WinterSummary(
+        status=w_status,
+        seasons=len(winters),
+        eligible_seasons=len(eligible_w),
+        per_season_median={
+            "rain_mm_outside_cover": _median([w.rain_outside_cover_mm for w in eligible_w]),  # type: ignore[misc]
+            "heavy_rain_days_outside_cover": _median(
+                [float(w.heavy_rain_days_outside_cover) for w in heavy_known],
+                1,  # type: ignore[arg-type]
+            ),
+        },
+        seasons_with_heavy_rain_outside_cover=(
+            sum(1 for w in heavy_known if w.heavy_rain_days_outside_cover) if heavy_known else None
+        ),
+        segments=(
+            list(ALL_SEGMENTS)
+            if plan.winter.kind in ("cover", "winter_grain")
+            else ["no_planned_cover"]
+        ),
+        reasons=[
+            f"{len(winters) - len(eligible_w)} season(s) not complete: " + ", ".join(w_reasons)
+        ]
+        if w_reasons
+        else [],
+    )
+    cutoff = ts.get(dry_name)
+    spring_summary = SpringSummary(
+        status=Status.COMPLETE if cutoff.status == Status.COMPLETE else cutoff.status,
+        window_days=30,
+        cutoff_mm=cutoff.value,
+        eligible_seasons=len(eligible_s),
+        dry_seasons=len(dry_years) if cutoff.value is not None else None,
+        dry_years=dry_years,
+        excluded_years=list(cutoff.parameters.get("excluded_years", ()))
+        and [{"year": y} for y in cutoff.parameters["excluded_years"]],
+        median_total_mm=_median([s.total_mm for s in eligible_s]),  # type: ignore[misc]
+    )
+    return winter_summary, spring_summary
+
+
+def _season_rows(bundles: list[SeasonBundle]) -> list[SeasonRow]:
+    return [
+        SeasonRow(
+            year=b.year,
+            winter_status=b.winter.status,
+            spring_status=b.spring.status,
+            full_season_status=b.coverage.metrics["full_season"].status,
+            spring_total_mm=b.spring.total_mm,
+            spring_rank=b.spring.rank,
+            spring_is_dry=b.spring.is_dry,
+            rain_outside_cover_mm=b.winter.rain_outside_cover_mm,
+            heavy_rain_days_outside_cover=b.winter.heavy_rain_days_outside_cover,
+            termination_gap_days=b.cal.termination_gap_days,
+            flagged_rule_ids=[
+                c.rule_id for c in b.evaluation.checks if c.flagged and c.rule_id in GATES
+            ],
+            # modeled soil wetness over the spring window; same window and label as the replay
+            gwetroot_window_mean=b.spring.wetness.gwetroot,
+            gwettop_window_mean=b.spring.wetness.gwettop,
+            wetness_status=b.spring.wetness.status,
+        )
+        for b in bundles
+    ]
+
+
+def spring_shortcuts(ref: SpringReference) -> SpringShortcuts:
+    """Typical / dry / wet planting years for one planting date: the same definition as
+    ``GET /v1/years``. Dry = lowest 30-day total, wet = highest, typical = closest to the median
+    (ties go to the lower year, except wet which takes the higher)."""
+    totals = ref.totals
+    ordered = sorted(totals, key=lambda y: (totals[y], y))
+    median_total = sorted(totals.values())[len(totals) // 2] if totals else None
+    typical = (
+        min(totals, key=lambda y: (abs(totals[y] - median_total), y))  # type: ignore[operator]
+        if totals
+        else None
+    )
+    return SpringShortcuts(
+        typical=typical,
+        dry=ordered[0] if ordered else None,
+        wet=ordered[-1] if ordered else None,
+    )
 
 
 def _analyze_wheat(
-    plan: Plan, ctx: Context, full_season_plan: Plan | None, maturity_group: Any
+    plan: Plan, ctx: Context, ts: ThresholdSet, full_season_plan: Plan | None, maturity_group: Any
 ) -> PlanComparison:
     """Winter wheat -> double-crop soybean through B's wheat path (Phase 12).
 
@@ -225,11 +347,15 @@ def _analyze_wheat(
     from fieldshift.planner.wheat_path import evaluate_wheat_double_crop
 
     result = evaluate_wheat_double_crop(
-        plan, ctx, maturity_group=maturity_group, year=REFERENCE_YEAR,
+        plan,
+        ctx,
+        maturity_group=maturity_group,
+        year=REFERENCE_YEAR,
         full_season_plan=full_season_plan,
     )
     if (
-        result["status"] == str(Status.INVALID_INPUT) and full_season_plan is not None
+        result["status"] == str(Status.INVALID_INPUT)
+        and full_season_plan is not None
         and all(i["field"].startswith("compare_to_plan") for i in result["issues"])
     ):  # an unusable neighbouring plan must not sink this plan; say why there is no comparison
         why = "; ".join(i["message"] for i in result["issues"])
@@ -238,36 +364,115 @@ def _analyze_wheat(
         )
         if result["status"] in (str(Status.COMPLETE), str(Status.PARTIAL)):
             result["cross_calendar"] = {
-                "label": "different-calendar", "status": str(Status.UNAVAILABLE),
+                "label": "different-calendar",
+                "status": str(Status.UNAVAILABLE),
                 "reason": f"the full-season soybean plan could not be used: {why}",
             }
     status = Status(result["status"])
     if status in (Status.COMPLETE, Status.PARTIAL):
-        return PlanComparison(
-            plan_id=plan.plan_id, label=plan.label, status=status,
-            reason=(result.get("catalog_state") or {}).get("reason"), plan=plan,
+        pc = PlanComparison(
+            plan_id=plan.plan_id,
+            label=plan.label,
+            status=status,
+            reason=(result.get("catalog_state") or {}).get("reason"),
+            plan=plan,
             double_crop=result,
         )
+        _wheat_winter_and_spring(pc, plan, ctx, ts, result)
+        return pc
     reason = result.get("reason") or "; ".join(
         f"{i['field']}: {i['message']}" for i in result.get("issues", [])
     )
     return PlanComparison(
-        plan_id=plan.plan_id, label=plan.label, status=status, reason=reason or None, plan=plan,
+        plan_id=plan.plan_id,
+        label=plan.label,
+        status=status,
+        reason=reason or None,
+        plan=plan,
     )
 
 
+def _wheat_winter_and_spring(
+    pc: PlanComparison, plan: Plan, ctx: Context, ts: ThresholdSet, result: dict[str, Any]
+) -> None:
+    """Fill the winter, spring, seasons and eras of a winter-wheat plan over its OWN windows.
+
+    Winter: growing wheat (wheat plant to wheat harvest) counts as living cover; the window runs
+    from the previous harvest to the soybean planting date; heavy rain uses the same frozen
+    ThresholdSet threshold as every other plan. Spring stays on its own-window baseline. The plan
+    is still kept out of every cross-plan (shared-year) comparison: nothing here is added to or
+    ranked against another plan.
+    """
+    bundles = season_bundles(plan, ctx, ts)
+    springs = {b.year: b.spring for b in bundles}
+    winters = {b.year: b.winter for b in bundles}
+    dry_name = f"{SPRING_DRY_PREFIX}{plan.next_plant}"
+    winter_summary, spring_summary = _summaries(plan, winters, springs, ts, dry_name)
+    shortcuts = spring_shortcuts(reference_for(ctx, plan.next_plant))
+    spring_summary = spring_summary.model_copy(update={"shortcuts": shortcuts})
+    winter_ind = winter_heavy_rain_indicator(winters)
+    eras = {
+        "dry_spring": compare_eras(
+            "dry_spring", dry_spring_indicator(springs), ts, threshold_names=[dry_name]
+        ),
+        "winter_heavy_rain_outside_cover": compare_eras(
+            "winter_heavy_rain_outside_cover",
+            winter_ind,
+            ts,
+            threshold_names=[HEAVY_RAIN_NAME],
+        ),
+    }
+    result = pc.double_crop  # PlanComparison holds its own copy of the dict; edit that one
+    assert result is not None
+    pc.calendar = _calendar_summary(plan)
+    pc.winter, pc.spring, pc.eras = winter_summary, spring_summary, eras
+    pc.seasons = _season_rows(bundles)
+    pc.residue_context = [
+        r.model_dump(mode="json") for r in winters[REFERENCE_YEAR].residue_context
+    ]
+    result["spring"]["shortcuts"] = shortcuts.model_dump(mode="json")
+    result["winter_exposure"] = {
+        "status": str(winter_summary.status),
+        "label": "own_window",
+        "window": {
+            "from": "previous harvest",
+            "to": "soybean planting date (exclusive)",
+            "days": pc.calendar.winter_days,
+            "living_cover": "growing wheat, wheat planting to wheat harvest (planned)",
+        },
+        "heavy_rain_threshold": ts.get(HEAVY_RAIN_NAME).model_dump(mode="json"),
+        "eligible_seasons": winter_summary.eligible_seasons,
+        "per_season_median": winter_summary.per_season_median,
+        "seasons_with_heavy_rain_outside_cover": winter_summary.seasons_with_heavy_rain_outside_cover,
+        "segments": winter_summary.segments,
+        "era": eras["winter_heavy_rain_outside_cover"].model_dump(mode="json"),
+        "note": (
+            "Rain on days with no planned living cover: before wheat is planted and after it is "
+            "harvested. Rainfall depth only, never erosion or soil loss. Computed over this "
+            "plan's own window with the same frozen heavy-rain threshold as every other plan."
+        ),
+    }
+
+
 def analyze_plan(
-    plan: Plan, ctx: Context, ts: ThresholdSet, *,
-    full_season_plan: Plan | None = None, maturity_group: Any = None,
+    plan: Plan,
+    ctx: Context,
+    ts: ThresholdSet,
+    *,
+    full_season_plan: Plan | None = None,
+    maturity_group: Any = None,
 ) -> tuple[PlanComparison, dict[str, Indicator]]:
     """Run one plan over every planting year. Returns the result and its per-year indicators."""
     if plan.winter.kind == "winter_grain":
-        return _analyze_wheat(plan, ctx, full_season_plan, maturity_group), {}
+        return _analyze_wheat(plan, ctx, ts, full_season_plan, maturity_group), {}
     checked = check_plan(plan, ctx.index, year=REFERENCE_YEAR)
     if checked.status == Status.UNSUPPORTED:
         return PlanComparison(
-            plan_id=plan.plan_id, label=plan.label, status=Status.UNSUPPORTED,
-            reason="; ".join(checked.unsupported) or "unsupported", plan=plan,
+            plan_id=plan.plan_id,
+            label=plan.label,
+            status=Status.UNSUPPORTED,
+            reason="; ".join(checked.unsupported) or "unsupported",
+            plan=plan,
         ), {}
     bundles = season_bundles(plan, ctx, ts)
     springs = {b.year: b.spring for b in bundles}
@@ -276,9 +481,7 @@ def analyze_plan(
     rules = {r.rule_id: r for r in ctx.index.catalog.rules}
 
     summaries = summarize_checks(evals)
-    spring_checks = [
-        s for s in summaries if s.rule_id in GATES and (not s.optional or s.count > 0)
-    ]
+    spring_checks = [s for s in summaries if s.rule_id in GATES and (not s.optional or s.count > 0)]
     dry_name = f"{SPRING_DRY_PREFIX}{plan.next_plant}"
     indicators: dict[str, Indicator] = {
         "dry_spring": dry_spring_indicator(springs),
@@ -289,7 +492,9 @@ def analyze_plan(
             "dry_spring", indicators["dry_spring"], ts, threshold_names=[dry_name]
         ),
         "winter_heavy_rain_outside_cover": compare_eras(
-            "winter_heavy_rain_outside_cover", indicators["winter_heavy_rain_outside_cover"], ts,
+            "winter_heavy_rain_outside_cover",
+            indicators["winter_heavy_rain_outside_cover"],
+            ts,
             threshold_names=[HEAVY_RAIN_NAME],
         ),
     }
@@ -301,60 +506,26 @@ def analyze_plan(
         indicators[out.check_id] = ind
         eras[out.check_id] = compare_eras(out.check_id, ind, ts, threshold_names=[dry_name])
 
-    eligible_w = [w for w in winters.values() if w.eligible]
-    eligible_s = [s for s in springs.values() if s.eligible]
-    dry_years = [s.year for s in springs.values() if s.is_dry]
-    heavy_known = [w for w in eligible_w if w.heavy_rain_days_outside_cover is not None]
-    w_status = (
-        Status.UNAVAILABLE if not eligible_w
-        else Status.COMPLETE if len(eligible_w) == len(winters) else Status.PARTIAL
-    )
-    w_reasons = sorted({r for w in winters.values() if not w.eligible for r in w.reasons})
-    winter_summary = WinterSummary(
-        status=w_status, seasons=len(winters), eligible_seasons=len(eligible_w),
-        per_season_median={
-            "rain_mm_outside_cover": _median([w.rain_outside_cover_mm for w in eligible_w]),  # type: ignore[misc]
-            "heavy_rain_days_outside_cover": _median(
-                [float(w.heavy_rain_days_outside_cover) for w in heavy_known], 1  # type: ignore[arg-type]
-            ),
-        },
-        seasons_with_heavy_rain_outside_cover=(
-            sum(1 for w in heavy_known if w.heavy_rain_days_outside_cover) if heavy_known else None
-        ),
-        segments=list(ALL_SEGMENTS) if plan.winter.kind == "cover" else ["no_planned_cover"],
-        reasons=[f"{len(winters) - len(eligible_w)} season(s) not complete: " + ", ".join(w_reasons)]
-        if w_reasons else [],
-    )
-    cutoff = ts.get(dry_name)
-    spring_summary = SpringSummary(
-        status=Status.COMPLETE if cutoff.status == Status.COMPLETE else cutoff.status,
-        window_days=30, cutoff_mm=cutoff.value, eligible_seasons=len(eligible_s),
-        dry_seasons=len(dry_years) if cutoff.value is not None else None,
-        dry_years=dry_years,
-        excluded_years=list(cutoff.parameters.get("excluded_years", ())) and [
-            {"year": y} for y in cutoff.parameters["excluded_years"]
-        ],
-        median_total_mm=_median([s.total_mm for s in eligible_s]),  # type: ignore[misc]
-    )
+    winter_summary, spring_summary = _summaries(plan, winters, springs, ts, dry_name)
+    shortcuts = spring_shortcuts(reference_for(ctx, plan.next_plant))
+    spring_summary = spring_summary.model_copy(update={"shortcuts": shortcuts})
     lines, conflicts, notes = _rule_lines(checked, {s.rule_id for s in spring_checks})
-    rows = [
-        SeasonRow(
-            year=b.year, winter_status=b.winter.status, spring_status=b.spring.status,
-            full_season_status=b.coverage.metrics["full_season"].status,
-            spring_total_mm=b.spring.total_mm, spring_rank=b.spring.rank,
-            spring_is_dry=b.spring.is_dry, rain_outside_cover_mm=b.winter.rain_outside_cover_mm,
-            heavy_rain_days_outside_cover=b.winter.heavy_rain_days_outside_cover,
-            termination_gap_days=b.cal.termination_gap_days,
-            flagged_rule_ids=[c.rule_id for c in b.evaluation.checks if c.flagged and c.rule_id in GATES],
-        )
-        for b in bundles
-    ]
+    rows = _season_rows(bundles)
     ref_winter = winters[REFERENCE_YEAR]
     return PlanComparison(
-        plan_id=plan.plan_id, label=plan.label, status=Status.COMPLETE, plan=plan,
-        calendar=_calendar_summary(plan), winter=winter_summary, spring=spring_summary,
-        spring_checks=outs, other_checks=lines, conflicts=conflicts, path_notes=notes,
-        eras=eras, seasons=rows,
+        plan_id=plan.plan_id,
+        label=plan.label,
+        status=Status.COMPLETE,
+        plan=plan,
+        calendar=_calendar_summary(plan),
+        winter=winter_summary,
+        spring=spring_summary,
+        spring_checks=outs,
+        other_checks=lines,
+        conflicts=conflicts,
+        path_notes=notes,
+        eras=eras,
+        seasons=rows,
         residue_context=[r.model_dump(mode="json") for r in ref_winter.residue_context],
     ), indicators
 
@@ -371,8 +542,12 @@ def _full_season_for(plans: list[Plan], default: Plan | None) -> Plan | None:
 
 
 def compare_plans(
-    plans: list[Plan], ctx: Context, *, meta_by_plan: dict[str, dict[str, Any]] | None = None,
-    maturity_group: Any = None, full_season_default: Plan | None = None,
+    plans: list[Plan],
+    ctx: Context,
+    *,
+    meta_by_plan: dict[str, dict[str, Any]] | None = None,
+    maturity_group: Any = None,
+    full_season_default: Plan | None = None,
 ) -> tuple[list[PlanComparison], ThresholdSet, SharedYears]:
     """Analyze every plan against ONE frozen ThresholdSet and the same weather rows.
 
@@ -392,14 +567,20 @@ def compare_plans(
     ]
     results = [a for a, _ in analyses]
     meta_by_plan = meta_by_plan or {}
-    live = [(r, ind) for r, (_, ind) in zip(results, analyses, strict=True) if r.status == Status.COMPLETE]
+    live = [
+        (r, ind)
+        for r, (_, ind) in zip(results, analyses, strict=True)
+        if r.status == Status.COMPLETE
+    ]
     if len(live) > 1:
         names = set.intersection(*(set(ind) for _, ind in live))
         for name in sorted(names):
             years = shared_years({r.plan_id: ind[name] for r, ind in live})
             for r, ind in live:  # each plan keeps ITS OWN frozen threshold (windows differ)
                 r.eras_shared_years[name] = compare_eras(
-                    name, restrict_to_years(ind[name], years), ts,
+                    name,
+                    restrict_to_years(ind[name], years),
+                    ts,
                     threshold_names=_threshold_names_for(name, r, ts),
                     basis="shared_evaluable_seasons",
                 )
@@ -432,7 +613,8 @@ def _shared_years(results: list[PlanComparison]) -> SharedYears:
         return sorted(set.intersection(*sets)) if sets else []
 
     return SharedYears(
-        spring=years("spring_status"), winter=years("winter_status"),
+        spring=years("spring_status"),
+        winter=years("winter_status"),
         full_season=years("full_season_status"),
         note="Years where every compared plan has a complete result; use these when comparing "
         "plans so no plan is judged on years another could not be evaluated.",
@@ -448,7 +630,18 @@ def eras_block() -> dict[str, Any]:
 
 
 __all__ = [
-    "InvalidPlanError", "MAX_PLANS", "REFERENCE_YEAR", "YEARS", "SeasonBundle", "analyze_plan",
-    "canonical_hash", "compare_plans", "eras_block", "reference_for", "season_bundle",
-    "season_bundles", "threshold_set_for", "thresholds_view",
+    "InvalidPlanError",
+    "MAX_PLANS",
+    "REFERENCE_YEAR",
+    "YEARS",
+    "SeasonBundle",
+    "analyze_plan",
+    "canonical_hash",
+    "compare_plans",
+    "eras_block",
+    "reference_for",
+    "season_bundle",
+    "season_bundles",
+    "threshold_set_for",
+    "thresholds_view",
 ]

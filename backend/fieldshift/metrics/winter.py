@@ -7,6 +7,12 @@ Per season, the winter window ``[prev_harvest, plant)`` is split into segments:
 * ``after_termination``       ``[terminate, plant)`` for a cover plan (terminate day included)
 * ``no_planned_cover``        the whole window for a no-cover plan
 
+A winter-grain plan (wheat) uses the same segments: growing wheat ``[wheat plant, wheat harvest)``
+is the living-cover interval (planned; establishment is uncertain), the days before it are
+``before_establishment`` and the days from the wheat harvest to the next planting are
+``after_termination`` (here: after harvest). The window always runs from the previous harvest to
+the next planting date, so it is that plan's own window.
+
 "Outside cover" = every segment except ``living_cover``. Residue context (corn residue,
 cover residue, grower-reported) is recorded separately and never changes any count.
 Paired plans read the same weather rows; the output carries the snapshot hash so a client
@@ -83,12 +89,23 @@ class WinterExposure(_M):
     cover_label: str | None = None  # "planned" for cover plans; establishment uncertain
 
 
+def living_interval(cal: SeasonCalendar) -> tuple[date, date] | None:
+    """``[start, end)`` of planned living cover: a cover crop's seed..terminate, or growing
+    winter grain's plant..harvest. ``None`` for a plan with nothing planned."""
+    if cal.cover is not None:
+        return cal.cover.seed, cal.cover.terminate
+    if cal.grain is not None:
+        return cal.grain.plant, cal.grain.harvest
+    return None
+
+
 def winter_day_segments(cal: SeasonCalendar) -> pd.Series:
     """Segment label for every day of ``[prev_harvest, plant)`` (index = Timestamp)."""
     days = pd.date_range(cal.prev_harvest, cal.plant - pd.Timedelta(days=1), freq="D")
     labels = pd.Series(NO_PLANNED_COVER, index=days, dtype="object")
-    if cal.cover is not None:
-        seed, term = pd.Timestamp(cal.cover.seed), pd.Timestamp(cal.cover.terminate)
+    interval = living_interval(cal)
+    if interval is not None:
+        seed, term = pd.Timestamp(interval[0]), pd.Timestamp(interval[1])
         labels[days < seed] = BEFORE_ESTABLISHMENT
         labels[(days >= seed) & (days < term)] = LIVING_COVER
         labels[days >= term] = AFTER_TERMINATION
@@ -98,22 +115,28 @@ def winter_day_segments(cal: SeasonCalendar) -> pd.Series:
 def _residue_context(plan: Plan, cal: SeasonCalendar) -> list[ResidueContext]:
     out: list[ResidueContext] = []
     if plan.previous_crop_id == "field_corn":
-        out.append(ResidueContext(
-            kind="corn_residue",
-            note="Corn residue may remain after harvest. Context only: it is not living cover "
-            "and changes no count.",
-        ))
-    if cal.cover is not None:
-        out.append(ResidueContext(
-            kind="cover_residue",
-            note="Terminated cover residue may remain after termination. Context only: it "
-            "does not extend the living-cover interval.",
-        ))
+        out.append(
+            ResidueContext(
+                kind="corn_residue",
+                note="Corn residue may remain after harvest. Context only: it is not living cover "
+                "and changes no count.",
+            )
+        )
+    if cal.cover is not None:  # winter grain leaves a harvested crop, not a terminated cover
+        out.append(
+            ResidueContext(
+                kind="cover_residue",
+                note="Terminated cover residue may remain after termination. Context only: it "
+                "does not extend the living-cover interval.",
+            )
+        )
     if plan.grower.residue_report:
-        out.append(ResidueContext(
-            kind="grower_reported",
-            note=f"Grower report: {plan.grower.residue_report}. Context only; no count changed.",
-        ))
+        out.append(
+            ResidueContext(
+                kind="grower_reported",
+                note=f"Grower report: {plan.grower.residue_report}. Context only; no count changed.",
+            )
+        )
     return out
 
 
@@ -136,8 +159,6 @@ def compute_winter(
     precip = rows["precip_mm"]
 
     status, reasons = cov.status, list(cov.reasons)
-    if plan.winter.kind == "winter_grain":  # Phase 12 path
-        status, reasons = Status.UNSUPPORTED, ["winter_grain_path_not_enabled"]
     rain_ok = status == Status.COMPLETE  # rain totals depend only on the weather window
     heavy_ok = rain_ok and heavy.value is not None
     if rain_ok and not heavy_ok:  # rain is known; only the heavy-rain count is missing
@@ -156,8 +177,11 @@ def compute_winter(
         )
     if heavy_ok:
         for ts in precip.index[heavy_flag.to_numpy()]:
-            events.append(HeavyRainEvent(
-                date=ts.date(), precip_mm=round(float(precip[ts]), 3), segment=str(labels[ts])))
+            events.append(
+                HeavyRainEvent(
+                    date=ts.date(), precip_mm=round(float(precip[ts]), 3), segment=str(labels[ts])
+                )
+            )
     computable = status == Status.COMPLETE
 
     outside = [segments[s] for s in OUTSIDE_SEGMENTS]
@@ -187,5 +211,5 @@ def compute_winter(
         segments=segments,
         heavy_rain_events=events,
         residue_context=_residue_context(plan, cal),
-        cover_label=cal.cover.label if cal.cover else None,
+        cover_label=(cal.cover or cal.grain).label if (cal.cover or cal.grain) else None,
     )

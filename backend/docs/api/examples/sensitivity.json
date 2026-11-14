@@ -25,7 +25,7 @@
     "request_id": "req_example",
     "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
   },
-  "note": "One point per valid termination date (reference-year calendar). A date that crosses Feb 29 has a different real gap in leap years (`gap_days_in_leap_years`); each historical season is evaluated with its own real gap. With the fixed 14-day rule the check count is a step: the dry-year count below 14 days, 0 at or above (unless the grower reports a low-moisture concern, which fires every evaluable season below 14 days).",
+  "note": "One point per valid termination date (reference-year calendar). A date that crosses Feb 29 has a different real gap in leap years (`gap_days_in_leap_years`); each historical season is evaluated with its own real gap. With the fixed 14-day rule the check count is a step: the dry-year count below 14 days, 0 at or above (unless the grower reports a low-moisture concern, which fires every evaluable season below 14 days). Each point's `qualifying_years` are the seasons the check would have fired for that end date (same meaning as the comparison check; its length equals `checks_count`, and it is empty when the count is 0).",
   "points": [
     {
       "checks_count": 0,
@@ -34,6 +34,7 @@
       "gap_days_in_leap_years": 223,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 1,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 682.205,
       "terminate": "10-02"
     },
@@ -44,6 +45,7 @@
       "gap_days_in_leap_years": 222,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 2,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 682.205,
       "terminate": "10-03"
     },
@@ -54,6 +56,7 @@
       "gap_days_in_leap_years": 221,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 3,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 678.07,
       "terminate": "10-04"
     },
@@ -64,6 +67,7 @@
       "gap_days_in_leap_years": 220,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 4,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 677.3,
       "terminate": "10-05"
     },
@@ -74,6 +78,7 @@
       "gap_days_in_leap_years": 219,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 5,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 677.175,
       "terminate": "10-06"
     },
@@ -84,6 +89,7 @@
       "gap_days_in_leap_years": 218,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 6,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 676.675,
       "terminate": "10-07"
     },
@@ -94,6 +100,7 @@
       "gap_days_in_leap_years": 217,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 7,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 676.22,
       "terminate": "10-08"
     },
@@ -104,6 +111,7 @@
       "gap_days_in_leap_years": 216,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 8,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 671.81,
       "terminate": "10-09"
     },
@@ -114,6 +122,7 @@
       "gap_days_in_leap_years": 215,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 9,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 668.9,
       "terminate": "10-10"
     },
@@ -124,6 +133,7 @@
       "gap_days_in_leap_years": 214,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 10,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 663.12,
       "terminate": "10-11"
     },
@@ -134,6 +144,7 @@
       "gap_days_in_leap_years": 213,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 11,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 661.105,
       "terminate": "10-12"
     },
@@ -144,6 +155,7 @@
       "gap_days_in_leap_years": 212,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 12,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 661.04,
       "terminate": "10-13"
     },
@@ -154,6 +166,7 @@
       "gap_days_in_leap_years": 211,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 13,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 660.87,
       "terminate": "10-14"
     },
@@ -164,6 +177,7 @@
       "gap_days_in_leap_years": 210,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 14,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 660.87,
       "terminate": "10-15"
     },
@@ -174,6 +188,7 @@
       "gap_days_in_leap_years": 209,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 15,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 659.81,
       "terminate": "10-16"
     },
@@ -184,6 +199,7 @@
       "gap_days_in_leap_years": 208,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 16,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 657.78,
       "terminate": "10-17"
     },
@@ -194,6 +210,7 @@
       "gap_days_in_leap_years": 207,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 17,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 642.295,
       "terminate": "10-18"
     },
@@ -204,6 +221,7 @@
       "gap_days_in_leap_years": 206,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 18,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 641.605,
       "terminate": "10-19"
     },
@@ -214,6 +232,7 @@
       "gap_days_in_leap_years": 205,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 19,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 641.18,
       "terminate": "10-20"
     },
@@ -224,6 +243,7 @@
       "gap_days_in_leap_years": 204,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 20,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 641.18,
       "terminate": "10-21"
     },
@@ -234,6 +254,7 @@
       "gap_days_in_leap_years": 203,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 21,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 639.5,
       "terminate": "10-22"
     },
@@ -244,6 +265,7 @@
       "gap_days_in_leap_years": 202,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 22,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 639.5,
       "terminate": "10-23"
     },
@@ -254,6 +276,7 @@
       "gap_days_in_leap_years": 201,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 23,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 639.5,
       "terminate": "10-24"
     },
@@ -264,6 +287,7 @@
       "gap_days_in_leap_years": 200,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 24,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 637.215,
       "terminate": "10-25"
     },
@@ -274,6 +298,7 @@
       "gap_days_in_leap_years": 199,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 25,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 637.215,
       "terminate": "10-26"
     },
@@ -284,6 +309,7 @@
       "gap_days_in_leap_years": 198,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 26,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 630.92,
       "terminate": "10-27"
     },
@@ -294,6 +320,7 @@
       "gap_days_in_leap_years": 197,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 27,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 624.23,
       "terminate": "10-28"
     },
@@ -304,6 +331,7 @@
       "gap_days_in_leap_years": 196,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 28,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 624.23,
       "terminate": "10-29"
     },
@@ -314,6 +342,7 @@
       "gap_days_in_leap_years": 195,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 29,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 624.23,
       "terminate": "10-30"
     },
@@ -324,6 +353,7 @@
       "gap_days_in_leap_years": 194,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 30,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 616.27,
       "terminate": "10-31"
     },
@@ -334,6 +364,7 @@
       "gap_days_in_leap_years": 193,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 31,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 615.59,
       "terminate": "11-01"
     },
@@ -344,6 +375,7 @@
       "gap_days_in_leap_years": 192,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 32,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 615.585,
       "terminate": "11-02"
     },
@@ -354,6 +386,7 @@
       "gap_days_in_leap_years": 191,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 33,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 612.635,
       "terminate": "11-03"
     },
@@ -364,6 +397,7 @@
       "gap_days_in_leap_years": 190,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 34,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 611.675,
       "terminate": "11-04"
     },
@@ -374,6 +408,7 @@
       "gap_days_in_leap_years": 189,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 35,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 606.49,
       "terminate": "11-05"
     },
@@ -384,6 +419,7 @@
       "gap_days_in_leap_years": 188,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 36,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 605.14,
       "terminate": "11-06"
     },
@@ -394,6 +430,7 @@
       "gap_days_in_leap_years": 187,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 37,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 602.165,
       "terminate": "11-07"
     },
@@ -404,6 +441,7 @@
       "gap_days_in_leap_years": 186,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 38,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 602.165,
       "terminate": "11-08"
     },
@@ -414,6 +452,7 @@
       "gap_days_in_leap_years": 185,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 39,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 602.145,
       "terminate": "11-09"
     },
@@ -424,6 +463,7 @@
       "gap_days_in_leap_years": 184,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 40,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 602.145,
       "terminate": "11-10"
     },
@@ -434,6 +474,7 @@
       "gap_days_in_leap_years": 183,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 41,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 601.33,
       "terminate": "11-11"
     },
@@ -444,6 +485,7 @@
       "gap_days_in_leap_years": 182,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 42,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 601.31,
       "terminate": "11-12"
     },
@@ -454,6 +496,7 @@
       "gap_days_in_leap_years": 181,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 43,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 587.385,
       "terminate": "11-13"
     },
@@ -464,6 +507,7 @@
       "gap_days_in_leap_years": 180,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 44,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 587.385,
       "terminate": "11-14"
     },
@@ -474,6 +518,7 @@
       "gap_days_in_leap_years": 179,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 45,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 577.885,
       "terminate": "11-15"
     },
@@ -484,6 +529,7 @@
       "gap_days_in_leap_years": 178,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 46,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 576.565,
       "terminate": "11-16"
     },
@@ -494,6 +540,7 @@
       "gap_days_in_leap_years": 177,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 47,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 576.215,
       "terminate": "11-17"
     },
@@ -504,6 +551,7 @@
       "gap_days_in_leap_years": 176,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 48,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 576.18,
       "terminate": "11-18"
     },
@@ -514,6 +562,7 @@
       "gap_days_in_leap_years": 175,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 49,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 576.18,
       "terminate": "11-19"
     },
@@ -524,6 +573,7 @@
       "gap_days_in_leap_years": 174,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 50,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 576.18,
       "terminate": "11-20"
     },
@@ -534,6 +584,7 @@
       "gap_days_in_leap_years": 173,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 51,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 575.1,
       "terminate": "11-21"
     },
@@ -544,6 +595,7 @@
       "gap_days_in_leap_years": 172,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 52,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 574.795,
       "terminate": "11-22"
     },
@@ -554,6 +606,7 @@
       "gap_days_in_leap_years": 171,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 53,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 574.665,
       "terminate": "11-23"
     },
@@ -564,6 +617,7 @@
       "gap_days_in_leap_years": 170,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 54,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 574.645,
       "terminate": "11-24"
     },
@@ -574,6 +628,7 @@
       "gap_days_in_leap_years": 169,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 55,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 572.925,
       "terminate": "11-25"
     },
@@ -584,6 +639,7 @@
       "gap_days_in_leap_years": 168,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 56,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 572.525,
       "terminate": "11-26"
     },
@@ -594,6 +650,7 @@
       "gap_days_in_leap_years": 167,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 57,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 570.405,
       "terminate": "11-27"
     },
@@ -604,6 +661,7 @@
       "gap_days_in_leap_years": 166,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 58,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 550.925,
       "terminate": "11-28"
     },
@@ -614,6 +672,7 @@
       "gap_days_in_leap_years": 165,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 59,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 545.645,
       "terminate": "11-29"
     },
@@ -624,6 +683,7 @@
       "gap_days_in_leap_years": 164,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 60,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 545.645,
       "terminate": "11-30"
     },
@@ -634,6 +694,7 @@
       "gap_days_in_leap_years": 163,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 61,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 536.35,
       "terminate": "12-01"
     },
@@ -644,6 +705,7 @@
       "gap_days_in_leap_years": 162,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 62,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 536.215,
       "terminate": "12-02"
     },
@@ -654,6 +716,7 @@
       "gap_days_in_leap_years": 161,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 63,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 536.215,
       "terminate": "12-03"
     },
@@ -664,6 +727,7 @@
       "gap_days_in_leap_years": 160,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 64,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 536.215,
       "terminate": "12-04"
     },
@@ -674,6 +738,7 @@
       "gap_days_in_leap_years": 159,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 65,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 529.55,
       "terminate": "12-05"
     },
@@ -684,6 +749,7 @@
       "gap_days_in_leap_years": 158,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 66,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 529.52,
       "terminate": "12-06"
     },
@@ -694,6 +760,7 @@
       "gap_days_in_leap_years": 157,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 67,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 529.47,
       "terminate": "12-07"
     },
@@ -704,6 +771,7 @@
       "gap_days_in_leap_years": 156,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 68,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 529.095,
       "terminate": "12-08"
     },
@@ -714,6 +782,7 @@
       "gap_days_in_leap_years": 155,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 69,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 525.11,
       "terminate": "12-09"
     },
@@ -724,6 +793,7 @@
       "gap_days_in_leap_years": 154,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 70,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 522.03,
       "terminate": "12-10"
     },
@@ -734,6 +804,7 @@
       "gap_days_in_leap_years": 153,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 71,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 522.03,
       "terminate": "12-11"
     },
@@ -744,6 +815,7 @@
       "gap_days_in_leap_years": 152,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 72,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 503.045,
       "terminate": "12-12"
     },
@@ -754,6 +826,7 @@
       "gap_days_in_leap_years": 151,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 73,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 502.565,
       "terminate": "12-13"
     },
@@ -764,6 +837,7 @@
       "gap_days_in_leap_years": 150,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 74,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 500.08,
       "terminate": "12-14"
     },
@@ -774,6 +848,7 @@
       "gap_days_in_leap_years": 149,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 75,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 494.395,
       "terminate": "12-15"
     },
@@ -784,6 +859,7 @@
       "gap_days_in_leap_years": 148,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 76,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 494.38,
       "terminate": "12-16"
     },
@@ -794,6 +870,7 @@
       "gap_days_in_leap_years": 147,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 77,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 487.445,
       "terminate": "12-17"
     },
@@ -804,6 +881,7 @@
       "gap_days_in_leap_years": 146,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 78,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 487.18,
       "terminate": "12-18"
     },
@@ -814,6 +892,7 @@
       "gap_days_in_leap_years": 145,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 79,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 485.65,
       "terminate": "12-19"
     },
@@ -824,6 +903,7 @@
       "gap_days_in_leap_years": 144,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 80,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 481.72,
       "terminate": "12-20"
     },
@@ -834,6 +914,7 @@
       "gap_days_in_leap_years": 143,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 81,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 477.22,
       "terminate": "12-21"
     },
@@ -844,6 +925,7 @@
       "gap_days_in_leap_years": 142,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 82,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 475.595,
       "terminate": "12-22"
     },
@@ -854,6 +936,7 @@
       "gap_days_in_leap_years": 141,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 83,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 475.34,
       "terminate": "12-23"
     },
@@ -864,6 +947,7 @@
       "gap_days_in_leap_years": 140,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 84,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 471.62,
       "terminate": "12-24"
     },
@@ -874,6 +958,7 @@
       "gap_days_in_leap_years": 139,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 85,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 466.74,
       "terminate": "12-25"
     },
@@ -884,6 +969,7 @@
       "gap_days_in_leap_years": 138,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 86,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 464.005,
       "terminate": "12-26"
     },
@@ -894,6 +980,7 @@
       "gap_days_in_leap_years": 137,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 87,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 463.915,
       "terminate": "12-27"
     },
@@ -904,6 +991,7 @@
       "gap_days_in_leap_years": 136,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 88,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 463.855,
       "terminate": "12-28"
     },
@@ -914,6 +1002,7 @@
       "gap_days_in_leap_years": 135,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 89,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 463.855,
       "terminate": "12-29"
     },
@@ -924,6 +1013,7 @@
       "gap_days_in_leap_years": 134,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 90,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 451.615,
       "terminate": "12-30"
     },
@@ -934,6 +1024,7 @@
       "gap_days_in_leap_years": 133,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 91,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 451.205,
       "terminate": "12-31"
     },
@@ -944,6 +1035,7 @@
       "gap_days_in_leap_years": 132,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 92,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 445.855,
       "terminate": "01-01"
     },
@@ -954,6 +1046,7 @@
       "gap_days_in_leap_years": 131,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 93,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 439.725,
       "terminate": "01-02"
     },
@@ -964,6 +1057,7 @@
       "gap_days_in_leap_years": 130,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 94,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 430.76,
       "terminate": "01-03"
     },
@@ -974,6 +1068,7 @@
       "gap_days_in_leap_years": 129,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 95,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 423.925,
       "terminate": "01-04"
     },
@@ -984,6 +1079,7 @@
       "gap_days_in_leap_years": 128,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 96,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 423.925,
       "terminate": "01-05"
     },
@@ -994,6 +1090,7 @@
       "gap_days_in_leap_years": 127,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 97,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 421.48,
       "terminate": "01-06"
     },
@@ -1004,6 +1101,7 @@
       "gap_days_in_leap_years": 126,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 98,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 417.835,
       "terminate": "01-07"
     },
@@ -1014,6 +1112,7 @@
       "gap_days_in_leap_years": 125,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 99,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 414.425,
       "terminate": "01-08"
     },
@@ -1024,6 +1123,7 @@
       "gap_days_in_leap_years": 124,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 100,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 413.555,
       "terminate": "01-09"
     },
@@ -1034,6 +1134,7 @@
       "gap_days_in_leap_years": 123,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 101,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 413.525,
       "terminate": "01-10"
     },
@@ -1044,6 +1145,7 @@
       "gap_days_in_leap_years": 122,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 102,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 406.795,
       "terminate": "01-11"
     },
@@ -1054,6 +1156,7 @@
       "gap_days_in_leap_years": 121,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 103,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 403.865,
       "terminate": "01-12"
     },
@@ -1064,6 +1167,7 @@
       "gap_days_in_leap_years": 120,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 104,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 396.115,
       "terminate": "01-13"
     },
@@ -1074,6 +1178,7 @@
       "gap_days_in_leap_years": 119,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 105,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 395.635,
       "terminate": "01-14"
     },
@@ -1084,6 +1189,7 @@
       "gap_days_in_leap_years": 118,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 106,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 387.83,
       "terminate": "01-15"
     },
@@ -1094,6 +1200,7 @@
       "gap_days_in_leap_years": 117,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 107,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 387.025,
       "terminate": "01-16"
     },
@@ -1104,6 +1211,7 @@
       "gap_days_in_leap_years": 116,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 108,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 386.765,
       "terminate": "01-17"
     },
@@ -1114,6 +1222,7 @@
       "gap_days_in_leap_years": 115,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 109,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 381.6,
       "terminate": "01-18"
     },
@@ -1124,6 +1233,7 @@
       "gap_days_in_leap_years": 114,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 110,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 381.245,
       "terminate": "01-19"
     },
@@ -1134,6 +1244,7 @@
       "gap_days_in_leap_years": 113,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 111,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 380.7,
       "terminate": "01-20"
     },
@@ -1144,6 +1255,7 @@
       "gap_days_in_leap_years": 112,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 112,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 378.43,
       "terminate": "01-21"
     },
@@ -1154,6 +1266,7 @@
       "gap_days_in_leap_years": 111,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 113,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 374.38,
       "terminate": "01-22"
     },
@@ -1164,6 +1277,7 @@
       "gap_days_in_leap_years": 110,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 114,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 369.575,
       "terminate": "01-23"
     },
@@ -1174,6 +1288,7 @@
       "gap_days_in_leap_years": 109,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 115,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 369.575,
       "terminate": "01-24"
     },
@@ -1184,6 +1299,7 @@
       "gap_days_in_leap_years": 108,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 116,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 368.765,
       "terminate": "01-25"
     },
@@ -1194,6 +1310,7 @@
       "gap_days_in_leap_years": 107,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 117,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 367.415,
       "terminate": "01-26"
     },
@@ -1204,6 +1321,7 @@
       "gap_days_in_leap_years": 106,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 118,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 367.06,
       "terminate": "01-27"
     },
@@ -1214,6 +1332,7 @@
       "gap_days_in_leap_years": 105,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 119,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 351.295,
       "terminate": "01-28"
     },
@@ -1224,6 +1343,7 @@
       "gap_days_in_leap_years": 104,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 120,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 349.115,
       "terminate": "01-29"
     },
@@ -1234,6 +1354,7 @@
       "gap_days_in_leap_years": 103,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 121,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 348.765,
       "terminate": "01-30"
     },
@@ -1244,6 +1365,7 @@
       "gap_days_in_leap_years": 102,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 122,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 345.73,
       "terminate": "01-31"
     },
@@ -1254,6 +1376,7 @@
       "gap_days_in_leap_years": 101,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 123,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 340.155,
       "terminate": "02-01"
     },
@@ -1264,6 +1387,7 @@
       "gap_days_in_leap_years": 100,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 124,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 337.895,
       "terminate": "02-02"
     },
@@ -1274,6 +1398,7 @@
       "gap_days_in_leap_years": 99,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 125,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 337.54,
       "terminate": "02-03"
     },
@@ -1284,6 +1409,7 @@
       "gap_days_in_leap_years": 98,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 126,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 337.54,
       "terminate": "02-04"
     },
@@ -1294,6 +1420,7 @@
       "gap_days_in_leap_years": 97,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 127,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 335.565,
       "terminate": "02-05"
     },
@@ -1304,6 +1431,7 @@
       "gap_days_in_leap_years": 96,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 128,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 333.04,
       "terminate": "02-06"
     },
@@ -1314,6 +1442,7 @@
       "gap_days_in_leap_years": 95,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 129,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 328.03,
       "terminate": "02-07"
     },
@@ -1324,6 +1453,7 @@
       "gap_days_in_leap_years": 94,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 130,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 322.905,
       "terminate": "02-08"
     },
@@ -1334,6 +1464,7 @@
       "gap_days_in_leap_years": 93,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 131,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 322.88,
       "terminate": "02-09"
     },
@@ -1344,6 +1475,7 @@
       "gap_days_in_leap_years": 92,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 132,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 321.785,
       "terminate": "02-10"
     },
@@ -1354,6 +1486,7 @@
       "gap_days_in_leap_years": 91,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 133,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 321.75,
       "terminate": "02-11"
     },
@@ -1364,6 +1497,7 @@
       "gap_days_in_leap_years": 90,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 134,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 315.935,
       "terminate": "02-12"
     },
@@ -1374,6 +1508,7 @@
       "gap_days_in_leap_years": 89,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 135,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 310.04,
       "terminate": "02-13"
     },
@@ -1384,6 +1519,7 @@
       "gap_days_in_leap_years": 88,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 136,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 309.825,
       "terminate": "02-14"
     },
@@ -1394,6 +1530,7 @@
       "gap_days_in_leap_years": 87,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 137,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 309.18,
       "terminate": "02-15"
     },
@@ -1404,6 +1541,7 @@
       "gap_days_in_leap_years": 86,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 138,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 307.42,
       "terminate": "02-16"
     },
@@ -1414,6 +1552,7 @@
       "gap_days_in_leap_years": 85,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 139,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 302.54,
       "terminate": "02-17"
     },
@@ -1424,6 +1563,7 @@
       "gap_days_in_leap_years": 84,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 140,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 302.25,
       "terminate": "02-18"
     },
@@ -1434,6 +1574,7 @@
       "gap_days_in_leap_years": 83,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 141,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 300.31,
       "terminate": "02-19"
     },
@@ -1444,6 +1585,7 @@
       "gap_days_in_leap_years": 82,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 142,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 297.655,
       "terminate": "02-20"
     },
@@ -1454,6 +1596,7 @@
       "gap_days_in_leap_years": 81,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 143,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 297.65,
       "terminate": "02-21"
     },
@@ -1464,6 +1607,7 @@
       "gap_days_in_leap_years": 80,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 144,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 295.835,
       "terminate": "02-22"
     },
@@ -1474,6 +1618,7 @@
       "gap_days_in_leap_years": 79,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 145,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 293.205,
       "terminate": "02-23"
     },
@@ -1484,6 +1629,7 @@
       "gap_days_in_leap_years": 78,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 146,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 291.685,
       "terminate": "02-24"
     },
@@ -1494,6 +1640,7 @@
       "gap_days_in_leap_years": 77,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 147,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 286.755,
       "terminate": "02-25"
     },
@@ -1504,6 +1651,7 @@
       "gap_days_in_leap_years": 76,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 148,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 285.845,
       "terminate": "02-26"
     },
@@ -1514,6 +1662,7 @@
       "gap_days_in_leap_years": 75,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 149,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 278.31,
       "terminate": "02-27"
     },
@@ -1524,6 +1673,7 @@
       "gap_days_in_leap_years": 74,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 150,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 276.92,
       "terminate": "02-28"
     },
@@ -1534,6 +1684,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 151,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 272.6,
       "terminate": "03-01"
     },
@@ -1544,6 +1695,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 152,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 260.71,
       "terminate": "03-02"
     },
@@ -1554,6 +1706,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 153,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 259.08,
       "terminate": "03-03"
     },
@@ -1564,6 +1717,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 154,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 252.015,
       "terminate": "03-04"
     },
@@ -1574,6 +1728,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 155,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 250.81,
       "terminate": "03-05"
     },
@@ -1584,6 +1739,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 156,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 250.805,
       "terminate": "03-06"
     },
@@ -1594,6 +1750,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 157,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 238.045,
       "terminate": "03-07"
     },
@@ -1604,6 +1761,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 158,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 237.555,
       "terminate": "03-08"
     },
@@ -1614,6 +1772,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 159,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 235.045,
       "terminate": "03-09"
     },
@@ -1624,6 +1783,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 160,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 231.075,
       "terminate": "03-10"
     },
@@ -1634,6 +1794,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 161,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 231.07,
       "terminate": "03-11"
     },
@@ -1644,6 +1805,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 162,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 231.065,
       "terminate": "03-12"
     },
@@ -1654,6 +1816,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 163,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 224.82,
       "terminate": "03-13"
     },
@@ -1664,6 +1827,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 164,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 224.68,
       "terminate": "03-14"
     },
@@ -1674,6 +1838,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 165,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 223.325,
       "terminate": "03-15"
     },
@@ -1684,6 +1849,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 166,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 222.755,
       "terminate": "03-16"
     },
@@ -1694,6 +1860,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 167,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 212.055,
       "terminate": "03-17"
     },
@@ -1704,6 +1871,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 168,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 206.21,
       "terminate": "03-18"
     },
@@ -1714,6 +1882,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 169,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 205.09,
       "terminate": "03-19"
     },
@@ -1724,6 +1893,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 170,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 204.805,
       "terminate": "03-20"
     },
@@ -1734,6 +1904,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 171,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 202.745,
       "terminate": "03-21"
     },
@@ -1744,6 +1915,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 172,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 201.04,
       "terminate": "03-22"
     },
@@ -1754,6 +1926,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 173,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 200.845,
       "terminate": "03-23"
     },
@@ -1764,6 +1937,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 174,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 198.51,
       "terminate": "03-24"
     },
@@ -1774,6 +1948,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 175,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 187.815,
       "terminate": "03-25"
     },
@@ -1784,6 +1959,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 176,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 185.845,
       "terminate": "03-26"
     },
@@ -1794,6 +1970,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 177,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 183.51,
       "terminate": "03-27"
     },
@@ -1804,6 +1981,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 178,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 172.33,
       "terminate": "03-28"
     },
@@ -1814,6 +1992,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 179,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 166.06,
       "terminate": "03-29"
     },
@@ -1824,6 +2003,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 180,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 166.06,
       "terminate": "03-30"
     },
@@ -1834,6 +2014,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 181,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 166.055,
       "terminate": "03-31"
     },
@@ -1844,6 +2025,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 182,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 158.26,
       "terminate": "04-01"
     },
@@ -1854,6 +2036,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 183,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 157.5,
       "terminate": "04-02"
     },
@@ -1864,6 +2047,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 184,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 151.675,
       "terminate": "04-03"
     },
@@ -1874,6 +2058,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 185,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 150.935,
       "terminate": "04-04"
     },
@@ -1884,6 +2069,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 186,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 150.92,
       "terminate": "04-05"
     },
@@ -1894,6 +2080,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 187,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 137.46,
       "terminate": "04-06"
     },
@@ -1904,6 +2091,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 188,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 135.77,
       "terminate": "04-07"
     },
@@ -1914,6 +2102,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 189,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 135.005,
       "terminate": "04-08"
     },
@@ -1924,6 +2113,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 190,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 132.735,
       "terminate": "04-09"
     },
@@ -1934,6 +2124,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 191,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 129.485,
       "terminate": "04-10"
     },
@@ -1944,6 +2135,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 192,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 123.635,
       "terminate": "04-11"
     },
@@ -1954,6 +2146,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 193,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 120.615,
       "terminate": "04-12"
     },
@@ -1964,6 +2157,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 194,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 118.3,
       "terminate": "04-13"
     },
@@ -1974,6 +2168,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 195,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 114.37,
       "terminate": "04-14"
     },
@@ -1984,6 +2179,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 196,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 112.375,
       "terminate": "04-15"
     },
@@ -1994,6 +2190,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 197,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 109.265,
       "terminate": "04-16"
     },
@@ -2004,6 +2201,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 198,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 107.015,
       "terminate": "04-17"
     },
@@ -2014,6 +2212,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 199,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 106.54,
       "terminate": "04-18"
     },
@@ -2024,6 +2223,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 200,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 104.355,
       "terminate": "04-19"
     },
@@ -2034,6 +2234,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 201,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 101.92,
       "terminate": "04-20"
     },
@@ -2044,6 +2245,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 202,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 97.895,
       "terminate": "04-21"
     },
@@ -2054,6 +2256,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 203,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 94.715,
       "terminate": "04-22"
     },
@@ -2064,6 +2267,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 204,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 93.5,
       "terminate": "04-23"
     },
@@ -2074,6 +2278,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 205,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 91.085,
       "terminate": "04-24"
     },
@@ -2084,6 +2289,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 206,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 86.97,
       "terminate": "04-25"
     },
@@ -2094,6 +2300,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 207,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 86.335,
       "terminate": "04-26"
     },
@@ -2104,6 +2311,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 208,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 83.375,
       "terminate": "04-27"
     },
@@ -2114,6 +2322,7 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 209,
+      "qualifying_years": [],
       "rain_outside_cover_mm_median": 82.41,
       "terminate": "04-28"
     },
@@ -2124,6 +2333,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 210,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 82.205,
       "terminate": "04-29"
     },
@@ -2134,6 +2354,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 211,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 78.14,
       "terminate": "04-30"
     },
@@ -2144,6 +2375,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 212,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 73.65,
       "terminate": "05-01"
     },
@@ -2154,6 +2396,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 213,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 67.79,
       "terminate": "05-02"
     },
@@ -2164,6 +2417,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 214,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 62.61,
       "terminate": "05-03"
     },
@@ -2174,6 +2438,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 215,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 59.015,
       "terminate": "05-04"
     },
@@ -2184,6 +2459,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 216,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 56.16,
       "terminate": "05-05"
     },
@@ -2194,6 +2480,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 217,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 52.29,
       "terminate": "05-06"
     },
@@ -2204,6 +2501,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 218,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 44.105,
       "terminate": "05-07"
     },
@@ -2214,6 +2522,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 219,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 41.26,
       "terminate": "05-08"
     },
@@ -2224,6 +2543,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 220,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 39.59,
       "terminate": "05-09"
     },
@@ -2234,6 +2564,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 221,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 37.67,
       "terminate": "05-10"
     },
@@ -2244,6 +2585,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 222,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 34.56,
       "terminate": "05-11"
     },
@@ -2254,6 +2606,17 @@
       "gap_days_in_leap_years": null,
       "heavy_rain_days_outside_cover_median": 0.0,
       "living_cover_days_planned": 223,
+      "qualifying_years": [
+        1981,
+        1983,
+        1986,
+        1993,
+        2001,
+        2008,
+        2010,
+        2021,
+        2022
+      ],
       "rain_outside_cover_mm_median": 30.24,
       "terminate": "05-12"
     }

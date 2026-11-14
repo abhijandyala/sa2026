@@ -1151,6 +1151,21 @@
             "title": "Living Cover Days Planned",
             "type": "integer"
           },
+          "living_cover_kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cover_crop",
+                  "winter_grain"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Living Cover Kind"
+          },
           "reference_year": {
             "title": "Reference Year",
             "type": "integer"
@@ -3846,6 +3861,11 @@
             ],
             "title": "Label"
           },
+          "label_generated": {
+            "default": false,
+            "title": "Label Generated",
+            "type": "boolean"
+          },
           "leg": {
             "anyOf": [
               {
@@ -3896,6 +3916,17 @@
               }
             ],
             "title": "Reason"
+          },
+          "reason_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Text"
           },
           "residue_context": {
             "items": {
@@ -4789,6 +4820,11 @@
             "title": "Flagged",
             "type": "boolean"
           },
+          "print": {
+            "default": false,
+            "title": "Print",
+            "type": "boolean"
+          },
           "reason": {
             "title": "Reason",
             "type": "string"
@@ -4823,6 +4859,11 @@
           },
           "status": {
             "$ref": "#/components/schemas/Status"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
           },
           "verdict": {
             "anyOf": [
@@ -5261,6 +5302,28 @@
           "full_season_status": {
             "$ref": "#/components/schemas/Status"
           },
+          "gwetroot_window_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gwetroot Window Mean"
+          },
+          "gwettop_window_mean": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gwettop Window Mean"
+          },
           "heavy_rain_days_outside_cover": {
             "anyOf": [
               {
@@ -5330,6 +5393,16 @@
             ],
             "title": "Termination Gap Days"
           },
+          "wetness_label": {
+            "const": "modeled",
+            "default": "modeled",
+            "title": "Wetness Label",
+            "type": "string"
+          },
+          "wetness_status": {
+            "$ref": "#/components/schemas/Status",
+            "default": "unavailable"
+          },
           "winter_status": {
             "$ref": "#/components/schemas/Status"
           },
@@ -5394,6 +5467,13 @@
           "living_cover_days_planned": {
             "title": "Living Cover Days Planned",
             "type": "integer"
+          },
+          "qualifying_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Qualifying Years",
+            "type": "array"
           },
           "rain_outside_cover_mm_median": {
             "anyOf": [
@@ -6054,6 +6134,52 @@
         "title": "SpringSection",
         "type": "object"
       },
+      "SpringShortcuts": {
+        "additionalProperties": false,
+        "description": "Typical / dry / wet planting years for THIS plan's planting date (its own 30-day window).\nSame definition as ``GET /v1/years``; they follow edited planting dates.",
+        "properties": {
+          "basis": {
+            "default": "own_window_baseline",
+            "title": "Basis",
+            "type": "string"
+          },
+          "dry": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dry"
+          },
+          "typical": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typical"
+          },
+          "wet": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wet"
+          }
+        },
+        "title": "SpringShortcuts",
+        "type": "object"
+      },
       "SpringSnapshot": {
         "additionalProperties": true,
         "properties": {
@@ -6173,6 +6299,16 @@
               }
             ],
             "title": "Median Total Mm"
+          },
+          "shortcuts": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpringShortcuts"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "status": {
             "$ref": "#/components/schemas/Status"

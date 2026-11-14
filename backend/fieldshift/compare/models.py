@@ -48,6 +48,8 @@ class CalendarSummary(_M):
     days_without_planned_cover: int
     termination_gap_days: int | None
     establishment: Literal["uncertain", "inapplicable"]
+    # what the "living cover" days are: a cover crop, or growing winter wheat (planned)
+    living_cover_kind: Literal["cover_crop", "winter_grain"] | None = None
     spring_window: dict[str, str]  # {"start": "04-12", "end": "05-11"} MM-DD, 30 days
 
 
@@ -61,6 +63,16 @@ class WinterSummary(_M):
     reasons: list[str] = Field(default_factory=list)
 
 
+class SpringShortcuts(_M):
+    """Typical / dry / wet planting years for THIS plan's planting date (its own 30-day window).
+    Same definition as ``GET /v1/years``; they follow edited planting dates."""
+
+    typical: int | None = None
+    dry: int | None = None
+    wet: int | None = None
+    basis: str = "own_window_baseline"
+
+
 class SpringSummary(_M):
     status: Status
     window_days: int
@@ -70,6 +82,7 @@ class SpringSummary(_M):
     dry_years: list[int]
     excluded_years: list[dict[str, Any]]
     median_total_mm: float | None
+    shortcuts: SpringShortcuts | None = None
 
 
 class CheckSummaryOut(_M):
@@ -92,7 +105,9 @@ class RuleLine(_M):
     status: Status
     verdict: str | None
     flagged: bool
-    reason: str
+    reason: str  # for debugging; clients show `text`
+    text: str = ""  # one plain sentence for the grower (B's rule_text); never null
+    print: bool = False  # worth a printed page (B's rule_text.should_print)
     conflict: bool = False
     conflicts_with: list[str] = Field(default_factory=list)
     source: dict[str, Any] | None = None
@@ -111,13 +126,21 @@ class SeasonRow(_M):
     heavy_rain_days_outside_cover: int | None
     termination_gap_days: int | None
     flagged_rule_ids: list[str]
+    # Modeled soil wetness (MERRA-2 GWET*, 0-1) averaged over the spring window: the same window
+    # and "modeled" label as the replay. null (never 0) when the window is not complete.
+    gwetroot_window_mean: float | None = None
+    gwettop_window_mean: float | None = None
+    wetness_status: Status = Status.UNAVAILABLE
+    wetness_label: Literal["modeled"] = "modeled"
 
 
 class PlanComparison(_M):
     plan_id: str
     label: str | None
+    label_generated: bool = False  # true when the label was filled in because none was sent
     status: Status
     reason: str | None = None
+    reason_text: str | None = None  # a plain sentence for a reason code; the code stays in `reason`
     rotation_id: str | None = None  # first requested rotation containing this plan
     rotation_ids: list[str] = Field(default_factory=list)  # every requested rotation containing it
     leg: int | None = None
@@ -159,7 +182,9 @@ class CompareResponse(_M):
     plans: list[PlanComparison]
     soil: dict[str, Any] | None = None
     location: dict[str, Any] | None = None  # resolve result when a point was requested
-    data_sources: dict[str, Any]  # per-source freshness: fresh | cached(<at>) | snapshot | unavailable
+    data_sources: dict[
+        str, Any
+    ]  # per-source freshness: fresh | cached(<at>) | snapshot | unavailable
     eras: dict[str, Any]  # window definitions: earlier/recent/excluded
     coverage_note: str | None = None
 
@@ -188,7 +213,9 @@ class ReplayDay(_M):
     segment: str
     in_spring_window: bool
     heavy_rain: bool | None
-    missing: list[str] = Field(default_factory=list)  # variables missing that day, with reason below
+    missing: list[str] = Field(
+        default_factory=list
+    )  # variables missing that day, with reason below
     missing_reasons: dict[str, str] = Field(default_factory=dict)
 
 
@@ -233,6 +260,9 @@ class SensitivityPoint(_M):
     heavy_rain_days_outside_cover_median: float | None
     checks_count: int
     denominator: int
+    # the seasons this end date would have flagged (same meaning as the comparison check's
+    # qualifying_years); len == checks_count, empty when 0
+    qualifying_years: list[int] = Field(default_factory=list)
     gap_days_in_leap_years: int | None = None  # set when a Feb 29 crossing changes the gap
 
 

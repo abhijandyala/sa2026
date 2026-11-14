@@ -168,8 +168,8 @@ def test_incomplete_window_has_no_totals_and_is_not_eligible():
     assert "record_starts_after_window_start" in w.reasons
 
 
-def test_winter_grain_is_unsupported_until_phase_12():
-    p = Plan(
+def wheat_plan() -> Plan:
+    return Plan(
         plan_id="wheat",
         previous_crop_id="field_corn",
         prev_harvest="09-25",
@@ -179,9 +179,45 @@ def test_winter_grain_is_unsupported_until_phase_12():
         next_crop_id="soybean",
         next_plant="06-20",
     )
+
+
+def test_winter_grain_counts_growing_wheat_as_living_cover_over_its_own_window():
+    heavy = ("2021-10-01", "2021-12-15", "2022-06-12")  # before wheat, growing wheat, after harvest
+    light = {"2021-10-10": 5.0, "2021-11-01": 10.0, "2022-06-15": 2.0}
+    p = wheat_plan()
     cal = build_calendar(p, 2022)
-    w = compute_winter(p, cal, weather(), thresholds(), HASH)
-    assert w.status == Status.UNSUPPORTED and w.total_rain_mm is None
+    w = compute_winter(p, cal, weather(heavy, light), thresholds(), HASH)
+    assert w.status == Status.COMPLETE and w.eligible
+    # window: previous harvest (2021-09-25) to the soybean planting date (2022-06-20, exclusive)
+    assert (w.window_start, w.window_end_exclusive, w.window_days) == (
+        date(2021, 9, 25),
+        date(2022, 6, 20),
+        268,
+    )
+    assert w.living_cover_days == 228 and w.days_outside_cover == 40
+    assert w.segments[BEFORE_ESTABLISHMENT].days == 30  # until wheat planting 10-25
+    assert w.segments[LIVING_COVER].days == 228  # [wheat plant, wheat harvest)
+    assert w.segments[AFTER_TERMINATION].days == 10  # wheat harvest 06-10 to soybean planting
+    assert w.segments[NO_PLANNED_COVER].days == 0
+    # rain on growing wheat is not "outside cover": 40 + 5 before, 40 + 2 after; 50 on wheat
+    assert w.rain_outside_cover_mm == 87.0 and w.total_rain_mm == 137.0
+    assert w.heavy_rain_days_outside_cover == 2 and w.heavy_rain_days == 3
+    assert {e.segment for e in w.heavy_rain_events} == {
+        BEFORE_ESTABLISHMENT,
+        LIVING_COVER,
+        AFTER_TERMINATION,
+    }
+    assert w.cover_label == "planned"
+    assert not any(r.kind == "cover_residue" for r in w.residue_context)
+
+
+def test_winter_grain_zero_heavy_days_is_a_real_zero_and_uses_the_frozen_threshold():
+    p = wheat_plan()
+    w = compute_winter(p, build_calendar(p, 2022), weather(), thresholds(76.2), HASH)
+    assert w.heavy_rain_days_outside_cover == 0 and w.rain_outside_cover_mm == 0.0
+    assert w.heavy_rain_threshold_mm == 76.2
+    with pytest.raises(ThresholdMismatchError):
+        compute_winter(p, build_calendar(p, 2022), weather(), thresholds(), "other-hash")
 
 
 # --- thresholds on the real snapshot -----------------------------------------------------------
@@ -257,7 +293,6 @@ def test_zero_count_winters_are_valid_complete_results_with_known_rain(union):
     assert sum(c.heavy_rain_days == 0 for c in counts) >= 36
 
 
-
 def test_missing_reference_row_is_a_loud_error_not_a_silent_default(monkeypatch, tmp_path):
     import fieldshift.metrics.thresholds as th
 
@@ -276,7 +311,9 @@ def test_the_old_p95_rule_is_not_part_of_the_default_set_but_remains_an_explicit
     assert "p95" not in str(build_threshold_set(series, h).thresholds).lower()
     exp = build_threshold_set(series, h, heavy_rule=HeavyRainRule(method="percentile_of_wet_days"))
     t = exp.get(HEAVY_RAIN_NAME)
-    assert t.parameters["assumed"] is True and 25 < t.value < 35  # labelled assumed, experiments only
+    assert (
+        t.parameters["assumed"] is True and 25 < t.value < 35
+    )  # labelled assumed, experiments only
     assert exp.threshold_set_id != build_threshold_set(series, h).threshold_set_id
 
 
@@ -303,10 +340,13 @@ def test_rain_totals_survive_when_no_heavy_rain_threshold_can_be_computed():
     from fieldshift.metrics.thresholds import HeavyRainRule
 
     days = pd.date_range("1981-01-01", "2025-06-30", freq="D")
-    series = DailySeries(pd.DataFrame({"date": days, "precip_mm": 0.0, "gwettop": 0.5,
-                                       "gwetroot": 0.5}))
+    series = DailySeries(
+        pd.DataFrame({"date": days, "precip_mm": 0.0, "gwettop": 0.5, "gwetroot": 0.5})
+    )
     # an all-zero record has no wet days, so the (experimental) relative rule has no value
-    ts = build_threshold_set(series, HASH, heavy_rule=HeavyRainRule(method="percentile_of_wet_days"))
+    ts = build_threshold_set(
+        series, HASH, heavy_rule=HeavyRainRule(method="percentile_of_wet_days")
+    )
     assert ts.get(HEAVY_RAIN_NAME).value is None
     p = plan("rye")
     w = compute_winter(p, build_calendar(p, 2010), series, ts, HASH)

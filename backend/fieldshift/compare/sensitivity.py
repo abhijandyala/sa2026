@@ -49,9 +49,15 @@ def sweep_termination(
     plan: Plan, ctx: Context, ts: ThresholdSet, rule_id: str = DEFAULT_RULE
 ) -> dict[str, Any]:
     if plan.winter.kind != "cover":
-        raise InvalidPlanError([FieldIssue(
-            field="plan.winter.kind", code="not_a_cover_plan",
-            message="termination sensitivity needs a plan with a winter cover crop")])
+        raise InvalidPlanError(
+            [
+                FieldIssue(
+                    field="plan.winter.kind",
+                    code="not_a_cover_plan",
+                    message="termination sensitivity needs a plan with a winter cover crop",
+                )
+            ]
+        )
     ref_cal = build_calendar(plan, REFERENCE_YEAR)
     assert ref_cal.cover is not None
     heavy = ts.get(HEAVY_RAIN_NAME).value
@@ -62,7 +68,9 @@ def sweep_termination(
         base = build_calendar(plan, y)
         cov = season_coverage(base, ctx.series)
         spring = compute_spring(plan, base, ctx.series, ts, ctx.snapshot_hash, ref)
-        rain = ctx.series.window(["precip_mm"], base.prev_harvest, base.plant)["precip_mm"].to_numpy()
+        rain = ctx.series.window(["precip_mm"], base.prev_harvest, base.plant)[
+            "precip_mm"
+        ].to_numpy()
         winter_ok = cov.metrics["winter"].eligible
         cum = np.concatenate([[0.0], np.cumsum(np.nan_to_num(rain))])
         hv = np.concatenate([[0.0], np.cumsum((rain >= heavy) if heavy is not None else 0)])
@@ -78,6 +86,7 @@ def sweep_termination(
         rains: list[float] = []
         heavies: list[float] = []
         count = denom = 0
+        qualifying: list[int] = []
         for y, _base, cov, spring, winter_ok, cum, hv in per_year:
             try:
                 cal = build_calendar(p2, y)
@@ -96,19 +105,26 @@ def sweep_termination(
                 seen.add(Status(chk.status))
             if chk is not None and chk.status == Status.COMPLETE:
                 denom += 1
-                count += bool(chk.flagged)
+                if chk.flagged:
+                    count += 1
+                    qualifying.append(y)
         gap_ref = (ref_cal.plant - d).days
         leap_gap = _leap_gap(p2)
-        points.append(SensitivityPoint(
-            terminate=md, gap_days=gap_ref,
-            gap_days_in_leap_years=leap_gap if leap_gap != gap_ref else None,
-            living_cover_days_planned=(d - seed_ref).days,
-            rain_outside_cover_mm_median=round(statistics.median(rains), 3) if rains else None,
-            heavy_rain_days_outside_cover_median=(
-                round(statistics.median(heavies), 1) if heavies else None
-            ),
-            checks_count=count, denominator=denom,
-        ))
+        points.append(
+            SensitivityPoint(
+                terminate=md,
+                gap_days=gap_ref,
+                gap_days_in_leap_years=leap_gap if leap_gap != gap_ref else None,
+                living_cover_days_planned=(d - seed_ref).days,
+                rain_outside_cover_mm_median=round(statistics.median(rains), 3) if rains else None,
+                heavy_rain_days_outside_cover_median=(
+                    round(statistics.median(heavies), 1) if heavies else None
+                ),
+                checks_count=count,
+                denominator=denom,
+                qualifying_years=qualifying,
+            )
+        )
         d += timedelta(days=1)
 
     dry_years = [y for y, _, _, s, _, _, _ in per_year if s.is_dry]
@@ -124,9 +140,12 @@ def sweep_termination(
         "status": status,
         "base_plan_id": plan.plan_id,
         "varied": "terminate",
-        "fixed": {"seed": plan.winter.seed, "next_plant": plan.next_plant,
-                  "prev_harvest": plan.prev_harvest,
-                  "low_moisture_concern": plan.grower.low_moisture_concern},
+        "fixed": {
+            "seed": plan.winter.seed,
+            "next_plant": plan.next_plant,
+            "prev_harvest": plan.prev_harvest,
+            "low_moisture_concern": plan.grower.low_moisture_concern,
+        },
         "check_id": CHECK_META.get(rule_id, (rule_id,))[0],
         "rule_ids": [rule_id],
         "denominator": max((p.denominator for p in points), default=0),
@@ -139,5 +158,7 @@ def sweep_termination(
         "historical season is evaluated with its own real gap. With the fixed "
         "14-day rule the check count is a step: the dry-year count below 14 days, 0 at or above "
         "(unless the grower reports a low-moisture concern, which fires every evaluable season "
-        "below 14 days).",
+        "below 14 days). Each point's `qualifying_years` are the seasons the check would have "
+        "fired for that end date (same meaning as the comparison check; its length equals "
+        "`checks_count`, and it is empty when the count is 0).",
     }

@@ -89,21 +89,35 @@ def test_double_crop_sits_next_to_full_season_only_as_different_calendar_raw_tot
     assert cross["double_crop"]["plan_id"] == WHEAT
     # raw totals only: no rank, percentile, dry label or era result across the two calendars
     keys = _all_keys(cross)
-    for forbidden in ("percentile", "rank", "is_dry", "dry_years", "dry_seasons", "eras", "era_dry_spring"):
+    for forbidden in (
+        "percentile",
+        "rank",
+        "is_dry",
+        "dry_years",
+        "dry_seasons",
+        "eras",
+        "era_dry_spring",
+    ):
         assert forbidden not in keys
     fs, dc = cross["full_season"], cross["double_crop"]
-    assert cross["median_total_mm_difference"] == round(dc["median_total_mm"] - fs["median_total_mm"], 3)
+    assert cross["median_total_mm_difference"] == round(
+        dc["median_total_mm"] - fs["median_total_mm"], 3
+    )
     assert fs["window"]["plant_md"] == "05-12" and dc["window"]["plant_md"] == "06-12"
 
 
 def test_maturity_group_checks_and_manual_check_rows_stay_visible(client):
     dc = wheat_of(compare(client, {"rotation_ids": ["add_grain_crop"]}).json())["double_crop"]
-    assert dc["maturity_group"]["status"] == "unknown" and dc["maturity_group"]["missing"] == ["maturity_group"]
+    assert dc["maturity_group"]["status"] == "unknown" and dc["maturity_group"]["missing"] == [
+        "maturity_group"
+    ]
     ids = {c["rule_id"] for c in dc["maturity_group"]["checks"]}
     assert ids == {"sb_v2_mg_mid_june", "sb_v2_mg_mid_july", "sb_rc_03"}
     manual = dc["rule_checks"]["manual_check"]
     assert manual and all(m["status"] == "manual_check" for m in manual)
-    withmg = wheat_of(compare(client, {"rotation_ids": ["add_grain_crop"], "maturity_group": 3}).json())
+    withmg = wheat_of(
+        compare(client, {"rotation_ids": ["add_grain_crop"], "maturity_group": 3}).json()
+    )
     mg = withmg["double_crop"]["maturity_group"]
     assert mg["input"] == 3 and mg["status"] == "complete"
     flagged = {c["rule_id"] for c in mg["checks"] if c["flagged"]}
@@ -112,8 +126,11 @@ def test_maturity_group_checks_and_manual_check_rows_stay_visible(client):
 
 @pytest.mark.parametrize("bad", [11, -1, True, "3", float("inf")])
 def test_bad_maturity_group_is_a_typed_400(client, bad):
-    r = client.post("/v1/plans/compare", content=json.dumps({"rotation_ids": ["add_grain_crop"],
-                    "maturity_group": bad}), headers={"content-type": "application/json"})
+    r = client.post(
+        "/v1/plans/compare",
+        content=json.dumps({"rotation_ids": ["add_grain_crop"], "maturity_group": bad}),
+        headers={"content-type": "application/json"},
+    )
     assert r.status_code == 400 and r.json()["status"] == "invalid_input"
     assert any(i["field"].startswith("maturity_group") for i in r.json()["issues"])
 
@@ -124,8 +141,8 @@ def test_wheat_is_never_added_to_other_plans_or_folded_into_shared_years(client)
     both = compare(client, {**others, "plan_ids": [*others["plan_ids"], WHEAT]}).json()
     assert both["shared_eligible_years"] == alone["shared_eligible_years"]
     wheat = wheat_of(both)
-    assert wheat["spring"] is None and wheat["winter"] is None
-    assert wheat["eras"] == {} and wheat["eras_shared_years"] == {} and wheat["seasons"] == []
+    assert wheat["eras_shared_years"] == {}  # never in a cross-plan era comparison
+    assert wheat["spring"]["shortcuts"]["basis"] == "own_window_baseline"
     for p in both["plans"]:
         if p["plan_id"] != WHEAT:  # the other plans' results are unchanged by the wheat plan
             twin = next(q for q in alone["plans"] if q["plan_id"] == p["plan_id"])
@@ -143,7 +160,10 @@ def test_the_request_s_own_full_season_soybean_plan_is_preferred_to_the_default(
     assert cross["full_season"]["plan_id"] == "my_full_season"
     assert cross["full_season"]["window"]["plant_md"] == "05-20"
     alone = compare(client, {"plan_ids": [WHEAT]}).json()  # no neighbour: sample default
-    assert wheat_of(alone)["double_crop"]["cross_calendar"]["full_season"]["plan_id"] == "corn_soy__no_cover"
+    assert (
+        wheat_of(alone)["double_crop"]["cross_calendar"]["full_season"]["plan_id"]
+        == "corn_soy__no_cover"
+    )
 
 
 def test_wheat_dry_cutoff_is_the_frozen_threshold_in_the_response(client):
@@ -200,17 +220,23 @@ def test_replay_of_the_wheat_sample_works_and_sensitivity_says_not_a_cover_plan(
 
 
 def test_maturity_group_zero_is_a_real_value_and_null_means_not_entered(client):
-    zero = wheat_of(compare(client, {"rotation_ids": ["add_grain_crop"], "maturity_group": 0}).json())
+    zero = wheat_of(
+        compare(client, {"rotation_ids": ["add_grain_crop"], "maturity_group": 0}).json()
+    )
     assert zero["double_crop"]["maturity_group"]["input"] == 0
     assert zero["double_crop"]["maturity_group"]["status"] == "complete"
-    blank = wheat_of(compare(client, {"rotation_ids": ["add_grain_crop"], "maturity_group": None}).json())
+    blank = wheat_of(
+        compare(client, {"rotation_ids": ["add_grain_crop"], "maturity_group": None}).json()
+    )
     assert blank["double_crop"]["maturity_group"]["input"] is None
     assert blank["double_crop"]["maturity_group"]["status"] == "unknown"
 
 
 def test_blank_maturity_group_means_not_entered_not_a_400(client):
     for blank in ("", "   "):
-        w = wheat_of(compare(client, {"rotation_ids": ["add_grain_crop"], "maturity_group": blank}).json())
+        w = wheat_of(
+            compare(client, {"rotation_ids": ["add_grain_crop"], "maturity_group": blank}).json()
+        )
         assert w["double_crop"]["maturity_group"]["status"] == "unknown"
 
 
@@ -232,3 +258,68 @@ def test_openapi_bounds_use_real_json_schema_keywords():
     for b in branches:
         assert b["minimum"] == 0 and b["maximum"] == 10
     assert not any({"ge", "le"} & set(b) for b in mg["anyOf"])
+
+
+def test_wheat_winter_exposure_is_computed_over_its_own_window_with_the_frozen_threshold(client):
+    body = compare(client, {"plan_ids": [WHEAT, "corn_soy__rye"]}).json()
+    w = wheat_of(body)
+    rye = next(p for p in body["plans"] if p["plan_id"] == "corn_soy__rye")
+    # winter 1981 starts before the record: 44 of 45 seasons evaluable, same as the rye plan
+    assert w["winter"]["status"] == rye["winter"]["status"] == "partial"
+    assert w["winter"]["eligible_seasons"] == 44
+    assert w["winter"]["segments"] == [
+        "living_cover",
+        "before_establishment",
+        "after_termination",
+        "no_planned_cover",
+    ]
+    assert w["calendar"]["living_cover_kind"] == "winter_grain"
+    assert w["calendar"]["living_cover_days_planned"] == 223  # wheat 10-25 .. 06-05 (2025)
+    assert w["calendar"]["winter_days"] == 265  # 2024-09-20 .. 2025-06-12 (exclusive)
+    rows = {r["year"]: r for r in w["seasons"]}
+    assert len(rows) == 45
+    first, last = rows[1981], rows[2025]
+    assert first["winter_status"] == "partial" and first["rain_outside_cover_mm"] is None  # not 0
+    assert last["rain_outside_cover_mm"] is not None and last["heavy_rain_days_outside_cover"] >= 0
+    assert (
+        w["eras"]["winter_heavy_rain_outside_cover"]["indicator"]
+        == "winter_heavy_rain_outside_cover"
+    )
+    eras = w["eras"]["winter_heavy_rain_outside_cover"]
+    assert eras["threshold_set_id"] == body["thresholds"]["threshold_set_id"]
+    # the block inside double_crop agrees with the plan-level numbers
+    we = w["double_crop"]["winter_exposure"]
+    assert we["status"] == "partial" and we["label"] == "own_window"
+    assert we["heavy_rain_threshold"]["value"] == body["thresholds"]["heavy_rain"]["value"] == 76.2
+    assert we["per_season_median"] == w["winter"]["per_season_median"]
+    # spring stays on its own planting window
+    assert w["spring"]["cutoff_mm"] == body["thresholds"]["dry_spring"]["06-12"]["value"]
+    assert w["double_crop"]["spring"]["cutoff_mm"] == w["spring"]["cutoff_mm"]
+
+
+def test_wheat_winter_numbers_match_a_direct_compute_winter(client):
+    from fieldshift.compare.context import get_context
+    from fieldshift.compare.engine import threshold_set_for
+    from fieldshift.metrics.winter import compute_winter
+    from fieldshift.seasons.align import build_calendar
+
+    ctx = get_context()
+    plan = Plan.model_validate(sample(WHEAT))
+    ts = threshold_set_for(ctx, [plan.next_plant])
+    rows = {
+        r["year"]: r for r in wheat_of(compare(client, {"plan_ids": [WHEAT]}).json())["seasons"]
+    }
+    for y in (1990, 2008, 2020):
+        direct = compute_winter(plan, build_calendar(plan, y), ctx.series, ts, ctx.snapshot_hash)
+        assert rows[y]["rain_outside_cover_mm"] == direct.rain_outside_cover_mm
+        assert rows[y]["heavy_rain_days_outside_cover"] == direct.heavy_rain_days_outside_cover
+
+
+def test_wheat_does_not_change_the_other_plans_or_the_shared_winter_years(client):
+    alone = compare(client, {"plan_ids": ["corn_soy__no_cover", "corn_soy__rye"]}).json()
+    both = compare(client, {"plan_ids": ["corn_soy__no_cover", "corn_soy__rye", WHEAT]}).json()
+    assert both["shared_eligible_years"]["winter"] == alone["shared_eligible_years"]["winter"]
+    for pid in ("corn_soy__no_cover", "corn_soy__rye"):
+        a = next(p for p in alone["plans"] if p["plan_id"] == pid)
+        b = next(p for p in both["plans"] if p["plan_id"] == pid)
+        assert a["winter"] == b["winter"] and a["seasons"] == b["seasons"]

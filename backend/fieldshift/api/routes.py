@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, field_validator
 
 from fieldshift.api.samples import SamplePlan, load_samples
-from fieldshift.compare import engine
+from fieldshift.compare import engine, text
 from fieldshift.compare.context import Context, get_context
 from fieldshift.compare.models import (
     CompareResponse,
@@ -109,9 +109,13 @@ def _full_season_default() -> Plan | None:
 def _unavailable(sp: SamplePlan) -> PlanComparison:
     info = sp.meta.get("unavailable") or {}
     return PlanComparison(
-        plan_id=sp.plan_id, label=sp.meta.get("label"), status=Status.UNAVAILABLE,
-        reason=info.get("reason", "unavailable"), rotation_id=sp.meta.get("rotation_id"),
-        leg=sp.meta.get("leg"), dates_assumed=sp.meta.get("dates_assumed"),
+        plan_id=sp.plan_id,
+        label=sp.meta.get("label"),
+        status=Status.UNAVAILABLE,
+        reason=info.get("reason", "unavailable"),
+        rotation_id=sp.meta.get("rotation_id"),
+        leg=sp.meta.get("leg"),
+        dates_assumed=sp.meta.get("dates_assumed"),
         dates_basis=sp.meta.get("dates_basis"),
     )
 
@@ -125,8 +129,13 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
     for i, rid in enumerate(body.rotation_ids):
         rot = samples.rotations.get(rid)
         if rot is None:
-            issues.append(issue(f"rotation_ids.{i}", "unknown_rotation",
-                                f"unknown rotation '{rid}'; known: {sorted(samples.rotations)}"))
+            issues.append(
+                issue(
+                    f"rotation_ids.{i}",
+                    "unknown_rotation",
+                    f"unknown rotation '{rid}'; known: {sorted(samples.rotations)}",
+                )
+            )
             continue
         for leg in rot.legs:
             wanted.setdefault(leg, (samples.plans[leg].plan, samples.plans[leg].meta))
@@ -139,15 +148,19 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
             wanted.setdefault(pid, (sp.plan, sp.meta))
             if not body.rotation_ids:
                 membership.setdefault(pid, []).extend(
-                    r.rotation_id for r in samples.rotations.values() if pid in r.legs)
+                    r.rotation_id for r in samples.rotations.values() if pid in r.legs
+                )
     for p in body.plans:  # an edited plan replaces the sample of the same id, keeping its place
         sample = samples.plans.get(p.plan_id)
         wanted[p.plan_id] = (p, sample.meta if sample else {})
     if not wanted and not issues:
-        issues.append(issue("plans", "no_plans", "give at least one of plans, plan_ids, rotation_ids"))
+        issues.append(
+            issue("plans", "no_plans", "give at least one of plans, plan_ids, rotation_ids")
+        )
     if len(wanted) > engine.MAX_PLANS:
-        issues.append(issue("plans", "too_many_plans",
-                            f"at most {engine.MAX_PLANS} plans per comparison"))
+        issues.append(
+            issue("plans", "too_many_plans", f"at most {engine.MAX_PLANS} plans per comparison")
+        )
     if issues:
         return invalid(issues)
 
@@ -160,8 +173,10 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
                 issues += _issues_from_plan_error(exc, f"plans.{pid}")
             else:
                 if plan.winter.kind == "winter_grain":  # the wheat path replays every year
-                    issues += [issue(f"plans.{pid}.{i['field']}", i["code"], i["message"])
-                               for i in plan_year_issues(plan, engine.YEARS)]
+                    issues += [
+                        issue(f"plans.{pid}.{i['field']}", i["code"], i["message"])
+                        for i in plan_year_issues(plan, engine.YEARS)
+                    ]
     if issues:
         return invalid(issues)
 
@@ -176,14 +191,22 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
         ts = engine.threshold_set_for(ctx, [p.next_plant for _, p, _ in live])
         shared = SharedYears(spring=[], winter=[], full_season=[], note=location_problem)
         by_id = {
-            pid: PlanComparison(plan_id=pid, label=p.label, status=Status.UNSUPPORTED,
-                                reason=location_problem, plan=p)
+            pid: PlanComparison(
+                plan_id=pid,
+                label=p.label,
+                status=Status.UNSUPPORTED,
+                reason=location_problem,
+                plan=p,
+            )
             for pid, p, _ in live
         }
     else:
         results_live, ts, shared = engine.compare_plans(
-            [p for _, p, _ in live], ctx, meta_by_plan={pid: m for pid, _, m in live},
-            maturity_group=body.maturity_group, full_season_default=_full_season_default(),
+            [p for _, p, _ in live],
+            ctx,
+            meta_by_plan={pid: m for pid, _, m in live},
+            maturity_group=body.maturity_group,
+            full_season_default=_full_season_default(),
         )
         by_id = {r.plan_id: r for r in results_live}
     results: list[PlanComparison] = []
@@ -192,26 +215,39 @@ def compare(body: CompareRequest, ctx: Annotated[Context, Depends(get_context)])
         res.rotation_ids = membership.get(pid, [])
         res.rotation_id = res.rotation_ids[0] if res.rotation_ids else None
         results.append(res)
+    text.finalize(results, {pid: p for pid, (p, _m) in wanted.items()}, ctx.index)
 
     echo = {
         "location_id": ctx.location_id if not loc else None,
-        "latitude": lat, "longitude": lon,
+        "latitude": lat,
+        "longitude": lon,
         "plan_ids": list(wanted),
         "rotation_ids": body.rotation_ids,
     }
-    input_hash = engine.canonical_hash({
-        "plans": [p.model_dump(mode="json") for _, p, _ in live], "location": [lat, lon],
-        "maturity_group": body.maturity_group,  # changes the double-crop checks
-        "unavailable": [pid for pid, (p, _m) in wanted.items() if p is None],
-    })
+    input_hash = engine.canonical_hash(
+        {
+            "plans": [p.model_dump(mode="json") for _, p, _ in live],
+            "location": [lat, lon],
+            "maturity_group": body.maturity_group,  # changes the double-crop checks
+            "unavailable": [pid for pid, (p, _m) in wanted.items() if p is None],
+        }
+    )
     meta = _meta(input_hash[:16])
     result_id = engine.canonical_hash(
-        [input_hash, ctx.snapshot_hash, meta.catalog_version, ts.threshold_set_id])[:16]
+        [input_hash, ctx.snapshot_hash, meta.catalog_version, ts.threshold_set_id]
+    )[:16]
     soil = _soil(lat, lon) if body.include_soil else None
     return CompareResponse(
-        meta=meta, result_id=result_id, input_hash=input_hash, request_echo=echo,
-        thresholds=engine.thresholds_view(ts), shared_eligible_years=shared, plans=results,
-        soil=soil, location=location_block, eras=engine.eras_block(),
+        meta=meta,
+        result_id=result_id,
+        input_hash=input_hash,
+        request_echo=echo,
+        thresholds=engine.thresholds_view(ts),
+        shared_eligible_years=shared,
+        plans=results,
+        soil=soil,
+        location=location_block,
+        eras=engine.eras_block(),
         data_sources=_data_sources(ctx, soil),
     )
 
@@ -251,8 +287,11 @@ def _data_sources(ctx: Context, soil: dict[str, Any] | None) -> dict[str, Any]:
             "last_date": cov["last_date"],
             "retrieved_at": ctx.manifest["retrieval"]["retrieved_at"],
         },
-        "soil": None if soil is None else {
-            "source": "USDA NRCS Soil Data Access", "freshness": soil_fresh or "unavailable",
+        "soil": None
+        if soil is None
+        else {
+            "source": "USDA NRCS Soil Data Access",
+            "freshness": soil_fresh or "unavailable",
         },
         "catalog": {"source": "Perplexity catalogs v1 (verbatim)", "freshness": "snapshot"},
     }
@@ -270,8 +309,15 @@ def _soil(lat: float, lon: float) -> dict[str, Any]:
 
 def _check_year(year: int) -> JSONResponse | None:
     if not FIRST_YEAR <= year <= LAST_YEAR:
-        return invalid([issue("year", "year_out_of_range",
-                              f"year must be {FIRST_YEAR}-{LAST_YEAR} (the planting years in the record)")])
+        return invalid(
+            [
+                issue(
+                    "year",
+                    "year_out_of_range",
+                    f"year must be {FIRST_YEAR}-{LAST_YEAR} (the planting years in the record)",
+                )
+            ]
+        )
     return None
 
 
@@ -285,8 +331,11 @@ def _unsupported(plan: Plan, ctx: Context, year: int | None = None) -> Unsupport
         return None  # reported as typed invalid_input by the caller
     if res.status == Status.UNSUPPORTED:
         return UnsupportedResponse(
-            meta=_meta(plan_version(plan, year)), status=Status.UNSUPPORTED, plan_id=plan.plan_id,
-            reason="; ".join(res.unsupported) or "unsupported", unsupported=res.unsupported,
+            meta=_meta(plan_version(plan, year)),
+            status=Status.UNSUPPORTED,
+            plan_id=plan.plan_id,
+            reason="; ".join(res.unsupported) or "unsupported",
+            unsupported=res.unsupported,
         )
     return None
 
@@ -316,13 +365,22 @@ def replay_get(
     if err:
         return invalid([err])
     if sp is None or sp.plan is None:
-        return invalid([issue("plan", "plan_unavailable",
-                              f"plan '{plan}' is unavailable: {(sp.meta.get('unavailable') or {}).get('reason') if sp else ''}")])
+        return invalid(
+            [
+                issue(
+                    "plan",
+                    "plan_unavailable",
+                    f"plan '{plan}' is unavailable: {(sp.meta.get('unavailable') or {}).get('reason') if sp else ''}",
+                )
+            ]
+        )
     return _replay(sp.plan, year, ctx)
 
 
 @router.post("/seasons/{year}/replay", response_model=ReplayResponse | UnsupportedResponse)
-def replay_post(year: int, body: ReplayRequest, ctx: Annotated[Context, Depends(get_context)]) -> Any:
+def replay_post(
+    year: int, body: ReplayRequest, ctx: Annotated[Context, Depends(get_context)]
+) -> Any:
     """Replay an edited plan (same payload as the GET)."""
     return _replay(body.plan, year, ctx)
 
@@ -344,8 +402,9 @@ def sensitivity(body: SensitivityRequest, ctx: Annotated[Context, Depends(get_co
         return unsupported
     rule_id = _CHECK_TO_RULE.get(body.rule_id, body.rule_id)
     if rule_id not in {r.rule_id for r in ctx.index.catalog.rules}:
-        return invalid([issue("rule_id", "unknown_rule",
-                              f"unknown rule or check '{body.rule_id}'")])
+        return invalid(
+            [issue("rule_id", "unknown_rule", f"unknown rule or check '{body.rule_id}'")]
+        )
     try:
         ts = engine.threshold_set_for(ctx, [plan.next_plant])
         payload = sweep_termination(plan, ctx, ts, rule_id)
@@ -357,7 +416,9 @@ def sensitivity(body: SensitivityRequest, ctx: Annotated[Context, Depends(get_co
 @router.get("/years", response_model=YearsResponse)
 def years(
     ctx: Annotated[Context, Depends(get_context)],
-    plan: Annotated[str, Query(description="sample plan id that sets the windows")] = "corn_soy__rye",
+    plan: Annotated[
+        str, Query(description="sample plan id that sets the windows")
+    ] = "corn_soy__rye",
 ) -> Any:
     sp, err = _sample(plan, "plan")
     if err:

@@ -97,6 +97,7 @@
       "eras": {},
       "eras_shared_years": {},
       "label": "Cereal rye before soybean",
+      "label_generated": false,
       "leg": null,
       "other_checks": [],
       "path_notes": [],
@@ -125,6 +126,7 @@
       },
       "plan_id": "corn_soy__rye",
       "reason": "unsupported_location: weather_history_not_available_for_location",
+      "reason_text": "Weather history is only built for the Union County cell, so this place is not evaluated.",
       "residue_context": [],
       "rotation_id": "winter_cover",
       "rotation_ids": [
