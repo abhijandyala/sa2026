@@ -13,6 +13,7 @@ Fieldback (NASA Space Apps 2026, Field Shift, Charlotte) compares three two-wint
 - **Missing is not zero.** A valid 0.0 mm stays 0.0; a missing value says "Not available" or "Not evaluated yet", never 0.
 - **No hardcoded thresholds.** Heavy-rain and dry cutoffs come from `thresholds` in the response.
 - **Every agronomic sentence has a source** in `src/content/strategies.ts` (NC State page checked against the source) or is listed as a gap.
+- **No invented proof on the site:** no customer logos, testimonials, prices or stats that are not read from the saved record. Numbers on the marketing pages come from `useNumbers()`.
 - **No outcome claims:** no "saved water", "optimized yield", "safe to plant", "best rotation", forecasts or profit.
 - **Unknown is a real answer** in forms; never treat a blank as No.
 - **Unless a test says otherwise, the backend's field names win.** If the API needs to change, write it in `docs/api-requests.md` and tell Rahul; do not patch around it in the UI.
@@ -35,6 +36,7 @@ Fieldback (NASA Space Apps 2026, Field Shift, Charlotte) compares three two-wint
 - `src/view/build.ts`: the only place that turns responses into what screens show.
 - `src/content`: card names, sourced headings, glossary, credits.
 - `src/state`: selection (card, year, winter, rye date, priorities), form, links.
+- `src/site`: the marketing site in front of the planner. `Landing.tsx` and `pages.tsx` (Product, Who it's for, Evidence, Resources, About) follow the tabs.com page templates with Fieldback's own words and numbers; `demo/` holds the Loom-style recordings, which drive the real planner screens with a scripted pointer (the hero's `TourScene` shows the whole dashboard, using the planner's own sidebar from `planner/SideNav.tsx`); the reading pages in `screens/Pages.tsx` (how it works, credits, privacy) sit inside the same site shell, one topic per row with its heading on the left; styles in `styles/site.css` (`st-` and `demo-` classes). Type sizes come from the `--t-*` steps on `.st`, which match the reference page's scale (hero 72, headings 48 and 36, card titles 28, body 16); use those instead of new font sizes. Routes: `./` is the landing page, `?view=app` is the planner, and a link with planner state in its hash still opens the planner.
 - `src/screens`, `src/ui` (kit pieces: `Roll`, `Accordion`, `components`), `src/scene` (3D), `src/styles` (`tokens.css`, `fieldback.css` = the kit).
 - `scripts/fetch-backend.mjs`: saves the real responses from a running backend into `public/data/nasa/` (`npm run data`).
 - `scripts/make-sample.mjs` and `public/data/sample/`: the old synthetic draft, kept only as a fixture for the view-builder tests.

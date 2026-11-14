@@ -1,13 +1,17 @@
-import { useEffect, type ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { APP_NAME, CHALLENGE_LABEL } from "../config";
 import { DATA_CREDITS, DISCLOSURES, LIBRARIES } from "../content/credits";
 import { GLOSSARY } from "../content/glossary";
 import { SOURCES } from "../content/strategies";
+import { Reveal, SiteShell, useNumbers } from "../site/Site";
+import { useSiteData } from "../site/useSiteData";
 
 /*
-  Methods (card 6.4) and Credits (card 6.5). Plain reading pages so a judge can explain
-  the method back and see every source, license and disclosure. The back link returns to
-  the planner state the reader came from.
+  Methods (card 6.4), Credits (card 6.5) and Privacy. Reading pages inside the site's own
+  nav and footer, so a judge can explain the method back and see every source, license and
+  disclosure. Each topic is a row across the page: heading on the left, text on the right,
+  lists and definitions in two columns. The back link returns to the planner state the
+  reader came from.
 */
 
 function backToPlanner(e: React.MouseEvent<HTMLAnchorElement>) {
@@ -18,40 +22,35 @@ function backToPlanner(e: React.MouseEvent<HTMLAnchorElement>) {
 }
 
 function DocPage({ title, lede, children }: { title: string; lede: string; children: ReactNode }) {
-  useEffect(() => {
-    const before = document.title;
-    document.title = `${title} · ${APP_NAME}`;
-    return () => {
-      document.title = before;
-    };
-  }, [title]);
+  const n = useNumbers(useSiteData());
   return (
-    <div className="doc">
-      <header className="doc-head">
-        <a className="doc-brand" href="./">
-          <span className="brand-mark" aria-hidden="true" />
-          <span className="brand-name">{APP_NAME}</span>
-        </a>
-        <a className="header-link" href="./" onClick={backToPlanner}>
-          ← Back to the planner
-        </a>
-      </header>
-      <main className="doc-main">
-        <p className="marker">{CHALLENGE_LABEL}</p>
-        <h1>{title}</h1>
-        <p className="doc-lede">{lede}</p>
-        {children}
-      </main>
-    </div>
+    <SiteShell current="resources" title={`${title} · ${APP_NAME}`} springs={n?.springs ?? null}>
+      <section className="st-hero st-wrap">
+        <p className="st-eyebrow st-rise">{CHALLENGE_LABEL}</p>
+        <div className="st-hero-head">
+          <h1 className="st-rise" style={{ "--d": "60ms" } as CSSProperties}>
+            {title}
+          </h1>
+          <div className="st-hero-side st-rise" style={{ "--d": "140ms" } as CSSProperties}>
+            <p>{lede}</p>
+            <a className="st-link" href="?view=app" onClick={backToPlanner}>
+              Back to the planner <i />
+            </a>
+          </div>
+        </div>
+      </section>
+      <div className="st-wrap st-doc">{children}</div>
+    </SiteShell>
   );
 }
 
+/** One topic: its heading stays on the left while its text spreads across the right. */
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
-    <section className="doc-section" aria-labelledby={id}>
+    <Reveal as="section" className="st-doc-row">
       <h2 id={id}>{title}</h2>
-      {children}
-    </section>
+      <div className="st-doc-body">{children}</div>
+    </Reveal>
   );
 }
 
@@ -164,7 +163,7 @@ export function MethodsPage() {
       </Section>
 
       <Section id="m-glossary" title="Words used on the screen">
-        <dl className="doc-glossary">
+        <dl className="st-doc-terms">
           {Object.values(GLOSSARY).map((g) => (
             <div key={g.term}>
               <dt>{g.term}</dt>
@@ -184,7 +183,7 @@ export function CreditsPage() {
       lede="Everything Fieldback uses, where it comes from, and what to know about how it was built."
     >
       <Section id="c-data" title="Data and guidance">
-        <ul className="doc-credits">
+        <ul className="st-doc-credits">
           {DATA_CREDITS.map((d) => (
             <li key={d.name}>
               <a href={d.url} target="_blank" rel="noreferrer">
@@ -192,14 +191,14 @@ export function CreditsPage() {
               </a>{" "}
               · {d.owner}
               <p>{d.used}</p>
-              {d.note ? <p className="doc-note">{d.note}</p> : null}
+              {d.note ? <p className="st-doc-note">{d.note}</p> : null}
             </li>
           ))}
         </ul>
       </Section>
 
       <Section id="c-code" title="Open-source code and fonts">
-        <div className="table-scroll doc-table">
+        <div className="table-scroll st-doc-table">
           <table>
             <thead>
               <tr>
@@ -221,7 +220,7 @@ export function CreditsPage() {
             </tbody>
           </table>
         </div>
-        <p className="doc-note">
+        <p className="st-doc-note">
           Source code:{" "}
           <a href="https://github.com/abhijandyala/sa2026" target="_blank" rel="noreferrer">
             github.com/abhijandyala/sa2026
@@ -230,7 +229,7 @@ export function CreditsPage() {
       </Section>
 
       <Section id="c-disclose" title="Disclosures">
-        <dl className="doc-glossary">
+        <dl className="st-doc-terms">
           {DISCLOSURES.map((d) => (
             <div key={d.title}>
               <dt>{d.title}</dt>

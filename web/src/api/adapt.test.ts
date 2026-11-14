@@ -35,11 +35,26 @@ describe("compare, adapted", () => {
     expect(plan("soy_corn__rye").sequence!.winter).toEqual({ type: "cover", crop_id: "cereal_rye", seed: "10-20", terminate: "04-05" });
   });
 
-  it("leaves the wheat plan unavailable, with the backend's reason", () => {
+  it("carries the wheat plan's dates and its own winter rain figure", () => {
     const wheat = plan("corn_soy__wheat_dc");
-    expect(wheat.status).toBe("unavailable");
-    expect(wheat.reason).toBe(rawPlan("corn_soy__wheat_dc").reason);
-    expect(wheat.sequence).toBeUndefined();
+    const rawWheat = rawPlan("corn_soy__wheat_dc");
+    expect(wheat.status).toBe(rawWheat.status);
+    expect(wheat.sequence).toMatchObject({ prev_harvest: rawWheat.plan!.prev_harvest, next_plant: rawWheat.plan!.next_plant });
+    expect(wheat.sequence!.winter).toEqual({ type: "winter_grain", crop_id: "winter_wheat", plant: rawWheat.plan!.winter.plant, harvest: rawWheat.plan!.winter.harvest });
+    // The figure is the service's own, over the wheat plan's own window; the reason is its plain sentence.
+    expect(wheat.winter!.per_season_median.rain_mm_without_cover).toBe(rawWheat.winter!.per_season_median.rain_mm_outside_cover);
+    expect(wheat.reason).toBe(rawWheat.reason_text);
+    // Its June planting date gets its own spring window and cutoff.
+    const june = view.spring_windows![windowId(rawWheat.plan!.next_plant)]!;
+    expect(june.threshold.value).toBe(raw.thresholds.dry_spring[rawWheat.plan!.next_plant]!.value);
+    expect(june.shortcuts).toMatchObject({ typical: rawWheat.spring!.shortcuts!.typical, dry: rawWheat.spring!.shortcuts!.dry, wet: rawWheat.spring!.shortcuts!.wet });
+  });
+
+  it("passes each rule's plain sentence and print flag through", () => {
+    const rawChecks = rawPlan("soy_corn__rye").other_checks;
+    const checks = plan("soy_corn__rye").other_checks;
+    expect(checks.map((c) => [c.rule_id, c.text, c.print])).toEqual(rawChecks.map((c) => [c.rule_id, c.text, c.print]));
+    expect(checks.every((c) => typeof c.text === "string" && c.text.length > 0)).toBe(true);
   });
 
   it("gives each planting date its own window, cutoff and 45 springs", () => {
@@ -62,12 +77,34 @@ describe("compare, adapted", () => {
     expect(soy.years.find((y) => y.year === 2014)!.gwetroot_window_mean).toBe(replay.wetness.gwetroot_window_mean);
   });
 
-  it("without the extras, shortcut years and wetness stay unknown, not guessed", () => {
+  it("reads shortcut years and wetness from the compare response itself, with no extras", () => {
     const bare = adaptCompare(raw);
     const soy = bare.spring_windows![windowId("05-12")]!;
-    expect(soy.shortcuts).toEqual({ typical: null, dry: null, wet: null });
-    expect(soy.years.every((y) => y.gwetroot_window_mean === null)).toBe(true);
+    const rawRye = rawPlan("corn_soy__rye");
+    expect(soy.shortcuts).toMatchObject({ typical: rawRye.spring!.shortcuts!.typical, dry: rawRye.spring!.shortcuts!.dry, wet: rawRye.spring!.shortcuts!.wet });
+    for (const y of soy.years) {
+      const season = rawRye.seasons.find((s) => s.year === y.year)!;
+      expect([y.gwetroot_window_mean, y.gwettop_window_mean]).toEqual([season.gwetroot_window_mean, season.gwettop_window_mean]);
+    }
     expect(bare.rotations).toEqual([]);
+  });
+
+  it("falls back to the extras for a response from an older service, and to unknown without them", () => {
+    // The same response with the newer fields taken out, as the service returned it before Nov 14.
+    const older = BackendCompare.parse({
+      ...raw,
+      plans: raw.plans.map((p) => ({
+        ...p,
+        spring: p.spring ? { ...p.spring, shortcuts: undefined } : p.spring,
+        seasons: p.seasons.map((s) => ({ ...s, gwetroot_window_mean: undefined, gwettop_window_mean: undefined })),
+      })),
+    });
+    const bare = adaptCompare(older).spring_windows![windowId("05-12")]!;
+    expect(bare.shortcuts).toEqual({ typical: null, dry: null, wet: null });
+    expect(bare.years.every((y) => y.gwetroot_window_mean === null)).toBe(true);
+    const withExtras = adaptCompare(older, extras).spring_windows![windowId("05-12")]!;
+    expect(withExtras.shortcuts).toEqual(extras.shortcuts["05-12"]);
+    expect(withExtras.years.find((y) => y.year === 1986)!.gwetroot_window_mean).toBe(extras.wetness["corn_soy__rye"]!["1986"]!.gwetroot_window_mean);
   });
 
   it("carries the moisture check and the two-period counts unchanged", () => {
@@ -108,8 +145,14 @@ describe("rye sweep, adapted", () => {
     expect(sweep.points[i]).toMatchObject({ gap_days: 12, rain_mm_without_cover_median: rawSweep.points[i]!.rain_outside_cover_mm_median, checks_count: 9 });
   });
 
-  it("names the flagged springs only when the count is the whole dry list or zero", () => {
-    for (const p of sweep.points) {
+  it("names the springs each end date flags, from the point's own list", () => {
+    for (const [i, p] of sweep.points.entries()) {
+      expect(p.qualifying_years).toEqual(rawSweep.points[i]!.qualifying_years);
+      expect(p.qualifying_years).toHaveLength(p.checks_count ?? 0);
+    }
+    // An older sweep gave only the dry list: it is used when the count is the whole list or zero, never guessed otherwise.
+    const older = adaptSensitivity(BackendSensitivity.parse({ ...rawSweep, points: rawSweep.points.map((p) => ({ ...p, qualifying_years: undefined })) }));
+    for (const p of older.points) {
       if (p.checks_count === 0) expect(p.qualifying_years).toEqual([]);
       else if (p.checks_count === rawSweep.dry_years!.length) expect(p.qualifying_years).toEqual(rawSweep.dry_years);
       else expect(p.qualifying_years).toBeUndefined();

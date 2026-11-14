@@ -89,6 +89,10 @@ export const OtherCheck = z
     verdict: Verdict,
     status: Status.optional(),
     reason: z.string(),
+    /** One plain sentence for the grower; `reason` is the engine's wording, kept for the evidence drawer. */
+    text: z.string().optional(),
+    /** The backend's call on whether the line is worth a printed page. */
+    print: z.boolean().optional(),
   })
   .passthrough();
 export type OtherCheck = z.infer<typeof OtherCheck>;

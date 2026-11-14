@@ -1,6 +1,25 @@
 # Frontend and backend: where things stand
 
-From Abhi (frontend) to Rahul (backend). Updated Nov 13 2026, after connecting the frontend to the real API at backend commit `83c4798`.
+From Abhi (frontend) to Rahul (backend). Updated Nov 14 2026, checked against backend commit `d7d3367` (wheat winter exposure, flagged years per sweep point, shortcuts and wetness in compare, generated labels, `reason_text`, rule `text` and `print`).
+
+## Status after your 00:15 push
+
+Thank you: everything below marked done is now read by the frontend and shown.
+
+| Ask | Status | What the frontend does with it |
+|---|---|---|
+| 0. Plain words for each rule | Done | Plan detail lists `text`; the printed summary lists the lines with `print: true` |
+| 1. Wetness for each spring in compare | Done | Read from `seasons[]`; `wetness.json` is only a fallback now |
+| 2. Typical, dry and wet springs for edited dates | Done | Read from `spring.shortcuts` |
+| 3. Flagged years on each sweep point | Done | The rye page lights the point's own `qualifying_years` |
+| 4. The grain plan in compare | Done | "Add a grain crop" shows its own winter rain (119 mm in winter 1) and its June window |
+| 5. Other places | Open | Any other cell is still `unsupported_location`; the picker's other counties show dates only |
+| 6. Small things | Done | `label` and `reason_text` are used; `localhost:5174` is allowed |
+
+**Still open.**
+- **Other places (5).** Tell me if fetching a cell on demand is out for this weekend and I will cut the picker to Union County plus "enter coordinates".
+- **The service address.** Nothing is deployed yet, so the frontend has no `VITE_API_BASE` and runs on the saved record. Abhi has to create the Railway project (admin).
+- **`eras[].missing_years[].reason`** codes have no plain text; the frontend does not show them today, so this is low priority.
 
 ## What is connected
 
@@ -22,9 +41,9 @@ The saved copy lives in `web/public/data/nasa/` and is your responses exactly as
 npm run data
 ```
 
-## Requests, most useful first
+## The original requests (kept for the record)
 
-Every item is optional for the UI. Where a value is missing the screen says so; it never computes one.
+All but "other places" are done as of `d7d3367`; the text below is what was asked on Nov 13.
 
 ### 0. Plain words for each rule
 

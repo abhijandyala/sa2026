@@ -14,20 +14,19 @@ import {
 } from "./schema";
 
 /*
-  The boundary with Rahul's backend (Phase 12, backend branch at 83c4798, Nov 13 2026).
+  The boundary with Rahul's backend (Phase 12, backend branch at d7d3367, Nov 14 2026).
 
   `Backend*` below are the real response shapes, field for field (docs/api/openapi.json and
   the generated examples). `adapt*` turns them into the model the screens were built on
   (schema.ts). Adapting only renames, selects and regroups values the backend already
   returned. It never computes a total, a rank, a count or a threshold.
 
-  Three things the real compare response does not carry, and where they come from instead:
-  - typical / dry / wet springs per planting date  → GET /v1/years?plan=… (`shortcuts`)
-  - modeled soil wetness for each spring           → each season's replay (`wetness`), collected
-                                                     into the saved file wetness.json
-  - which springs a rye end date flags             → the sweep's own `dry_years`, used only when
-                                                     a point's count equals that list's length
-  All three are listed for Rahul in web/docs/api-requests.md.
+  Since d7d3367 the compare and sensitivity responses carry everything the screens need:
+  typical / dry / wet springs (`spring.shortcuts`), modeled soil wetness for each spring
+  (`seasons[].gwet*_window_mean`), the springs each rye end date flags (`qualifying_years`),
+  a plain sentence for each rule (`other_checks[].text`, `print`) and for each reason code
+  (`reason_text`). The older sources (GET /v1/years, the saved wetness.json, the sweep's
+  `dry_years`) are read only when a response from an older service leaves a value out.
 */
 
 const md = z.string().regex(/^\d{2}-\d{2}$/, "expected MM-DD");
@@ -68,8 +67,13 @@ const BackendSeason = z
     spring_is_dry: z.boolean().nullable(),
     winter_status: Status,
     rain_outside_cover_mm: z.number().nullable(),
+    // Modeled soil wetness over the same spring window as the replay; null when the window is incomplete.
+    gwettop_window_mean: z.number().nullable().optional(),
+    gwetroot_window_mean: z.number().nullable().optional(),
   })
   .passthrough();
+
+const Shortcuts = z.object({ typical: int.nullable(), dry: int.nullable(), wet: int.nullable() }).passthrough();
 
 const BackendPlan = z
   .object({
@@ -77,6 +81,8 @@ const BackendPlan = z
     label: z.string().nullable().optional(),
     status: Status,
     reason: z.string().nullable().optional(),
+    // A plain sentence beside a reason that is a code (or the short form of a long one).
+    reason_text: z.string().nullable().optional(),
     leg: z.union([z.literal(1), z.literal(2)]).nullable().optional(),
     rotation_id: z.string().nullable().optional(),
     editable: z.array(z.string()).nullable().optional(),
@@ -106,7 +112,14 @@ const BackendPlan = z
       .nullable()
       .optional(),
     spring: z
-      .object({ status: Status, median_total_mm: z.number().nullable(), dry_seasons: int.nullable(), eligible_seasons: int })
+      .object({
+        status: Status,
+        median_total_mm: z.number().nullable(),
+        dry_seasons: int.nullable(),
+        eligible_seasons: int,
+        // Typical, dry and wet springs for this plan's own planting date (so edited dates get them too).
+        shortcuts: Shortcuts.nullable().optional(),
+      })
       .passthrough()
       .nullable()
       .optional(),
@@ -129,10 +142,28 @@ const BackendPlan = z
       )
       .default([]),
     other_checks: z
-      .array(z.object({ rule_id: z.string(), verdict: z.string().nullable(), status: Status.optional(), reason: z.string() }).passthrough())
+      .array(
+        z
+          .object({
+            rule_id: z.string(),
+            verdict: z.string().nullable(),
+            status: Status.optional(),
+            reason: z.string(),
+            // One sentence for the grower, and whether the line is worth a printed page.
+            text: z.string().optional(),
+            print: z.boolean().optional(),
+          })
+          .passthrough(),
+      )
       .default([]),
     eras: z.record(BackendEra).default({}),
     seasons: z.array(BackendSeason).default([]),
+    // A wheat double-crop plan also carries its own block (its dates and its own-window baseline).
+    double_crop: z
+      .object({ winter_exposure: z.object({ status: Status, reason: z.string().nullable().optional() }).passthrough().nullable().optional() })
+      .passthrough()
+      .nullable()
+      .optional(),
   })
   .passthrough();
 type BackendPlan = z.infer<typeof BackendPlan>;
@@ -176,6 +207,8 @@ export const BackendSensitivity = z
             living_cover_days_planned: int,
             rain_outside_cover_mm_median: z.number().nullable(),
             checks_count: int.nullable(),
+            // The springs this end date would have flagged.
+            qualifying_years: z.array(int).optional(),
           })
           .passthrough(),
       )
@@ -239,7 +272,9 @@ function plan(p: BackendPlan): Plan {
     rotation_id: p.rotation_id ?? undefined,
     leg: p.leg ?? undefined,
     status: p.status,
-    reason: p.reason ?? undefined,
+    // The backend's plain sentence when it gives one; with no winter figure, its words for that figure.
+    reason: p.reason_text || (!p.winter && p.double_crop?.winter_exposure?.reason) || p.reason || undefined,
+    double_crop: p.double_crop ?? undefined,
     editable: p.editable ?? undefined,
     dates_assumed: p.dates_assumed ?? undefined,
     sequence,
@@ -271,7 +306,7 @@ function plan(p: BackendPlan): Plan {
   };
 }
 
-/** Extra values the compare response does not carry, keyed by planting date (MM-DD). */
+/** Fallback values for a response from an older service, keyed by planting date (MM-DD). */
 export interface CompareExtras {
   rotations?: BackendRotations | null;
   /** Shortcut years per planting date, from GET /v1/years for a plan with that date. */
@@ -308,7 +343,7 @@ export function adaptCompare(real: BackendCompare, extras: CompareExtras = {}): 
       median_mm: p.spring.median_total_mm,
       dry_count: p.spring.dry_seasons,
       denominator: of,
-      shortcuts: extras.shortcuts?.[d.next_plant] ?? { typical: null, dry: null, wet: null },
+      shortcuts: p.spring.shortcuts ?? extras.shortcuts?.[d.next_plant] ?? { typical: null, dry: null, wet: null },
       years: p.seasons.map((s) => ({
         year: s.year,
         start: `${s.year}-${p.calendar!.spring_window.start}`,
@@ -319,8 +354,8 @@ export function adaptCompare(real: BackendCompare, extras: CompareExtras = {}): 
         of: s.spring_rank === null ? null : of,
         percentile: null,
         is_dry: s.spring_is_dry,
-        gwettop_window_mean: wet?.[String(s.year)]?.gwettop_window_mean ?? null,
-        gwetroot_window_mean: wet?.[String(s.year)]?.gwetroot_window_mean ?? null,
+        gwettop_window_mean: s.gwettop_window_mean !== undefined ? s.gwettop_window_mean : (wet?.[String(s.year)]?.gwettop_window_mean ?? null),
+        gwetroot_window_mean: s.gwetroot_window_mean !== undefined ? s.gwetroot_window_mean : (wet?.[String(s.year)]?.gwetroot_window_mean ?? null),
       })),
       eras: { dry_spring: era(dry) },
     };
@@ -362,9 +397,9 @@ export function adaptSensitivity(real: BackendSensitivity): SensitivityResponse 
     points: real.points.map((p) => ({
       ...p,
       rain_mm_without_cover_median: p.rain_outside_cover_mm_median,
-      // The sweep names its dry springs once. A point is given that list only when its own
-      // count says every one of them is flagged; otherwise the years stay unknown.
-      qualifying_years: p.checks_count === 0 ? [] : dry && p.checks_count === dry.length ? dry : undefined,
+      // The point's own list. An older service gave only the sweep's dry springs: use that list
+      // just when the point's count says every one of them is flagged, else leave the years unknown.
+      qualifying_years: p.qualifying_years ?? (p.checks_count === 0 ? [] : dry && p.checks_count === dry.length ? dry : undefined),
     })),
   });
 }

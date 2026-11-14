@@ -74,6 +74,7 @@ export function change(delta: number, more: string, fewer: string): string {
  */
 const REASON_TEXT: Record<string, string> = {
   catalog_missing: "Wheat double-crop is not in the comparison yet. Its dates come from the grower, not the guidance catalog.",
+  "rain-outside-cover exposure is not computed for harvested winter grain": "The service does not work out winter rain with nothing growing for a harvested grain crop.",
   record_starts_after_window_start: "NASA's record starts after this winter began.",
   weather_history_not_available_for_location: "Weather history is not available for this place yet.",
 };

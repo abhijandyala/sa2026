@@ -261,7 +261,7 @@ export function EvidenceDrawer({
             <ul className="ev-rules">
               {card.checks.map((c) => (
                 <li key={c.rule_id}>
-                  <code>{c.rule_id}</code> {c.verdict.replace("_", " ")}: {c.reason.replace(/^[a-z_]+:\s*/, "")}
+                  <code>{c.rule_id}</code> {c.verdict.replace("_", " ")}: {c.text ?? c.reason.replace(/^[a-z_]+:\s*/, "")}
                 </li>
               ))}
             </ul>

@@ -46,6 +46,8 @@ interface DiscussItem {
   text: string;
   source: SourceId | null;
   where: string[];
+  /** Worth a line on the printed page. The backend decides; an older service that does not say prints them all. */
+  print: boolean;
 }
 
 /** Checks to talk over, merged when the same rule applies to several plans (display grouping only). */
@@ -55,9 +57,9 @@ function discussList(legViews: Record<Leg, ViewModel>): DiscussItem[] {
     ([1, 2] as Leg[]).forEach((l) => {
       const card = legViews[l].cards[i]!;
       for (const ch of card.checks) {
-        if (!TO_DISCUSS.includes(ch.verdict)) continue;
+        if (!TO_DISCUSS.includes(ch.verdict) && !ch.print) continue;
         const key = `${l}:${ch.rule_id}`;
-        const item = items.get(key) ?? { key, verdict: ch.verdict, text: clean(ch.reason), source: null, where: [] };
+        const item = items.get(key) ?? { key, verdict: ch.verdict, text: ch.text ?? clean(ch.reason), source: null, where: [], print: ch.print ?? true };
         item.where.push(content.name);
         items.set(key, item);
       }
@@ -65,13 +67,13 @@ function discussList(legViews: Record<Leg, ViewModel>): DiscussItem[] {
     const obs: ObservationVM[] = legViews[1].cards[i]!.observations;
     for (const o of obs) {
       const key = `obs:${o.text}`;
-      const item = items.get(key) ?? { key, verdict: "observation", text: o.text, source: o.source, where: [] };
+      const item = items.get(key) ?? { key, verdict: "observation", text: o.text, source: o.source, where: [], print: true };
       item.where.push(content.name);
       items.set(key, item);
     }
   });
-  const rank = (v: DiscussItem["verdict"]) => (v === "observation" ? -1 : TO_DISCUSS.indexOf(v));
-  return [...items.values()].sort((a, b) => rank(a.verdict) - rank(b.verdict));
+  const rank = (v: DiscussItem["verdict"]) => (v === "observation" ? -1 : TO_DISCUSS.includes(v) ? TO_DISCUSS.indexOf(v) : TO_DISCUSS.length);
+  return [...items.values()].sort((a, b) => Number(b.print) - Number(a.print) || rank(a.verdict) - rank(b.verdict));
 }
 
 export function ExtensionSummary({
@@ -141,6 +143,8 @@ export function ExtensionSummary({
   const boundary = rye && rye.boundaryIndex !== null ? rye.points[rye.boundaryIndex]! : null;
   const y = view.selectedYear;
   const discuss = discussList(legViews);
+  // The printed page lists the lines the backend marked for print, up to what fits; the rest are counted.
+  const onPage = discuss.filter((d) => d.print).slice(0, DISCUSS_ON_PAGE);
   const prepared = new Date().toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   const place = placeLabel ?? view.locationLabel.replace(/\s*\(sample\)$/i, "");
 
@@ -173,7 +177,7 @@ export function ExtensionSummary({
     });
     if (discuss.length) {
       lines.push("", "To discuss:");
-      for (const d of discuss.slice(0, DISCUSS_ON_PAGE)) lines.push(`- ${d.verdict === "observation" ? "You reported" : VERDICT_WORD[d.verdict]}: ${d.text} (${where(d)})`);
+      for (const d of onPage) lines.push(`- ${d.verdict === "observation" ? "You reported" : (VERDICT_WORD[d.verdict] ?? "Check")}: ${d.text} (${where(d)})`);
     }
     if (questions.trim()) lines.push("", "My questions:", questions.trim());
     lines.push("", `Open it: ${window.location.href}`);
@@ -349,7 +353,7 @@ export function ExtensionSummary({
           <section aria-labelledby="xs-discuss">
             <h2 id="xs-discuss">To discuss with your agent</h2>
             <ul className="xs-discuss">
-              {discuss.slice(0, DISCUSS_ON_PAGE).map((d) => (
+              {onPage.map((d) => (
                 <li key={d.key} className={done.has(d.key) ? "is-done" : undefined}>
                   <input
                     type="checkbox"
@@ -358,14 +362,14 @@ export function ExtensionSummary({
                     onChange={() => toggleDone(d.key)}
                     aria-label={`Discussed: ${d.text}`}
                   />
-                  <strong>{d.verdict === "observation" ? "You reported" : VERDICT_WORD[d.verdict]}:</strong> {d.text}
+                  <strong>{d.verdict === "observation" ? "You reported" : (VERDICT_WORD[d.verdict] ?? "Check")}:</strong> {d.text}
                   {cite(d.source)} <span className="xs-where">({where(d)})</span>
                 </li>
               ))}
             </ul>
-            {discuss.length > DISCUSS_ON_PAGE ? (
+            {discuss.length > onPage.length ? (
               <p className="xs-note">
-                {discuss.length - DISCUSS_ON_PAGE} more field checks are listed on each plan's page in {APP_NAME}.
+                {discuss.length - onPage.length} more field checks are listed on each plan's page in {APP_NAME}.
               </p>
             ) : null}
           </section>

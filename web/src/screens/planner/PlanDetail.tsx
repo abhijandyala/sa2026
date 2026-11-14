@@ -124,7 +124,7 @@ export function PlanDetail({
       for (const l of card.legs) {
         for (const c of l.plan?.other_checks ?? []) {
           if (!g.verdicts.includes(c.verdict)) continue;
-          const text = clean(c.reason);
+          const text = c.text ?? clean(c.reason);
           const item = merged.get(text) ?? { key: `${l.leg}${c.rule_id}`, text, winters: [] };
           if (!item.winters.includes(l.leg)) item.winters.push(l.leg);
           merged.set(text, item);
@@ -197,7 +197,7 @@ export function PlanDetail({
                 onPickYear={onPickYear}
                 onWhy={onWhy}
                 caption={
-                  l.available && l.plan?.sequence ? (
+                  l.plan?.sequence ? (
                     <p className="pd-dates">
                       {datesLine(l.plan)} <Src k={planSource} />
                     </p>

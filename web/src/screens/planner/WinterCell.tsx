@@ -32,6 +32,20 @@ export function WinterCell({
   onWhy: (kind: "rain" | "check", leg: 1 | 2) => void;
 }) {
   if (!leg.available) {
+    // The service gave this plan's dates but no winter figure (wheat): draw the field, state the gap.
+    if (leg.plan?.sequence) {
+      return (
+        <>
+          <div className="cmp-fact">
+            <span className="cmp-glass is-missing" aria-hidden="true" />
+            <span className="cmp-none">No rain figure</span>
+          </div>
+          <WinterPicture plan={leg.plan} onOpen={onZoom} openLabel={`Open the large picture: ${planName}, winter ${leg.leg}`} />
+          {caption}
+          {leg.reason ? <p className="cmp-na-why">{sentence(leg.reason)}</p> : null}
+        </>
+      );
+    }
     return (
       <div className="cmp-na">
         <p className="cmp-na-title">Not evaluated yet</p>

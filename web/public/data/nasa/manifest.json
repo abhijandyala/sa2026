@@ -1,6 +1,6 @@
 {
   "what": "Responses from the Field Shift backend, saved exactly as returned. wetness.json collects each replay's own wetness block.",
-  "saved_at": "2026-11-13T18:58:30.744Z",
+  "saved_at": "2026-11-14T05:31:55.161Z",
   "api": "http://localhost:8000",
   "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
   "catalog_version": "v2:8eeb5bf961eb",
@@ -14,11 +14,12 @@
     "corn_soy__no_cover",
     "soy_corn__no_cover",
     "corn_soy__rye",
-    "soy_corn__rye"
+    "soy_corn__rye",
+    "corn_soy__wheat_dc"
   ],
   "years": [
     1981,
     2025
   ],
-  "replays": 180
+  "replays": 225
 }

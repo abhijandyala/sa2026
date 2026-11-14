@@ -237,14 +237,21 @@
   text-decoration: none;
 }
 .fb-mark {
-  width: 24px;
-  height: 24px;
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 26px;
+  height: 26px;
   border-radius: 6px;
-  background:
-    linear-gradient(var(--accent), var(--accent)) 5px 16px / 14px 2px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) 5px 11px / 14px 2px no-repeat,
-    linear-gradient(var(--accent), var(--accent)) 5px 6px / 9px 2px no-repeat,
-    var(--night);
+  background: var(--night);
+}
+.fb-mark::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--mark-ink, var(--accent));
+  -webkit-mask: var(--mark-wheat) center / 100% 100% no-repeat;
+  mask: var(--mark-wheat) center / 100% 100% no-repeat;
 }
 .fb-nav-links {
   display: flex;
@@ -1169,11 +1176,8 @@
   text-decoration: none;
 }
 .db-brand .fb-mark {
-  background:
-    linear-gradient(var(--night), var(--night)) 5px 16px / 14px 2px no-repeat,
-    linear-gradient(var(--night), var(--night)) 5px 11px / 14px 2px no-repeat,
-    linear-gradient(var(--night), var(--night)) 5px 6px / 9px 2px no-repeat,
-    var(--accent);
+  --mark-ink: var(--night);
+  background: var(--accent);
 }
 .db-nav {
   display: grid;
