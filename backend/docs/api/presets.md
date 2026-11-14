@@ -31,9 +31,9 @@ Soybean → clover → corn is the well-supported clover use (`fc_nut_03` N cred
 |---|---|---|---|---|---|
 | `corn_soy__no_cover` | 09-20 | — | — | 05-12 | — |
 | `corn_soy__rye` | 09-20 | 10-01 | 04-30 | 05-12 | 12 d |
-| `corn_soy__clover` | 09-20 | 10-01 | 04-20 | 05-12 | 22 d |
+| `corn_soy__clover` | 09-20 | 10-15 (moved from 10-01 so `cc_rc_02` flags) | 04-20 | 05-12 | 22 d |
 | `soy_corn__no_cover` | 10-15 | — | — | 04-15 | — |
 | `soy_corn__rye` | 10-15 | 10-20 | 04-05 | 04-15 | 10 d (`cr_tt_01` prefers 7–14 d before corn) |
-| `corn_soy__wheat_dc` | 09-20 | wheat plant TBD | wheat harvest TBD | soybean TBD | — |
+| `corn_soy__wheat_dc` | 09-20 | wheat plant 10-25 | wheat harvest 06-05 | soybean 06-12 | — (demo dates from `GET /v1/plans/wheat/template`, `dates_basis: assumed`) |
 
 Leg-2 checks come from the corn-side rules: `cr_tt_01`, `cr_tt_02`, `cr_nut_01`, `fc_nut_02`, `fc_pw_01`/`fc_pw_02` (conflict surfaced), and `fc_wt_03`.

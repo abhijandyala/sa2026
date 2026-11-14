@@ -239,3 +239,8 @@ def test_exception_tracebacks_never_carry_message_text_into_logs(caplog, monkeyp
         (rec.exc_text or "") + str(rec.getMessage()) for rec in caplog.records)
     assert "RuntimeError" in text and "unhandled" in text
     assert secret not in text
+
+
+def test_cors_allows_vite_fallback_port():
+    r = TestClient(create_app()).get("/health", headers={"Origin": "http://localhost:5174"})
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:5174"
