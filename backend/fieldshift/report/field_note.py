@@ -311,7 +311,8 @@ def _calendar_section(cal: ActionCalendar, n: _Nums) -> dict[str, Any]:
                 "evidence": [
                     {
                         "rule_id": e.rule_id, "status": str(e.status), "verdict": e.verdict,
-                        "reason": e.reason, "missing_inputs": e.missing_inputs,
+                        "reason": e.reason, "text": e.text, "print": e.print,
+                        "missing_inputs": e.missing_inputs,
                         "reference": _reference(e.reference, n, e.rule_id), "source": e.source,
                     }
                     for e in a.evidence
@@ -375,13 +376,15 @@ def _scenarios(sc: dict[str, Any], n: _Nums) -> dict[str, Any]:
 def _unresolved(cal: ActionCalendar, res: Any) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for a in cal.actions:
-        if a.kind != "check" or a.status == Status.COMPLETE and not a.flagged:
+        printable = any(e.print for e in a.evidence)
+        if a.kind != "check" or (a.status == Status.COMPLETE and not a.flagged and not printable):
             continue
         for e in a.evidence:
             items.append(
                 {
                     "rule_id": e.rule_id, "status": str(e.status), "flagged": a.flagged,
                     "due": a.date.isoformat(), "what": a.label, "reason": e.reason,
+                    "text": e.text, "print": e.print,
                     "missing_inputs": e.missing_inputs, "source": e.source,
                 }
             )  # fmt: skip
@@ -389,14 +392,22 @@ def _unresolved(cal: ActionCalendar, res: Any) -> list[dict[str, Any]]:
     if cr is not None:
         for g in cr.conflicts:
             items.append({"rule_id": ", ".join(g.rule_ids), "status": "manual_check", "flagged": True,
-                          "what": "conflicting catalog rules", "reason": g.note, "source": None})  # fmt: skip
+                          "what": "conflicting catalog rules", "reason": g.note,
+                          "text": f"The sources disagree here ({' and '.join(g.rule_ids)}); both are shown and neither is chosen.",
+                          "print": True, "source": None})  # fmt: skip
         for p in cr.path_notes:
             items.append({"rule_id": p.path, "status": str(p.status), "flagged": False,
-                          "what": "path not fully evaluable", "reason": p.reason, "source": None})  # fmt: skip
+                          "what": "path not fully evaluable", "reason": p.reason, "text": p.text,
+                          "print": False, "source": None})  # fmt: skip
+    plain = {r.rule_id: r for r in (cr.rules if cr is not None else [])}
     for x in res.other_checks:
         if x.flagged and not any(i["rule_id"] == x.rule_id for i in items):
+            chk = plain.get(x.rule_id)
             items.append({"rule_id": x.rule_id, "status": str(x.status), "flagged": True,
-                          "what": x.reason, "reason": x.reason, "source": x.source})  # fmt: skip
+                          "what": x.reason, "reason": x.reason,
+                          "text": chk.text if chk else f"Flagged by rule {x.rule_id}: see the source.",
+                          "print": True, "source": x.source})  # fmt: skip
+    items.sort(key=lambda i: (not i["print"], not i["flagged"]))  # the printable ones first
     return items
 
 

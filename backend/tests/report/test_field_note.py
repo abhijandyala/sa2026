@@ -249,3 +249,85 @@ def test_published_heavy_rain_threshold_is_an_extension_number_with_its_source(c
     # computed (not published) thresholds stay "calculation"
     cutoff = by_path["spring.dry_cutoff_mm"]
     assert cutoff["derivation"] == "calculation"
+
+
+# ------------------------------------------------------------------ plain-language text (rule lines)
+
+
+def test_unresolved_checks_carry_the_same_text_as_the_checker(ctx, rye):
+    from fieldshift.planner.checker import check_plan
+
+    note = build_field_note(rye, ctx, year=YEAR, as_of=AS_OF)
+    rules = {r.rule_id: r for r in check_plan(rye, ctx.index, year=YEAR).rules}
+    seen = 0
+    for item in note["unresolved_checks"]:
+        assert item["text"] and isinstance(item["print"], bool)
+        if item["rule_id"] in rules:
+            seen += 1
+            assert item["text"] == rules[item["rule_id"]].text, item["rule_id"]
+            assert item["print"] == rules[item["rule_id"]].print
+    assert seen >= 5
+    by_id = {i["rule_id"]: i for i in note["unresolved_checks"]}
+    assert by_id["cr_tt_03"]["text"].startswith(
+        "Depends on a dry spring or your low-moisture concern"
+    )
+    assert by_id["cr_tt_03"]["print"] is True and by_id["sb_soil_01"]["print"] is False
+    assert by_id["sb_soil_01"]["text"].startswith("Ask your adviser about slope position")
+    assert (
+        by_id["sb_soil_01"]["reason"] != by_id["sb_soil_01"]["text"]
+    )  # reason is kept for debugging
+
+
+def test_unresolved_checks_list_the_printable_ones_first(ctx, rye):
+    from fieldshift.contracts import GrowerInputs
+
+    worried = rye.model_copy(update={"grower": GrowerInputs(low_moisture_concern=True)})
+    items = build_field_note(worried, ctx, year=YEAR, as_of=AS_OF)["unresolved_checks"]
+    flags = [i["print"] for i in items]
+    assert flags == sorted(flags, reverse=True) and flags[0] is True
+    assert items[0]["flagged"] and items[0]["text"].startswith("Heads-up:")
+    assert sum(flags) <= 6  # a handful, not the whole list
+
+
+def test_calendar_evidence_and_conflict_and_path_notes_have_text(ctx):
+    from fieldshift.planner.wheat_path import demo_plan
+
+    note = build_field_note(demo_plan(), ctx, year=YEAR, maturity_group=3)
+    for a in note["calendar"]["actions"]:
+        for e in a["evidence"]:
+            assert e["text"] and isinstance(e["print"], bool)
+    path = next(i for i in note["unresolved_checks"] if i["rule_id"] == "winter_grain_double_crop")
+    assert "enter your own wheat harvest" in path["text"] and path["print"] is False
+    mg = next(c for c in note["maturity_group"]["checks"] if c["rule_id"] == "sb_rc_03")
+    assert mg["flagged"] and mg["print"] and mg["text"].startswith("Heads-up:")
+    assert all(i["text"] for i in note["unresolved_checks"])
+
+
+def test_conflict_group_text_in_the_note(ctx):
+    from fieldshift.contracts import Plan, WinterManagement
+
+    corn = Plan(plan_id="c", previous_crop_id="soybean", prev_harvest="10-20",
+                winter=WinterManagement(kind="none"), next_crop_id="field_corn", next_plant="04-25",
+                region="NC Piedmont", production_system="no-till")  # fmt: skip
+    from fieldshift.planner.checker import check_plan
+
+    res = check_plan(corn, ctx.index, year=YEAR)
+    assert res.conflicts and "sources disagree" in res.conflicts[0].text
+    assert res.rule("fc_pw_01").print and "fc_pw_02" in res.rule("fc_pw_01").text
+
+
+def test_printed_conflicts_keep_their_text_in_the_note(ctx):
+    from fieldshift.contracts import Plan, WinterManagement
+    from fieldshift.planner.checker import check_plan
+
+    corn = Plan(plan_id="c", previous_crop_id="soybean", prev_harvest="10-20",
+                winter=WinterManagement(kind="none"), next_crop_id="field_corn", next_plant="05-05",
+                region="NC Piedmont", production_system="no-till")  # fmt: skip
+    note = build_field_note(corn, ctx, year=YEAR, inputs={"soil_temp_f": 60})
+    rules = {
+        r.rule_id: r
+        for r in check_plan(corn, ctx.index, year=YEAR, inputs={"soil_temp_f": 60}).rules
+    }
+    items = {i["rule_id"]: i for i in note["unresolved_checks"]}
+    for rid in ("fc_pw_01", "fc_pw_02"):
+        assert items[rid]["print"] is True and items[rid]["text"] == rules[rid].text

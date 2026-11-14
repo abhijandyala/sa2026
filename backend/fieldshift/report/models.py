@@ -83,7 +83,9 @@ class RuleLineOut(_Open):
     flagged: bool = False
     condition_met: bool | None = None
     suitability: str | None = None
-    reason: str
+    reason: str  # the engine's wording (debugging)
+    text: str = ""  # one plain sentence for the grower
+    print: bool = False  # worth a printed page
     missing_inputs: list[str] = Field(default_factory=list)
     reference: ReferenceOut | None = None
     source: SourceOut | None = None
@@ -94,6 +96,8 @@ class EvidenceOut(_Open):
     status: Status
     verdict: str | None = None
     reason: str
+    text: str = ""
+    print: bool = False
     missing_inputs: list[str] = Field(default_factory=list)
     reference: ReferenceOut | None = None
     source: SourceOut | None = None
@@ -292,7 +296,9 @@ class UnresolvedOut(_Open):
     flagged: bool = False
     due: str | None = None
     what: str | None = None
-    reason: str | None = None
+    reason: str | None = None  # the engine's wording (debugging)
+    text: str = ""  # one plain sentence for the grower
+    print: bool = False  # worth a printed page
     missing_inputs: list[str] = Field(default_factory=list)
     reference: ReferenceOut | None = None
     source: SourceOut | None = None

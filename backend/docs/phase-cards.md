@@ -210,6 +210,8 @@ The handbooks (`Field-Shift-Backend-Rahul.pdf`, `Field-Shift-Charlotte-Playbook-
 
 **Status (B, 2026-11-13): 4b (rule engine) done; 4a and the regression cases are A's.** `fieldshift/metrics/rules.py` (+ `field/regions.py`) covers applicability, `manual_check`/`unknown`, catalog-declared conflicts, `cr_tt_03` (gap < 14 and (dry or concern); clears at gap >= 14 even with dryness missing) and optional `cr_tt_04`, and per-check qualifying/skipped/count/denominator. It reads the real `SeasonFacts`. Codex r1 (7 medium) and r2 (4 medium) fixed with tests; no r3 run. A: pass regression cases 1-5 once 4a lands (see docs/handoff.md).
 
+**Status (B, 2026-11-13, plain-language rule lines): done.** Every `RuleCheck` now has `text` (one short grower sentence from the catalog row and the status; built in `metrics/rule_text.py`, never a number that is not in the row, a real 0 kept) and `print` (flagged or conflicting checks, plus unresolved checks that block a seeding/termination/planting decision; the rule is documented in `rule_text.py`). `reason` is unchanged. The same `text`/`print` appear in the checker rules, calendar evidence and the field note's `unresolved_checks` (printable first). Codex r3 (5 medium, 1 low) fixed with tests; no r4. `docs/api/*` regenerated.
+
 **Status (A, 2026-11-13): 4a done; regression cases 1-5 pass** against B's rule engine (`tests/metrics/test_metrics_spring.py`). `metrics/spring.py`: fixed 1981-2025 baseline, bottom-20% cutoff = ceil(20% n)-th smallest, ties at the cutoff are dry, modeled wetness. Codex r1 (4 medium) and r2 (2 medium) fixed with tests; no r3 run.
 ---
 

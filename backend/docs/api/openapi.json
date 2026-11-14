@@ -1547,6 +1547,11 @@
             },
             "title": "Rule Ids",
             "type": "array"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
           }
         },
         "required": [
@@ -2420,6 +2425,11 @@
             "title": "Missing Inputs",
             "type": "array"
           },
+          "print": {
+            "default": false,
+            "title": "Print",
+            "type": "boolean"
+          },
           "reason": {
             "title": "Reason",
             "type": "string"
@@ -2447,6 +2457,11 @@
           },
           "status": {
             "$ref": "#/components/schemas/Status"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
           },
           "verdict": {
             "anyOf": [
@@ -2479,6 +2494,11 @@
             "title": "Missing Inputs",
             "type": "array"
           },
+          "print": {
+            "default": false,
+            "title": "Print",
+            "type": "boolean"
+          },
           "reason": {
             "title": "Reason",
             "type": "string"
@@ -2509,6 +2529,11 @@
           },
           "status": {
             "$ref": "#/components/schemas/Status"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
           },
           "verdict": {
             "anyOf": [
@@ -3529,6 +3554,11 @@
           },
           "status": {
             "$ref": "#/components/schemas/Status"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
           }
         },
         "required": [
@@ -4637,6 +4667,11 @@
             "title": "Optional",
             "type": "boolean"
           },
+          "print": {
+            "default": false,
+            "title": "Print",
+            "type": "boolean"
+          },
           "reason": {
             "title": "Reason",
             "type": "string"
@@ -4696,6 +4731,11 @@
               }
             ],
             "title": "Suitability"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
           },
           "verdict": {
             "anyOf": [
@@ -4832,6 +4872,11 @@
             "title": "Missing Inputs",
             "type": "array"
           },
+          "print": {
+            "default": false,
+            "title": "Print",
+            "type": "boolean"
+          },
           "reason": {
             "title": "Reason",
             "type": "string"
@@ -4873,6 +4918,11 @@
               }
             ],
             "title": "Suitability"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
+            "type": "string"
           },
           "verdict": {
             "anyOf": [
@@ -6531,6 +6581,11 @@
             "title": "Missing Inputs",
             "type": "array"
           },
+          "print": {
+            "default": false,
+            "title": "Print",
+            "type": "boolean"
+          },
           "reason": {
             "anyOf": [
               {
@@ -6568,6 +6623,11 @@
           },
           "status": {
             "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "default": "",
+            "title": "Text",
             "type": "string"
           },
           "what": {

@@ -56,7 +56,8 @@ class PathNote(BaseModel):
 
     path: str
     status: Status
-    reason: str
+    reason: str  # the engine's wording
+    text: str = ""  # one plain sentence for the grower
 
 
 class ConflictGroup(BaseModel):
@@ -64,6 +65,7 @@ class ConflictGroup(BaseModel):
 
     rule_ids: list[str]
     note: str
+    text: str = ""  # one plain sentence for the grower
 
 
 class CheckResult(BaseModel):
@@ -151,8 +153,16 @@ def _path_notes(plan: Plan, index: CatalogIndex) -> list[PathNote]:
     if plan.winter.kind == "winter_grain":
         state, reason = wheat_catalog_state(index, plan.winter.crop_id or "")
         if state != Status.COMPLETE:
+            plain = (
+                "The catalog has no wheat planting rows yet, so the wheat path cannot be checked."
+                if state == Status.UNAVAILABLE
+                else "The catalog has no numeric Piedmont dates for wheat: enter your own wheat "
+                "harvest and soybean planting dates, and check the rest with your adviser."
+            )
             notes.append(
-                PathNote(path="winter_grain_double_crop", status=state, reason=reason or "")
+                PathNote(
+                    path="winter_grain_double_crop", status=state, reason=reason or "", text=plain
+                )
             )
     return notes
 
@@ -169,6 +179,8 @@ def _conflict_groups(rules: list[RuleCheck]) -> list[ConflictGroup]:
                     ConflictGroup(
                         rule_ids=list(ids),
                         note="The catalog lists these rules as conflicting; both are shown and "
+                        "neither is chosen.",
+                        text=f"The sources disagree here ({' and '.join(ids)}); both are shown and "
                         "neither is chosen.",
                     )
                 )

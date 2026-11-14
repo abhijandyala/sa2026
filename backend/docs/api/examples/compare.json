@@ -5436,6 +5436,7 @@
               "missing_inputs": [
                 "maturity_group"
               ],
+              "print": false,
               "reason": "input 'maturity_group' is not available",
               "reference": null,
               "rule_id": "sb_v2_mg_mid_june",
@@ -5447,12 +5448,14 @@
               },
               "status": "unknown",
               "suitability": null,
+              "text": "Enter the soybean maturity group you plan to plant so this can be checked: the guide says 4 to 7.",
               "verdict": "unknown"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "this row was studied at a planting date of 07-08 to 07-22; the plan plants on 2025-06-12, so apply judgment",
               "reference": null,
               "rule_id": "sb_v2_mg_mid_july",
@@ -5464,6 +5467,7 @@
               },
               "status": "manual_check",
               "suitability": null,
+              "text": "Your planting date is outside the mid-July planting timing this row covers (the trials say maturity group 5 to 7): check the maturity group with your adviser.",
               "verdict": "manual_check"
             },
             {
@@ -5472,6 +5476,7 @@
               "missing_inputs": [
                 "maturity_group"
               ],
+              "print": true,
               "reason": "input 'maturity_group' is not available",
               "reference": null,
               "rule_id": "sb_rc_03",
@@ -5483,6 +5488,7 @@
               },
               "status": "unknown",
               "suitability": "caution",
+              "text": "Enter the soybean maturity group you plan to plant so this can be checked: the guide warns about less than 4.",
               "verdict": "unknown"
             }
           ],
@@ -5522,6 +5528,7 @@
               "condition_met": true,
               "flagged": true,
               "missing_inputs": [],
+              "print": true,
               "reason": "crop sequence matches the rule",
               "reference": null,
               "rule_id": "ww_rc_01",
@@ -5533,6 +5540,7 @@
               },
               "status": "complete",
               "suitability": "caution",
+              "text": "Heads-up: corn residue can raise Fusarium head blight risk.",
               "verdict": "caution"
             }
           ],
@@ -5541,6 +5549,7 @@
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "rule needs production system 'organic_grain'; the plan is ['conventional']",
               "reference": null,
               "rule_id": "ww_v2_pw_freeze_reference",
@@ -5552,12 +5561,14 @@
               },
               "status": "inapplicable",
               "suitability": null,
+              "text": "Does not apply to this plan.",
               "verdict": "inapplicable"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "rule needs production system 'organic_grain'; the plan is ['conventional']",
               "reference": null,
               "rule_id": "ww_v2_pw_hessian_fly",
@@ -5569,12 +5580,14 @@
               },
               "status": "inapplicable",
               "suitability": "caution",
+              "text": "Does not apply to this plan.",
               "verdict": "inapplicable"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "rule needs production system 'organic_grain'; the plan is ['conventional']",
               "reference": null,
               "rule_id": "ww_v2_seed_drilled",
@@ -5586,6 +5599,7 @@
               },
               "status": "inapplicable",
               "suitability": null,
+              "text": "Does not apply to this plan.",
               "verdict": "inapplicable"
             }
           ],
@@ -5594,6 +5608,7 @@
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": true,
               "reason": "published reference value 0-21 days; not measured on this field",
               "reference": {
                 "condition_key": "days_after_local_mapped_start",
@@ -5616,12 +5631,14 @@
               },
               "status": "manual_check",
               "suitability": "preferred",
+              "text": "Check your wheat planting date against your local map date: the guide allows 0 to 21 days after it, and advises planting before Thanksgiving.",
               "verdict": "manual_check"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "no evaluator for condition 'harvest_season_context'",
               "reference": null,
               "rule_id": "ww_v2_gd_harvest_context",
@@ -5633,12 +5650,14 @@
               },
               "status": "manual_check",
               "suitability": null,
+              "text": "For reference: wheat planted in fall 2026 is expected to be harvested mainly in June 2027.",
               "verdict": "manual_check"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "no evaluator for condition 'planting_after_small_grain'",
               "reference": null,
               "rule_id": "sb_v2_pw_after_wheat_context",
@@ -5650,12 +5669,14 @@
               },
               "status": "manual_check",
               "suitability": null,
+              "text": "Ask your adviser about double-crop soybean planting timing: soybean planting behind small grain typically occurs from the second week of June through early July.",
               "verdict": "manual_check"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "this row was studied at a planting date of 07-08 to 07-22; the plan plants on 2025-06-12, so apply judgment",
               "reference": null,
               "rule_id": "sb_v2_mg_mid_july",
@@ -5667,12 +5688,14 @@
               },
               "status": "manual_check",
               "suitability": null,
+              "text": "Your planting date is outside the mid-July planting timing this row covers (the trials say maturity group 5 to 7): check the maturity group with your adviser.",
               "verdict": "manual_check"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "no evaluator for condition 'delayed_planting_yield'",
               "reference": null,
               "rule_id": "sb_v2_pw_delay_yield",
@@ -5684,12 +5707,14 @@
               },
               "status": "manual_check",
               "suitability": "caution",
+              "text": "Ask your adviser about late planting: yield declines consistently when planting is delayed past the third week of May.",
               "verdict": "manual_check"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "published reference value 165000-175000 seeds/acre; not measured on this field",
               "reference": {
                 "condition_key": "seeding_rate",
@@ -5712,12 +5737,14 @@
               },
               "status": "manual_check",
               "suitability": null,
+              "text": "Check seeding rate: the guide says 165000 to 175000 seeds/acre, before planting.",
               "verdict": "manual_check"
             },
             {
               "condition_met": null,
               "flagged": false,
               "missing_inputs": [],
+              "print": false,
               "reason": "no evaluator for condition 'late_planting_narrow_rows'",
               "reference": null,
               "rule_id": "sb_v2_spacing_late",
@@ -5729,6 +5756,7 @@
               },
               "status": "manual_check",
               "suitability": null,
+              "text": "Ask your adviser about row spacing for late planting.",
               "verdict": "manual_check"
             }
           ],
@@ -5739,6 +5767,7 @@
               "missing_inputs": [
                 "maturity_group"
               ],
+              "print": true,
               "reason": "input 'maturity_group' is not available",
               "reference": null,
               "rule_id": "sb_rc_03",
@@ -5750,6 +5779,7 @@
               },
               "status": "unknown",
               "suitability": "caution",
+              "text": "Enter the soybean maturity group you plan to plant so this can be checked: the guide warns about less than 4.",
               "verdict": "unknown"
             },
             {
@@ -5758,6 +5788,7 @@
               "missing_inputs": [
                 "maturity_group"
               ],
+              "print": false,
               "reason": "input 'maturity_group' is not available",
               "reference": null,
               "rule_id": "sb_v2_mg_mid_june",
@@ -5769,6 +5800,7 @@
               },
               "status": "unknown",
               "suitability": null,
+              "text": "Enter the soybean maturity group you plan to plant so this can be checked: the guide says 4 to 7.",
               "verdict": "unknown"
             }
           ]
@@ -5780,6 +5812,7 @@
             "flagged": false,
             "kind": "context only; not a calendar rule",
             "missing_inputs": [],
+            "print": false,
             "reason": "no evaluator for condition 'planting_after_small_grain'",
             "reference": null,
             "rule_id": "sb_v2_pw_after_wheat_context",
@@ -5791,6 +5824,7 @@
             },
             "status": "manual_check",
             "suitability": null,
+            "text": "Ask your adviser about double-crop soybean planting timing: soybean planting behind small grain typically occurs from the second week of June through early July.",
             "verdict": "manual_check"
           },
           "days_after_wheat_harvest": 7,
@@ -5798,6 +5832,7 @@
             "condition_met": null,
             "flagged": false,
             "missing_inputs": [],
+            "print": false,
             "reason": "no evaluator for condition 'delayed_planting_yield'",
             "reference": null,
             "rule_id": "sb_v2_pw_delay_yield",
@@ -5809,6 +5844,7 @@
             },
             "status": "manual_check",
             "suitability": "caution",
+            "text": "Ask your adviser about late planting: yield declines consistently when planting is delayed past the third week of May.",
             "verdict": "manual_check"
           },
           "earliest_planting_date": "2025-06-05",

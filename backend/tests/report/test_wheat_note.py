@@ -216,7 +216,9 @@ def test_calendar_for_a_wheat_plan_has_dated_actions_and_scenarios(ctx):
     assert acts["check:sb_rc_03"].flagged and acts["check:sb_v2_mg_mid_june"].flagged
     assert acts["check:ww_v2_pw_local_map"].status == "manual_check"
     assert cal.scenarios["status"] == "complete" and {"typical", "dry", "wet"} <= set(cal.scenarios)
-    assert cal.scenarios["dry"]["winter"]["rain_outside_cover_mm"] is None  # not computed for wheat
+    assert (
+        "rain_outside_cover_mm" in cal.scenarios["dry"]["winter"]
+    )  # A's winter metric; may be null
 
 
 def test_backup_for_a_wheat_plan_compares_as_different_calendar(ctx):
@@ -472,3 +474,10 @@ def test_backup_and_calendar_responses_validate_for_every_variant(app_client):
         )
         assert c.status_code == 200
         CalendarResponse.model_validate(c.json())
+
+
+def test_openapi_rule_lines_have_text_and_print(app_client):
+    schemas = app_client.get("/openapi.json").json()["components"]["schemas"]
+    for name in ("RuleLineOut", "EvidenceOut", "UnresolvedOut"):
+        props = schemas[name]["properties"]
+        assert "text" in props and "print" in props and "reason" in props, name

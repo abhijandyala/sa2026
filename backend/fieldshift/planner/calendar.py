@@ -43,7 +43,9 @@ class Evidence(BaseModel):
     rule_id: str
     status: Status
     verdict: str | None = None
-    reason: str
+    reason: str  # the engine's wording
+    text: str = ""  # one plain sentence for the grower (same as RuleCheck.text)
+    print: bool = False  # worth a printed page (see metrics.rule_text)
     reference: dict[str, Any] | None = None
     missing_inputs: list[str] = Field(default_factory=list)
     source: dict[str, Any]
@@ -83,7 +85,8 @@ def _src(c: RuleCheck) -> dict[str, Any]:
 def _evidence(c: RuleCheck) -> Evidence:
     return Evidence(
         rule_id=c.rule_id, status=c.status, verdict=str(c.verdict) if c.verdict else None,
-        reason=c.reason, reference=c.reference, missing_inputs=list(c.missing_inputs),
+        reason=c.reason, text=c.text, print=c.print, reference=c.reference,
+        missing_inputs=list(c.missing_inputs),
         source=_src(c),
     )  # fmt: skip
 
@@ -127,7 +130,7 @@ def _check_actions(check: CheckResult, cal: SeasonCalendar, index: CatalogIndex)
             and not (c.reference is not None and c.rule_type != "nutrient_guidance"
                      and c.suitability is None)
         )  # fmt: skip
-        if not (c.flagged or needs_person):
+        if not (c.flagged or needs_person or c.print):  # printable conflicts stay in the calendar
             continue
         due, why = _check_date(c, rule.management_action, cal)
         trigger = f"rule {c.rule_id}" + (f" ({rule.applies_when})" if rule.applies_when else "")

@@ -73,7 +73,8 @@ def demo_plan() -> Plan:
 def _rule_line(c: RuleCheck) -> dict[str, Any]:
     return {
         "rule_id": c.rule_id, "status": c.status, "verdict": c.verdict, "flagged": c.flagged,
-        "condition_met": c.condition_met, "reason": c.reason, "reference": c.reference,
+        "condition_met": c.condition_met, "reason": c.reason, "text": c.text, "print": c.print,
+        "reference": c.reference,
         "missing_inputs": c.missing_inputs, "suitability": c.suitability, "source": c.source.model_dump(mode="json"),
     }  # fmt: skip
 

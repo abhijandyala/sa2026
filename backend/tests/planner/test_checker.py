@@ -364,3 +364,29 @@ def test_http_numeric_strings_and_blanks_are_accepted(client):
 def test_state_abbreviations_are_unsupported(index):
     for region in ("VA Piedmont", "SC Coastal Plain"):
         assert check_plan(plan(region=region), index, year=YEAR).status == "unsupported", region
+
+
+def test_checker_output_has_plain_text_and_a_print_flag(index):
+    res = check_plan(plan(), index, year=YEAR)
+    assert all(r.text and isinstance(r.print, bool) for r in res.rules)
+    printed = [r.rule_id for r in res.rules if r.print]
+    assert 0 <= len(printed) <= 6
+    assert res.rule("sb_soil_01").text.startswith("Ask your adviser about slope position")
+    assert res.rule("sb_soil_01").reason.startswith("no evaluator")  # kept for debugging
+    organic = check_plan(
+        plan(previous_crop_id="soybean", next_crop_id="field_corn", next_plant="05-10"),
+        index,
+        year=YEAR,
+    )
+    assert organic.rule("fc_pw_03").text == "Does not apply to this plan."
+    assert organic.rule("fc_pw_03").print is False
+    assert res.rule("sb_nut_01").text.startswith(
+        "For reference, the published nitrogen rate is 0 lb N/acre"
+    )
+
+
+def test_http_check_returns_text_and_print(client):
+    r = client.post("/v1/plans/check", json=body())
+    rules = {x["rule_id"]: x for x in r.json()["result"]["rules"]}
+    assert rules["sb_soil_01"]["text"] and rules["sb_soil_01"]["print"] is False
+    assert rules["sb_soil_01"]["reason"] != rules["sb_soil_01"]["text"]

@@ -68,6 +68,8 @@ def _rule_line(line: dict[str, Any], n: fn._Nums) -> dict[str, Any]:
         "condition_met": line.get("condition_met"),
         "suitability": line.get("suitability"),
         "reason": line["reason"],
+        "text": line.get("text", ""),
+        "print": bool(line.get("print", False)),
         "missing_inputs": line.get("missing_inputs", []),
         "reference": fn._reference(line.get("reference"), n, line["rule_id"]),
         "source": line.get("source"),
@@ -341,6 +343,7 @@ def _unresolved(res: dict[str, Any], cal: Any, n: fn._Nums) -> list[dict[str, An
                     "rule_id": line["rule_id"], "status": str(line["status"]),
                     "flagged": bool(line["flagged"]), "due": due.get(line["rule_id"]),
                     "what": line["reason"], "reason": line["reason"],
+                    "text": line.get("text", ""), "print": bool(line.get("print", False)),
                     "missing_inputs": line.get("missing_inputs", []),
                     "reference": fn._reference(line.get("reference"), n, line["rule_id"]),
                     "source": line.get("source"),
@@ -348,8 +351,9 @@ def _unresolved(res: dict[str, Any], cal: Any, n: fn._Nums) -> list[dict[str, An
             )  # fmt: skip
     for p in cal.check_result.path_notes if cal.check_result else []:
         items.append({"rule_id": p.path, "status": str(p.status), "flagged": False, "due": None,
-                      "what": "path not fully evaluable", "reason": p.reason, "missing_inputs": [],
-                      "reference": None, "source": None})  # fmt: skip
+                      "what": "path not fully evaluable", "reason": p.reason, "text": p.text,
+                      "print": False, "missing_inputs": [], "reference": None, "source": None})  # fmt: skip
+    items.sort(key=lambda i: (not i["print"], not i["flagged"]))  # the printable ones first
     return items
 
 

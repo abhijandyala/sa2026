@@ -42,6 +42,7 @@ from fieldshift.catalogs.index import CatalogIndex
 from fieldshift.catalogs.models import CropRule
 from fieldshift.catalogs.validate import parse_mm_dd
 from fieldshift.field.regions import region_match
+from fieldshift.metrics import rule_text
 
 Status = Literal[
     "complete",
@@ -157,7 +158,11 @@ class RuleCheck(BaseModel):
     chronology_conflict: bool = False
     conflict: bool = False
     conflicts_with: list[str] = Field(default_factory=list)
-    reason: str
+    reason: str  # the engine's wording, kept for debugging
+    # One short sentence for the grower (what to look at or do), built from the catalog row and the
+    # status by ``metrics.rule_text``. ``print`` marks the few worth a printed page (see there).
+    text: str = ""
+    print: bool = False
     inputs_used: dict[str, Any] = Field(default_factory=dict)
     missing_inputs: list[str] = Field(default_factory=list)
     # A published number carried by a rule that cannot be evaluated against this season (for
@@ -660,7 +665,22 @@ def _source(rule: CropRule) -> RuleSource:
 
 
 def _check(rule: CropRule, status: Status, reason: str, **kw: Any) -> RuleCheck:
+    flagged = bool(kw.get("flagged", False))
+    chrono = bool(kw.get("chronology_conflict", False))
+    text = rule_text.explain(
+        rule, status=status, verdict=kw.get("verdict"), flagged=flagged,
+        condition_met=kw.get("condition_met"), gate_active=kw.get("gate_active"),
+        missing_inputs=list(kw.get("missing_inputs") or []), chronology_conflict=chrono,
+    )  # fmt: skip
     return RuleCheck(
+        text=text,
+        print=rule_text.should_print(
+            rule,
+            status=status,
+            flagged=flagged,
+            chronology_conflict=chrono,
+            has_gate=rule.rule_id in GATES,
+        ),
         rule_id=rule.rule_id,
         crop_id=rule.crop_id,
         rule_type=rule.rule_type,
@@ -798,6 +818,11 @@ def evaluate_rule(
 # --------------------------------------------------------------------------- one season
 
 
+def _sentence_join(text: str, extra: str) -> str:
+    """Keep ``text`` one sentence: fold ``extra`` in after a semicolon."""
+    return f"{text.rstrip('.')}; {extra.strip().rstrip('.')}."
+
+
 def _mark_conflicts(checks: list[RuleCheck], index: CatalogIndex) -> None:
     by_id = {c.rule_id: c for c in checks}
     # A rule is "live" when it applies, or might: missing location/system leaves it undecided,
@@ -819,6 +844,10 @@ def _mark_conflicts(checks: list[RuleCheck], index: CatalogIndex) -> None:
                     chk.conflict = True
                     if b not in chk.conflicts_with:
                         chk.conflicts_with.append(b)
+                        chk.text = _sentence_join(
+                            chk.text, f"the sources disagree here (see {b}) and neither is chosen"
+                        )
+                    chk.print = True  # conflicting guidance is worth putting on the page
 
 
 def evaluate_season(

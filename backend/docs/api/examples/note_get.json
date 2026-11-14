@@ -1194,6 +1194,7 @@
         "evidence": [
           {
             "missing_inputs": [],
+            "print": false,
             "reason": "no evaluator for condition 'drainage_class'",
             "reference": null,
             "rule_id": "cr_soil_01",
@@ -1205,6 +1206,7 @@
               "verified_date": "2026-11-12"
             },
             "status": "manual_check",
+            "text": "Ask your adviser about drainage: prefers light loams or sands; tolerant of poor drainage.",
             "verdict": "manual_check"
           }
         ],
@@ -1236,6 +1238,7 @@
             "missing_inputs": [
               "spring.is_dry or grower.low_moisture_concern"
             ],
+            "print": true,
             "reason": "12-day termination-to-planting gap does not meet the rule (>= 14 days); applies_when cannot tell: dryness is unavailable (spring status <Status.UNAVAILABLE: 'unavailable'>) and no low-moisture concern was reported",
             "reference": null,
             "rule_id": "cr_tt_03",
@@ -1247,6 +1250,7 @@
               "verified_date": "2026-11-12"
             },
             "status": "unknown",
+            "text": "Depends on a dry spring or your low-moisture concern: consider ending rye at least 14 days before soybean planting when low soil moisture is a concern.",
             "verdict": "unknown"
           }
         ],
@@ -1276,6 +1280,7 @@
         "evidence": [
           {
             "missing_inputs": [],
+            "print": false,
             "reason": "sourced reference N rate 0 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
             "reference": {
               "is_grower_target": false,
@@ -1300,6 +1305,7 @@
               "verified_date": "2026-11-13"
             },
             "status": "manual_check",
+            "text": "For reference, the published nitrogen rate is 0 lb N/acre; your soil test sets your own target.",
             "verdict": "manual_check"
           }
         ],
@@ -1317,6 +1323,7 @@
         "evidence": [
           {
             "missing_inputs": [],
+            "print": false,
             "reason": "qualitative rule: Before mid-April",
             "reference": null,
             "rule_id": "sb_pw_02",
@@ -1328,6 +1335,7 @@
               "verified_date": "2026-11-12"
             },
             "status": "manual_check",
+            "text": "Ask your adviser about the planting dates: yield penalty and shorter plants when planted before mid-April regardless of maturity group.",
             "verdict": "manual_check"
           }
         ],
@@ -1345,6 +1353,7 @@
         "evidence": [
           {
             "missing_inputs": [],
+            "print": false,
             "reason": "qualitative rule: Past the third week of May",
             "reference": null,
             "rule_id": "sb_pw_03",
@@ -1356,6 +1365,7 @@
               "verified_date": "2026-11-12"
             },
             "status": "manual_check",
+            "text": "Ask your adviser about the planting dates: yields consistently decline when planting is delayed past the third week of May.",
             "verdict": "manual_check"
           }
         ],
@@ -1373,6 +1383,7 @@
         "evidence": [
           {
             "missing_inputs": [],
+            "print": false,
             "reason": "no evaluator for condition 'soil_moisture_status'",
             "reference": null,
             "rule_id": "sb_pw_05",
@@ -1384,6 +1395,7 @@
               "verified_date": "2026-11-12"
             },
             "status": "manual_check",
+            "text": "Ask your adviser about soil moisture before planting: hold off planting until the optimal window and until soil moisture improves.",
             "verdict": "manual_check"
           }
         ],
@@ -1401,6 +1413,7 @@
         "evidence": [
           {
             "missing_inputs": [],
+            "print": false,
             "reason": "no evaluator for condition 'slope_position'",
             "reference": null,
             "rule_id": "sb_soil_01",
@@ -1412,6 +1425,7 @@
               "verified_date": "2026-11-12"
             },
             "status": "manual_check",
+            "text": "Ask your adviser about slope position: runoff on Piedmont hills limits plant-available water.",
             "verdict": "manual_check"
           }
         ],
@@ -1429,6 +1443,7 @@
         "evidence": [
           {
             "missing_inputs": [],
+            "print": false,
             "reason": "qualitative rule: Frost damage; seedling disease; early insect pressure",
             "reference": null,
             "rule_id": "sb_wt_01",
@@ -1440,6 +1455,7 @@
               "verified_date": "2026-11-12"
             },
             "status": "manual_check",
+            "text": "Ask your adviser about the weather before planting: too-early planting risks frost damage, seedling disease and end-of-season quality problems.",
             "verdict": "manual_check"
           }
         ],
@@ -2217,28 +2233,12 @@
   ],
   "unresolved_checks": [
     {
-      "due": "2024-10-01",
-      "flagged": false,
-      "missing_inputs": [],
-      "reason": "no evaluator for condition 'drainage_class'",
-      "reference": null,
-      "rule_id": "cr_soil_01",
-      "source": {
-        "locator": "Establishment and Fieldwork",
-        "snapshot_hash": null,
-        "title": "Cereal Rye (SARE Managing Cover Crops Profitably 3rd ed.)",
-        "url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
-        "verified_date": "2026-11-12"
-      },
-      "status": "manual_check",
-      "what": "Prefers light loams or sands; tolerant of poor drainage."
-    },
-    {
       "due": "2025-04-30",
       "flagged": false,
       "missing_inputs": [
         "spring.is_dry or grower.low_moisture_concern"
       ],
+      "print": true,
       "reason": "12-day termination-to-planting gap does not meet the rule (>= 14 days); applies_when cannot tell: dryness is unavailable (spring status <Status.UNAVAILABLE: 'unavailable'>) and no low-moisture concern was reported",
       "reference": null,
       "rule_id": "cr_tt_03",
@@ -2250,12 +2250,33 @@
         "verified_date": "2026-11-12"
       },
       "status": "unknown",
+      "text": "Depends on a dry spring or your low-moisture concern: consider ending rye at least 14 days before soybean planting when low soil moisture is a concern.",
       "what": "Consider ending rye at least 14 days before soybean planting when low soil moisture is a concern."
+    },
+    {
+      "due": "2024-10-01",
+      "flagged": false,
+      "missing_inputs": [],
+      "print": false,
+      "reason": "no evaluator for condition 'drainage_class'",
+      "reference": null,
+      "rule_id": "cr_soil_01",
+      "source": {
+        "locator": "Establishment and Fieldwork",
+        "snapshot_hash": null,
+        "title": "Cereal Rye (SARE Managing Cover Crops Profitably 3rd ed.)",
+        "url": "https://www.sare.org/publications/managing-cover-crops-profitably/nonlegume-cover-crops/cereal-rye/",
+        "verified_date": "2026-11-12"
+      },
+      "status": "manual_check",
+      "text": "Ask your adviser about drainage: prefers light loams or sands; tolerant of poor drainage.",
+      "what": "Prefers light loams or sands; tolerant of poor drainage."
     },
     {
       "due": "2025-05-12",
       "flagged": false,
       "missing_inputs": [],
+      "print": false,
       "reason": "sourced reference N rate 0 lb_N_per_acre (Crop Fertilization Based on North Carolina Soil Tests; Circular No. 1; February 2014); it is not the grower's target: the target comes from the soil test",
       "reference": null,
       "rule_id": "sb_nut_01",
@@ -2267,12 +2288,14 @@
         "verified_date": "2026-11-13"
       },
       "status": "manual_check",
+      "text": "For reference, the published nitrogen rate is 0 lb N/acre; your soil test sets your own target.",
       "what": "The published routine soybean fertilizer nitrogen recommendation is zero. Crop nitrogen uptake and nutrient guidance for a combined wheat\u2013soybean system are..."
     },
     {
       "due": "2025-05-12",
       "flagged": false,
       "missing_inputs": [],
+      "print": false,
       "reason": "qualitative rule: Before mid-April",
       "reference": null,
       "rule_id": "sb_pw_02",
@@ -2284,12 +2307,14 @@
         "verified_date": "2026-11-12"
       },
       "status": "manual_check",
+      "text": "Ask your adviser about the planting dates: yield penalty and shorter plants when planted before mid-April regardless of maturity group.",
       "what": "Yield penalty and shorter plants when planted before mid-April regardless of maturity group."
     },
     {
       "due": "2025-05-12",
       "flagged": false,
       "missing_inputs": [],
+      "print": false,
       "reason": "qualitative rule: Past the third week of May",
       "reference": null,
       "rule_id": "sb_pw_03",
@@ -2301,12 +2326,14 @@
         "verified_date": "2026-11-12"
       },
       "status": "manual_check",
+      "text": "Ask your adviser about the planting dates: yields consistently decline when planting is delayed past the third week of May.",
       "what": "Yields consistently decline when planting is delayed past the third week of May."
     },
     {
       "due": "2025-05-12",
       "flagged": false,
       "missing_inputs": [],
+      "print": false,
       "reason": "no evaluator for condition 'soil_moisture_status'",
       "reference": null,
       "rule_id": "sb_pw_05",
@@ -2318,12 +2345,14 @@
         "verified_date": "2026-11-12"
       },
       "status": "manual_check",
+      "text": "Ask your adviser about soil moisture before planting: hold off planting until the optimal window and until soil moisture improves.",
       "what": "Hold off planting until the optimal window and until soil moisture improves."
     },
     {
       "due": "2025-05-12",
       "flagged": false,
       "missing_inputs": [],
+      "print": false,
       "reason": "no evaluator for condition 'slope_position'",
       "reference": null,
       "rule_id": "sb_soil_01",
@@ -2335,12 +2364,14 @@
         "verified_date": "2026-11-12"
       },
       "status": "manual_check",
+      "text": "Ask your adviser about slope position: runoff on Piedmont hills limits plant-available water.",
       "what": "Runoff on Piedmont hills limits plant-available water. Manual field check."
     },
     {
       "due": "2025-05-12",
       "flagged": false,
       "missing_inputs": [],
+      "print": false,
       "reason": "qualitative rule: Frost damage; seedling disease; early insect pressure",
       "reference": null,
       "rule_id": "sb_wt_01",
@@ -2352,6 +2383,7 @@
         "verified_date": "2026-11-12"
       },
       "status": "manual_check",
+      "text": "Ask your adviser about the weather before planting: too-early planting risks frost damage, seedling disease and end-of-season quality problems.",
       "what": "Too-early planting risks frost damage, seedling disease and end-of-season quality problems. Manual check."
     }
   ],
