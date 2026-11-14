@@ -104,7 +104,7 @@ def replay_season(plan: Plan, year: int, ctx: Context, ts: ThresholdSet) -> dict
             "unit": "fraction (0-1)", "label": "modeled", "status": spring.wetness.status,
         },
         "winter": b.winter.model_dump(mode="json", exclude={"heavy_rain_events"}),
-        "thresholds": thresholds_view(ts),
+        "thresholds": thresholds_view(ts, ctx),
         "checks_triggered": triggered,
         "key_rain_days": key_days,
         "daily": daily,

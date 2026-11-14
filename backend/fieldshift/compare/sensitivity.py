@@ -152,7 +152,7 @@ def sweep_termination(
         "dry_years": dry_years,
         "reference_year": REFERENCE_YEAR,
         "points": points,
-        "thresholds": thresholds_view(ts),
+        "thresholds": thresholds_view(ts, ctx),
         "note": "One point per valid termination date (reference-year calendar). A date that "
         "crosses Feb 29 has a different real gap in leap years (`gap_days_in_leap_years`); each "
         "historical season is evaluated with its own real gap. With the fixed "

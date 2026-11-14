@@ -1414,6 +1414,17 @@
               }
             ]
           },
+          "location_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Id"
+          },
           "maturity_group": {
             "anyOf": [
               {
@@ -1533,6 +1544,16 @@
           },
           "thresholds": {
             "$ref": "#/components/schemas/ThresholdsView"
+          },
+          "weather_location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WeatherLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2981,6 +3002,14 @@
       "HealthResponse": {
         "additionalProperties": false,
         "properties": {
+          "locations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Locations",
+            "type": "array"
+          },
           "meta": {
             "$ref": "#/components/schemas/Meta"
           },
@@ -3806,6 +3835,17 @@
             ],
             "title": "Dates Assumed"
           },
+          "dates_assumed_for_region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dates Assumed For Region"
+          },
           "dates_basis": {
             "anyOf": [
               {
@@ -3927,6 +3967,17 @@
               }
             ],
             "title": "Reason Text"
+          },
+          "region_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Note"
           },
           "residue_context": {
             "items": {
@@ -4488,6 +4539,27 @@
       "ReplayRequest": {
         "additionalProperties": false,
         "properties": {
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LocationIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "location_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Id"
+          },
           "plan": {
             "$ref": "#/components/schemas/Plan"
           }
@@ -4548,6 +4620,16 @@
           },
           "thresholds": {
             "$ref": "#/components/schemas/ThresholdsView"
+          },
+          "weather_location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WeatherLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "wetness": {
             "additionalProperties": true,
@@ -5506,6 +5588,27 @@
       "SensitivityRequest": {
         "additionalProperties": false,
         "properties": {
+          "location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LocationIn"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "location_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Id"
+          },
           "plan": {
             "anyOf": [
               {
@@ -5598,6 +5701,16 @@
             "const": "terminate",
             "title": "Varied",
             "type": "string"
+          },
+          "weather_location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WeatherLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -6622,6 +6735,17 @@
         "additionalProperties": false,
         "description": "Every frozen threshold used. Never hard-code these in a client.",
         "properties": {
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
           "dry_spring": {
             "additionalProperties": {
               "$ref": "#/components/schemas/Threshold"
@@ -6631,6 +6755,28 @@
           },
           "heavy_rain": {
             "$ref": "#/components/schemas/Threshold"
+          },
+          "location_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Id"
+          },
+          "location_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location Name"
           },
           "threshold_set_id": {
             "title": "Threshold Set Id",
@@ -6789,6 +6935,17 @@
         "additionalProperties": false,
         "description": "A plan the catalog/weather cannot evaluate. A result, not an HTTP error.",
         "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
           "meta": {
             "$ref": "#/components/schemas/Meta"
           },
@@ -6800,6 +6957,17 @@
             "title": "Reason",
             "type": "string"
           },
+          "reason_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Text"
+          },
           "status": {
             "$ref": "#/components/schemas/Status"
           },
@@ -6809,6 +6977,16 @@
             },
             "title": "Unsupported",
             "type": "array"
+          },
+          "weather_location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WeatherLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -6818,6 +6996,197 @@
           "reason"
         ],
         "title": "UnsupportedResponse",
+        "type": "object"
+      },
+      "WeatherLocation": {
+        "additionalProperties": false,
+        "description": "Which place's weather answered the request, and where its thresholds come from.",
+        "properties": {
+          "cell_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cell Id"
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code"
+          },
+          "first_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Date"
+          },
+          "grid_cell": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grid Cell"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "last_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Date"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "point": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Point"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "reason_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Text"
+          },
+          "region": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region"
+          },
+          "region_basis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Region Basis"
+          },
+          "requested_point": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Point"
+          },
+          "shares_snapshot_with": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shares Snapshot With"
+          },
+          "snapshot_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot Hash"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "thresholds_from": {
+            "title": "Thresholds From",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "thresholds_from"
+        ],
+        "title": "WeatherLocation",
         "type": "object"
       },
       "WetnessSnapshot": {
@@ -7254,6 +7623,16 @@
             },
             "title": "Shortcuts",
             "type": "object"
+          },
+          "weather_location": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WeatherLocation"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "years": {
             "items": {
@@ -8139,6 +8518,60 @@
               "title": "Plan",
               "type": "string"
             }
+          },
+          {
+            "description": "place id from the snapshot index",
+            "in": "query",
+            "name": "location_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "place id from the snapshot index",
+              "title": "Location Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "latitude",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 90,
+                  "minimum": -90,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Latitude"
+            }
+          },
+          {
+            "in": "query",
+            "name": "longitude",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 180,
+                  "minimum": -180,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Longitude"
+            }
           }
         ],
         "responses": {
@@ -8347,6 +8780,60 @@
               "title": "Plan",
               "type": "string"
             }
+          },
+          {
+            "description": "place id from the snapshot index",
+            "in": "query",
+            "name": "location_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "place id from the snapshot index",
+              "title": "Location Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "latitude",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 90,
+                  "minimum": -90,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Latitude"
+            }
+          },
+          {
+            "in": "query",
+            "name": "longitude",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 180,
+                  "minimum": -180,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Longitude"
+            }
           }
         ],
         "responses": {
@@ -8354,7 +8841,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/YearsResponse"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/YearsResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedResponse"
+                    }
+                  ],
+                  "title": "Response Years V1 Years Get"
                 }
               }
             },

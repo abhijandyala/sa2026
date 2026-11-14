@@ -27,6 +27,31 @@ class Meta(_M):
     request_id: str
 
 
+# --------------------------------------------------------------------------- weather location
+
+
+class WeatherLocation(_M):
+    """Which place's weather answered the request, and where its thresholds come from."""
+
+    status: Status  # complete | unavailable | unsupported
+    code: str | None = None  # no_weather_snapshot | unsupported_location
+    reason: str | None = None
+    reason_text: str | None = None
+    id: str | None = None
+    name: str | None = None
+    region: str | None = None  # piedmont | coastal_plain (the place's region, from the index)
+    region_basis: str | None = None
+    point: dict[str, float] | None = None  # the indexed county point
+    requested_point: dict[str, float] | None = None
+    grid_cell: dict[str, Any] | None = None
+    cell_id: str | None = None
+    snapshot_hash: str | None = None
+    first_date: str | None = None
+    last_date: str | None = None
+    shares_snapshot_with: str | None = None
+    thresholds_from: str
+
+
 # --------------------------------------------------------------------------- thresholds
 
 
@@ -36,6 +61,10 @@ class ThresholdsView(_M):
     threshold_set_id: str
     heavy_rain: Threshold
     dry_spring: dict[str, Threshold]  # keyed by planting MM-DD (the window anchor)
+    # which location's weather baseline these were computed from (never shared across locations)
+    location_id: str | None = None
+    location_name: str | None = None
+    baseline: str | None = None
 
 
 # --------------------------------------------------------------------------- compare
@@ -146,6 +175,9 @@ class PlanComparison(_M):
     leg: int | None = None
     dates_assumed: bool | None = None
     dates_basis: str | None = None  # "assumed" for the sample plans' demo dates
+    # set when the sample plan's Piedmont-based demo dates are shown for another region
+    dates_assumed_for_region: str | None = None
+    region_note: str | None = None  # plain sentence: dates assumed for the Piedmont / region mismatch
     editable: list[str] = Field(default_factory=list)
     plan: Plan | None = None
     calendar: CalendarSummary | None = None
@@ -182,6 +214,7 @@ class CompareResponse(_M):
     plans: list[PlanComparison]
     soil: dict[str, Any] | None = None
     location: dict[str, Any] | None = None  # resolve result when a point was requested
+    weather_location: WeatherLocation | None = None  # whose weather and thresholds were used
     data_sources: dict[
         str, Any
     ]  # per-source freshness: fresh | cached(<at>) | snapshot | unavailable
@@ -197,6 +230,9 @@ class UnsupportedResponse(_M):
     plan_id: str
     reason: str
     unsupported: list[str] = Field(default_factory=list)
+    code: str | None = None  # no_weather_snapshot | unsupported_location when the place is the cause
+    reason_text: str | None = None
+    weather_location: WeatherLocation | None = None
 
 
 # --------------------------------------------------------------------------- replay
@@ -247,6 +283,7 @@ class ReplayResponse(_M):
     checks_triggered: list[TriggeredCheck]
     key_rain_days: list[KeyRainDay]
     daily: list[ReplayDay]
+    weather_location: WeatherLocation | None = None
 
 
 # --------------------------------------------------------------------------- sensitivity
@@ -280,6 +317,7 @@ class SensitivityResponse(_M):
     points: list[SensitivityPoint]
     thresholds: ThresholdsView
     note: str
+    weather_location: WeatherLocation | None = None
 
 
 # --------------------------------------------------------------------------- years
@@ -300,6 +338,7 @@ class YearsResponse(_M):
     years: list[YearRow]
     shortcuts: dict[str, int | None]
     eras: dict[str, Any]
+    weather_location: WeatherLocation | None = None
 
 
 # --------------------------------------------------------------------------- rotations

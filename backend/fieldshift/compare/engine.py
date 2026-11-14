@@ -100,7 +100,10 @@ def reference_for(ctx: Context, plant_md: str) -> SpringReference:
     return _REFERENCE_CACHE[key]
 
 
-def thresholds_view(ts: ThresholdSet) -> ThresholdsView:
+def thresholds_view(ts: ThresholdSet, ctx: Context | None = None) -> ThresholdsView:
+    """The frozen thresholds. With ``ctx`` they also say which location's baseline they came from."""
+    place = ctx.place if ctx is not None else None
+    cov = ctx.manifest["coverage"] if ctx is not None else None
     return ThresholdsView(
         threshold_set_id=ts.threshold_set_id,
         heavy_rain=ts.get(HEAVY_RAIN_NAME),
@@ -109,6 +112,11 @@ def thresholds_view(ts: ThresholdSet) -> ThresholdsView:
             for n, t in ts.thresholds.items()
             if n.startswith(SPRING_DRY_PREFIX)
         },
+        location_id=place.id if place else None,
+        location_name=place.name if place else None,
+        baseline=f"{cov['first_date']}..{cov['last_date']} daily record of this location's snapshot"
+        if cov
+        else None,
     )
 
 

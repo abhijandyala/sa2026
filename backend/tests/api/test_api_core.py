@@ -429,14 +429,22 @@ def test_sensitivity_flags_gaps_that_cross_feb_29(client):
 # --- review r2 fixes ----------------------------------------------------------------------------------------
 
 
-def test_a_point_outside_the_union_cell_is_unsupported_not_union_county_data(client):
-    for lat, lon in [(0.0, 0.0), (35.78, -78.64), (40.7, -74.0)]:  # null island, Raleigh, NYC
+def test_a_point_outside_nc_is_unsupported_not_union_county_data(client):
+    for lat, lon in [(0.0, 0.0), (40.7, -74.0)]:  # null island, NYC
         body = post(client, "/v1/plans/compare", {
             "plan_ids": ["corn_soy__rye"], "location": {"latitude": lat, "longitude": lon}}).json()
         plan = body["plans"][0]
         assert plan["status"] == "unsupported" and "unsupported_location" in plan["reason"]
         assert plan["spring"] is None and plan["eras"] == {}
         assert body["location"] is not None
+
+
+def test_an_nc_cell_with_no_snapshot_is_unavailable_not_union_county_data(client):
+    body = post(client, "/v1/plans/compare", {
+        "plan_ids": ["corn_soy__rye"], "location": {"latitude": 35.78, "longitude": -78.64}}).json()
+    plan = body["plans"][0]  # Raleigh: in NC, its grid cell has no committed snapshot
+    assert plan["status"] == "unavailable" and plan["reason"].startswith("no_weather_snapshot")
+    assert plan["reason_text"] and plan["spring"] is None and plan["eras"] == {}
 
 
 def test_a_point_inside_the_union_cell_resolves_to_the_snapshot(client):

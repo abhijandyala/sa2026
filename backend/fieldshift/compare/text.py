@@ -16,7 +16,11 @@ from fieldshift.contracts import Plan
 REASON_TEXT: dict[str, str] = {
     "catalog_missing": "The catalog has no rows for this path yet.",
     "unsupported_location": (
-        "Weather history is only built for the Union County cell, so this place is not evaluated."
+        "This place is outside North Carolina, so it is not evaluated: guidance and weather "
+        "history cover North Carolina only."
+    ),
+    "no_weather_snapshot": (
+        "We have no stored weather history for this part of North Carolina yet."
     ),
     "unsupported": "This plan uses a crop, region or system the guidance does not cover.",
     "unavailable": "This result is not available right now.",

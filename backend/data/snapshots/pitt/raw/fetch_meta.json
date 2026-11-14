@@ -1,0 +1,18 @@
+{
+  "elapsed_s": 6.441,
+  "params": {
+    "community": "AG",
+    "end": "20250630",
+    "format": "JSON",
+    "latitude": "35.59",
+    "longitude": "-77.37",
+    "parameters": "PRECTOTCORR,T2M_MAX,T2M_MIN,T2M,GWETTOP,GWETROOT",
+    "start": "19810101",
+    "time-standard": "LST"
+  },
+  "raw_file": "raw/power_daily.json",
+  "raw_sha256": "86158759a9917000fcba98c951a7043238bdcc4c6ae151a81dc3d805a8dbfb6e",
+  "retrieved_at": "2026-11-14T13:34:12Z",
+  "status_code": 200,
+  "url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=PRECTOTCORR%2CT2M_MAX%2CT2M_MIN%2CT2M%2CGWETTOP%2CGWETROOT&community=AG&longitude=-77.37&latitude=35.59&start=19810101&end=20250630&format=JSON&time-standard=LST"
+}

@@ -60,6 +60,7 @@
       },
       "conflicts": [],
       "dates_assumed": true,
+      "dates_assumed_for_region": null,
       "dates_basis": "assumed",
       "double_crop": null,
       "editable": [
@@ -554,6 +555,7 @@
       "plan_id": "corn_soy__no_cover",
       "reason": null,
       "reason_text": null,
+      "region_note": null,
       "residue_context": [
         {
           "changes_living_cover_indicator": false,
@@ -1398,6 +1400,7 @@
         ]
       ],
       "dates_assumed": true,
+      "dates_assumed_for_region": null,
       "dates_basis": "assumed",
       "double_crop": null,
       "editable": [
@@ -1849,6 +1852,7 @@
       "plan_id": "soy_corn__no_cover",
       "reason": null,
       "reason_text": null,
+      "region_note": null,
       "residue_context": [],
       "rotation_id": "current_practice",
       "rotation_ids": [
@@ -2683,6 +2687,7 @@
       },
       "conflicts": [],
       "dates_assumed": true,
+      "dates_assumed_for_region": null,
       "dates_basis": "assumed",
       "double_crop": null,
       "editable": [
@@ -3404,6 +3409,7 @@
       "plan_id": "corn_soy__rye",
       "reason": null,
       "reason_text": null,
+      "region_note": null,
       "residue_context": [
         {
           "changes_living_cover_indicator": false,
@@ -4343,6 +4349,7 @@
         ]
       ],
       "dates_assumed": true,
+      "dates_assumed_for_region": null,
       "dates_basis": "assumed",
       "double_crop": null,
       "editable": [
@@ -5183,6 +5190,7 @@
       "plan_id": "soy_corn__rye",
       "reason": null,
       "reason_text": null,
+      "region_note": null,
       "residue_context": [
         {
           "changes_living_cover_indicator": false,
@@ -6273,6 +6281,7 @@
       },
       "conflicts": [],
       "dates_assumed": true,
+      "dates_assumed_for_region": null,
       "dates_basis": "assumed",
       "double_crop": {
         "catalog_state": {
@@ -7065,6 +7074,7 @@
       "plan_id": "corn_soy__wheat_dc",
       "reason": "the catalog has no numeric Piedmont calendar windows for winter wheat or double-crop soybean; the wheat harvest and soybean planting dates are entered by the grower, the maturity-group rows are checked, and qualitative or map-based rows are manual_check",
       "reason_text": "The catalog has no numeric Piedmont dates for wheat: enter your own wheat harvest and soybean planting dates.",
+      "region_note": null,
       "residue_context": [
         {
           "changes_living_cover_indicator": false,
@@ -8070,6 +8080,7 @@
     "survey_version": null
   },
   "thresholds": {
+    "baseline": "1981-01-01..2025-06-30 daily record of this location's snapshot",
     "dry_spring": {
       "04-15": {
         "method": "bottom_20pct_order_statistic",
@@ -8296,6 +8307,33 @@
       "unit": "mm/day",
       "value": 76.2
     },
+    "location_id": "union",
+    "location_name": "Union County",
     "threshold_set_id": "0823af244148ab8e"
+  },
+  "weather_location": {
+    "cell_id": "cell_+35.000_-80.625",
+    "code": null,
+    "first_date": "1981-01-01",
+    "grid_cell": {
+      "center_latitude": 35.0,
+      "center_longitude": -80.625
+    },
+    "id": "union",
+    "last_date": "2025-06-30",
+    "name": "Union County",
+    "point": {
+      "latitude": 34.98,
+      "longitude": -80.55
+    },
+    "reason": null,
+    "reason_text": null,
+    "region": "piedmont",
+    "region_basis": "county table: the place's region as listed in the snapshot index",
+    "requested_point": null,
+    "shares_snapshot_with": null,
+    "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
+    "status": "complete",
+    "thresholds_from": "Dry-spring cutoffs come from Union County's own 1981-2025 weather baseline (snapshot 5ce131cfcd1f); heavy rain is the fixed 76.2 mm daily value. Thresholds are never shared across locations."
   }
 }

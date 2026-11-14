@@ -1,0 +1,12 @@
+{
+  "body": {
+    "location_id": "johnston",
+    "plan_ids": [
+      "corn_soy__no_cover",
+      "corn_soy__rye"
+    ]
+  },
+  "method": "POST",
+  "status": 200,
+  "url": "/v1/plans/compare"
+}

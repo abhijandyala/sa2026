@@ -12,6 +12,12 @@ from fieldshift.seasons.align import build_calendar
 from fieldshift.seasons.coverage import season_coverage
 
 
+def _label(ctx: Context) -> str:
+    if ctx.location is None or ctx.location.id == "union":
+        return "Union County, NC (sample)"
+    return f"{ctx.location.name}, NC"
+
+
 def years_payload(plan: Plan, ctx: Context) -> dict[str, Any]:
     """Coverage by year for ``plan``'s dates. Shortcuts use the spring totals of its window."""
     rows: list[YearRow] = []
@@ -39,7 +45,7 @@ def years_payload(plan: Plan, ctx: Context) -> dict[str, Any]:
     return {
         "location": {
             "id": ctx.location_id,
-            "label": "Union County, NC (sample)",
+            "label": _label(ctx),
             "grid": {
                 "lat": cfg["requested_latitude"],
                 "lon": cfg["requested_longitude"],

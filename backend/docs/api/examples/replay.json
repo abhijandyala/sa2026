@@ -3349,6 +3349,7 @@
     "total_mm": 64.09
   },
   "thresholds": {
+    "baseline": "1981-01-01..2025-06-30 daily record of this location's snapshot",
     "dry_spring": {
       "05-12": {
         "method": "bottom_20pct_order_statistic",
@@ -3443,7 +3444,34 @@
       "unit": "mm/day",
       "value": 76.2
     },
+    "location_id": "union",
+    "location_name": "Union County",
     "threshold_set_id": "d00101e09f5cae7e"
+  },
+  "weather_location": {
+    "cell_id": "cell_+35.000_-80.625",
+    "code": null,
+    "first_date": "1981-01-01",
+    "grid_cell": {
+      "center_latitude": 35.0,
+      "center_longitude": -80.625
+    },
+    "id": "union",
+    "last_date": "2025-06-30",
+    "name": "Union County",
+    "point": {
+      "latitude": 34.98,
+      "longitude": -80.55
+    },
+    "reason": null,
+    "reason_text": null,
+    "region": "piedmont",
+    "region_basis": "county table: the place's region as listed in the snapshot index",
+    "requested_point": null,
+    "shares_snapshot_with": null,
+    "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
+    "status": "complete",
+    "thresholds_from": "Dry-spring cutoffs come from Union County's own 1981-2025 weather baseline (snapshot 5ce131cfcd1f); heavy rain is the fixed 76.2 mm daily value. Thresholds are never shared across locations."
   },
   "wetness": {
     "gwetroot_window_mean": 0.6293,

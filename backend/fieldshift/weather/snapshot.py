@@ -14,9 +14,12 @@ also a library-independent hash of the canonical CSV form of the table.
 
 from __future__ import annotations
 
+import contextvars
 import hashlib
 import io
 import json
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -49,6 +52,32 @@ RAW_NAME = "power_daily.json"
 FETCH_META_NAME = "fetch_meta.json"
 PARQUET_NAME = "daily.parquet"
 MANIFEST_NAME = "manifest.json"
+
+
+#: The snapshot directory the current request is answered from. ``load_snapshot()`` with no
+#: argument reads it, so code that only wants "the snapshot in use" (response metadata) follows
+#: the request's location without being passed anything. ``None`` means the Union County default.
+_ACTIVE_DIR: contextvars.ContextVar[Path | None] = contextvars.ContextVar(
+    "fieldshift_active_snapshot_dir", default=None
+)
+
+
+@contextmanager
+def active_snapshot_dir(directory: Path | str | None) -> Iterator[None]:
+    """Make ``load_snapshot()`` read ``directory`` inside the block (this request only)."""
+    token = _ACTIVE_DIR.set(Path(directory) if directory is not None else None)
+    try:
+        yield
+    finally:
+        try:
+            _ACTIVE_DIR.reset(token)
+        except ValueError:  # reset from a copied context; the copy dies with the request
+            pass
+
+
+def set_active_snapshot_dir(directory: Path | str | None) -> None:
+    """Set the active directory for the rest of this request (async dependencies)."""
+    _ACTIVE_DIR.set(Path(directory) if directory is not None else None)
 
 
 class SnapshotError(RuntimeError):
@@ -228,9 +257,13 @@ class Snapshot:
         return self.manifest["hashes"]["snapshot_hash"]
 
 
-def load_snapshot(directory: Path | str = DEFAULT_SNAPSHOT_DIR) -> Snapshot:
-    """Read the committed snapshot. Reads files only; never touches the network."""
-    d = Path(directory)
+def load_snapshot(directory: Path | str | None = None) -> Snapshot:
+    """Read a committed snapshot. Reads files only; never touches the network.
+
+    With no argument: the request's active snapshot (:func:`active_snapshot_dir`), else the Union
+    County default.
+    """
+    d = Path(directory) if directory is not None else (_ACTIVE_DIR.get() or DEFAULT_SNAPSHOT_DIR)
     manifest_path, parquet_path = d / MANIFEST_NAME, d / PARQUET_NAME
     if not manifest_path.exists() or not parquet_path.exists():
         raise SnapshotError(f"snapshot not found in {d}")

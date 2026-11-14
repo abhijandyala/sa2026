@@ -10,11 +10,11 @@
       "source": "USDA NRCS Soil Data Access"
     },
     "weather": {
-      "first_date": "1981-01-01",
-      "freshness": "snapshot",
-      "last_date": "2025-06-30",
-      "retrieved_at": "2026-11-13T03:24:40Z",
-      "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e",
+      "first_date": null,
+      "freshness": "unavailable",
+      "last_date": null,
+      "retrieved_at": null,
+      "snapshot_hash": null,
       "source": "NASA POWER daily (offline snapshot)"
     }
   },
@@ -35,62 +35,40 @@
       "start": 2006
     }
   },
-  "input_hash": "40aa7c6ca35051917b172f49600b6dde048c3159bc0be5ef328e977db1a0fcf2",
+  "input_hash": "5d420701862057118b7f90ba1c5175728006e5e89e15ac51f064f879bb417762",
   "location": {
     "bounds": {
       "basis": "coarse_polygon",
       "east": -75.46,
-      "in_nc": true,
+      "in_nc": false,
       "north": 36.59,
       "south": 33.84,
       "tolerance_note": "approximate NC outline (about 10 km tolerance at the border); not a legal boundary",
       "west": -84.32
     },
-    "cell_id": "cell_+36.000_-78.750",
-    "code": null,
-    "grid_cell": {
-      "basis": "derived from the MERRA-2 native grid; POWER does not return the cell",
-      "center_latitude": 36.0,
-      "center_longitude": -78.75,
-      "lat_step_deg": 0.5,
-      "lon_step_deg": 0.625
-    },
-    "guidance": {
-      "basis": "none",
-      "reason": "the point is too close to a region boundary to infer a region; pass region explicitly",
-      "region": null,
-      "status": "unknown",
-      "supported": false
-    },
-    "latitude": 35.78,
-    "longitude": -78.64,
-    "notes": [
-      "weather history is not available for this grid cell yet"
-    ],
-    "reason": null,
-    "status": "partial",
-    "weather": {
-      "first_date": null,
-      "freshness": "unavailable",
-      "last_date": null,
-      "reason": "offline mode: no usable cached history for this grid cell",
-      "snapshot_hash": null,
-      "source": "none",
-      "status": "unavailable",
-      "supported": false
-    }
+    "cell_id": null,
+    "code": "unsupported_location",
+    "grid_cell": null,
+    "guidance": null,
+    "latitude": 40.7,
+    "longitude": -74.0,
+    "notes": [],
+    "reason": "the point is outside North Carolina; guidance and history cover NC only",
+    "status": "unsupported",
+    "weather": null
   },
   "meta": {
     "catalog_version": "v2:8eeb5bf961eb",
-    "plan_version": "40aa7c6ca3505191",
+    "plan_version": "5d42070186205711",
     "request_id": "req_example",
-    "snapshot_hash": "5ce131cfcd1f07d3738ecb9afaec6c3ef6a4764b6a3528bdd2b64debe7ba5f4e"
+    "snapshot_hash": null
   },
   "plans": [
     {
       "calendar": null,
       "conflicts": [],
       "dates_assumed": null,
+      "dates_assumed_for_region": null,
       "dates_basis": null,
       "double_crop": null,
       "editable": [],
@@ -125,8 +103,9 @@
         }
       },
       "plan_id": "corn_soy__rye",
-      "reason": "unsupported_location: weather_history_not_available_for_location",
-      "reason_text": "Weather history is only built for the Union County cell, so this place is not evaluated.",
+      "reason": "unsupported_location: the point is outside North Carolina; guidance and history cover NC only",
+      "reason_text": "This place is outside North Carolina, so it is not evaluated: guidance and weather history cover North Carolina only.",
+      "region_note": null,
       "residue_context": [],
       "rotation_id": "winter_cover",
       "rotation_ids": [
@@ -140,18 +119,18 @@
     }
   ],
   "request_echo": {
-    "latitude": 35.78,
+    "latitude": 40.7,
     "location_id": null,
-    "longitude": -78.64,
+    "longitude": -74.0,
     "plan_ids": [
       "corn_soy__rye"
     ],
     "rotation_ids": []
   },
-  "result_id": "1e6ad1e31e269710",
+  "result_id": "5cc3fbf0f9ce81eb",
   "shared_eligible_years": {
     "full_season": [],
-    "note": "unsupported_location: weather_history_not_available_for_location",
+    "note": "unsupported_location: the point is outside North Carolina; guidance and history cover NC only",
     "spring": [],
     "winter": []
   },
@@ -173,6 +152,7 @@
     "survey_version": null
   },
   "thresholds": {
+    "baseline": null,
     "dry_spring": {
       "05-12": {
         "method": "bottom_20pct_order_statistic",
@@ -267,6 +247,30 @@
       "unit": "mm/day",
       "value": 76.2
     },
+    "location_id": null,
+    "location_name": null,
     "threshold_set_id": "d00101e09f5cae7e"
+  },
+  "weather_location": {
+    "cell_id": "cell_+40.500_-73.750",
+    "code": "unsupported_location",
+    "first_date": null,
+    "grid_cell": null,
+    "id": null,
+    "last_date": null,
+    "name": null,
+    "point": null,
+    "reason": "unsupported_location: the point is outside North Carolina; guidance and history cover NC only",
+    "reason_text": "This place is outside North Carolina, so it is not evaluated: guidance and weather history cover North Carolina only.",
+    "region": null,
+    "region_basis": null,
+    "requested_point": {
+      "latitude": 40.7,
+      "longitude": -74.0
+    },
+    "shares_snapshot_with": null,
+    "snapshot_hash": null,
+    "status": "unsupported",
+    "thresholds_from": "No plan was evaluated for this place. The thresholds shown only keep the response shape; they are Union County's and apply to nothing here."
   }
 }

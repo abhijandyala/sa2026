@@ -1,0 +1,299 @@
+{
+  "coverage_note": null,
+  "data_sources": {
+    "catalog": {
+      "freshness": "snapshot",
+      "source": "Perplexity catalogs v1 (verbatim)"
+    },
+    "soil": {
+      "freshness": "unavailable",
+      "source": "USDA NRCS Soil Data Access"
+    },
+    "weather": {
+      "first_date": null,
+      "freshness": "unavailable",
+      "last_date": null,
+      "retrieved_at": null,
+      "snapshot_hash": null,
+      "source": "NASA POWER daily (offline snapshot)"
+    }
+  },
+  "eras": {
+    "earlier": {
+      "end": 2000,
+      "start": 1981
+    },
+    "excluded_from_eras": [
+      2001,
+      2002,
+      2003,
+      2004,
+      2005
+    ],
+    "recent": {
+      "end": 2025,
+      "start": 2006
+    }
+  },
+  "input_hash": "40aa7c6ca35051917b172f49600b6dde048c3159bc0be5ef328e977db1a0fcf2",
+  "location": {
+    "bounds": {
+      "basis": "coarse_polygon",
+      "east": -75.46,
+      "in_nc": true,
+      "north": 36.59,
+      "south": 33.84,
+      "tolerance_note": "approximate NC outline (about 10 km tolerance at the border); not a legal boundary",
+      "west": -84.32
+    },
+    "cell_id": "cell_+36.000_-78.750",
+    "code": null,
+    "grid_cell": {
+      "basis": "derived from the MERRA-2 native grid; POWER does not return the cell",
+      "center_latitude": 36.0,
+      "center_longitude": -78.75,
+      "lat_step_deg": 0.5,
+      "lon_step_deg": 0.625
+    },
+    "guidance": {
+      "basis": "none",
+      "reason": "the point is too close to a region boundary to infer a region; pass region explicitly",
+      "region": null,
+      "status": "unknown",
+      "supported": false
+    },
+    "latitude": 35.78,
+    "longitude": -78.64,
+    "notes": [
+      "weather history is not available for this grid cell yet"
+    ],
+    "reason": null,
+    "status": "partial",
+    "weather": {
+      "first_date": null,
+      "freshness": "unavailable",
+      "last_date": null,
+      "reason": "offline mode: no usable cached history for this grid cell",
+      "snapshot_hash": null,
+      "source": "none",
+      "status": "unavailable",
+      "supported": false
+    }
+  },
+  "meta": {
+    "catalog_version": "v2:8eeb5bf961eb",
+    "plan_version": "40aa7c6ca3505191",
+    "request_id": "req_example",
+    "snapshot_hash": null
+  },
+  "plans": [
+    {
+      "calendar": null,
+      "conflicts": [],
+      "dates_assumed": null,
+      "dates_assumed_for_region": null,
+      "dates_basis": null,
+      "double_crop": null,
+      "editable": [],
+      "eras": {},
+      "eras_shared_years": {},
+      "label": "Cereal rye before soybean",
+      "label_generated": false,
+      "leg": null,
+      "other_checks": [],
+      "path_notes": [],
+      "plan": {
+        "grower": {
+          "low_moisture_concern": null,
+          "observations": [],
+          "residue_report": null
+        },
+        "label": "Cereal rye before soybean",
+        "next_crop_id": "soybean",
+        "next_plant": "05-12",
+        "plan_id": "corn_soy__rye",
+        "prev_harvest": "09-20",
+        "previous_crop_id": "field_corn",
+        "production_system": null,
+        "region": "NC Piedmont",
+        "winter": {
+          "crop_id": "cereal_rye",
+          "harvest": null,
+          "kind": "cover",
+          "plant": null,
+          "seed": "10-01",
+          "terminate": "04-30"
+        }
+      },
+      "plan_id": "corn_soy__rye",
+      "reason": "no_weather_snapshot: no committed weather snapshot for grid cell cell_+36.000_-78.750",
+      "reason_text": "We have no stored weather history for this part of North Carolina yet.",
+      "region_note": null,
+      "residue_context": [],
+      "rotation_id": "winter_cover",
+      "rotation_ids": [
+        "winter_cover"
+      ],
+      "seasons": [],
+      "spring": null,
+      "spring_checks": [],
+      "status": "unavailable",
+      "winter": null
+    }
+  ],
+  "request_echo": {
+    "latitude": 35.78,
+    "location_id": null,
+    "longitude": -78.64,
+    "plan_ids": [
+      "corn_soy__rye"
+    ],
+    "rotation_ids": []
+  },
+  "result_id": "1e6ad1e31e269710",
+  "shared_eligible_years": {
+    "full_season": [],
+    "note": "no_weather_snapshot: no committed weather snapshot for grid cell cell_+36.000_-78.750",
+    "spring": [],
+    "winter": []
+  },
+  "soil": {
+    "awc": null,
+    "dominant_component": null,
+    "horizons": [],
+    "map_unit_name": null,
+    "mukey": null,
+    "notes": [],
+    "other_components": [],
+    "provenance": null,
+    "reason": "offline mode: SDA was not queried",
+    "stale_copy": null,
+    "status": "unavailable",
+    "surface_texture": null,
+    "survey_area": null,
+    "survey_area_name": null,
+    "survey_version": null
+  },
+  "thresholds": {
+    "baseline": null,
+    "dry_spring": {
+      "05-12": {
+        "method": "bottom_20pct_order_statistic",
+        "n_reference": 45,
+        "name": "spring_dry_mm@05-12",
+        "note": null,
+        "parameters": {
+          "eligible_years": [
+            1981,
+            1982,
+            1983,
+            1984,
+            1985,
+            1986,
+            1987,
+            1988,
+            1989,
+            1990,
+            1991,
+            1992,
+            1993,
+            1994,
+            1995,
+            1996,
+            1997,
+            1998,
+            1999,
+            2000,
+            2001,
+            2002,
+            2003,
+            2004,
+            2005,
+            2006,
+            2007,
+            2008,
+            2009,
+            2010,
+            2011,
+            2012,
+            2013,
+            2014,
+            2015,
+            2016,
+            2017,
+            2018,
+            2019,
+            2020,
+            2021,
+            2022,
+            2023,
+            2024,
+            2025
+          ],
+          "excluded_years": [],
+          "fraction": 0.2,
+          "k": 9,
+          "plant_md": "05-12",
+          "tie_rule": "total <= cutoff counts as dry",
+          "window_days": 30
+        },
+        "reference_span": "1981..2025",
+        "source": null,
+        "status": "complete",
+        "unit": "mm",
+        "value": 64.18
+      }
+    },
+    "heavy_rain": {
+      "method": "published_fixed",
+      "n_reference": 16252,
+      "name": "heavy_rain_mm",
+      "note": "Applied to NASA POWER daily values, which are Local Solar Time days (time_standard=LST), not a rolling 24-hour window; a storm split across two solar days can fall below the value on each day. Rainfall-depth weather metric only: not erosion, runoff or soil loss. Zero-count winters are valid results.",
+      "parameters": {
+        "assumed": false,
+        "comparison": "daily precip_mm >= value",
+        "daily_value_basis": "NASA POWER PRECTOTCORR, time_standard=LST (solar day)",
+        "depth_in": 3.0,
+        "inclusive": true,
+        "reference_duration_h": 24.0,
+        "scope": "rainfall depth only; not erosion or soil loss"
+      },
+      "reference_span": "1981-01-01..2025-06-30",
+      "source": {
+        "locator": "PDF p. 4, precipitation discussion",
+        "rule_id": "fc_v2_ref_very_heavy_rain",
+        "title": "North Carolina Climate Science Report: Plain Language Summary; March 2020",
+        "url": "https://files.nc.gov/ncdeq/climate-change/climate-scinece-report/NC-Climate-Science-Report_Plain_Language_Summary.pdf",
+        "verified_date": "2026-11-13"
+      },
+      "status": "complete",
+      "unit": "mm/day",
+      "value": 76.2
+    },
+    "location_id": null,
+    "location_name": null,
+    "threshold_set_id": "d00101e09f5cae7e"
+  },
+  "weather_location": {
+    "cell_id": "cell_+36.000_-78.750",
+    "code": "no_weather_snapshot",
+    "first_date": null,
+    "grid_cell": null,
+    "id": null,
+    "last_date": null,
+    "name": null,
+    "point": null,
+    "reason": "no_weather_snapshot: no committed weather snapshot for grid cell cell_+36.000_-78.750",
+    "reason_text": "We have no stored weather history for this part of North Carolina yet.",
+    "region": null,
+    "region_basis": null,
+    "requested_point": {
+      "latitude": 35.78,
+      "longitude": -78.64
+    },
+    "shares_snapshot_with": null,
+    "snapshot_hash": null,
+    "status": "unavailable",
+    "thresholds_from": "No plan was evaluated for this place. The thresholds shown only keep the response shape; they are Union County's and apply to nothing here."
+  }
+}

@@ -16,7 +16,7 @@ curl -X POST localhost:8000/v1/plans/compare -H 'content-type: application/json'
      -d '{"rotation_ids": ["current_practice", "winter_cover"]}'
 ```
 
-With `FIELDSHIFT_OFFLINE=1`, weather comes only from `data/snapshots/union_county/` and no live provider (NWS, USDM, USDA SDA, NASA POWER) is called. A provider with a still-valid on-disk cache entry (SDA 30 days, `data/cache/`, not committed, so empty in a fresh clone) is answered from it and labelled `cached(<time>)`; otherwise it is reported `unavailable`; plan comparison, replay, sensitivity and years all still work. A test (`tests/api/test_api_contract.py::test_offline_demo_...`) starts a fresh process that refuses every non-loopback connection and exercises those endpoints.
+With `FIELDSHIFT_OFFLINE=1`, weather comes only from the committed snapshots under `data/snapshots/` (`index.json` lists them: Union plus seven more NC counties) and no live provider (NWS, USDM, USDA SDA, NASA POWER) is called. A provider with a still-valid on-disk cache entry (SDA 30 days, `data/cache/`, not committed, so empty in a fresh clone) is answered from it and labelled `cached(<time>)`; otherwise it is reported `unavailable`; plan comparison, replay, sensitivity and years all still work. A test (`tests/api/test_api_contract.py::test_offline_demo_...`) starts a fresh process that refuses every non-loopback connection and exercises those endpoints.
 
 Python 3.12 is the target. The code is also 3.11-compatible (no PEP 695 syntax) because the Homebrew 3.12 on one development Mac has a broken `pyexpat`.
 
@@ -65,7 +65,8 @@ HTTP 400 is only for invalid input (typed `{field, code, message}` issues); ever
 | Card term | Where it appears | Status string |
 |---|---|---|
 | `invalid_input` | HTTP 400 `{status, issues[{field, code, message}], meta fields}` | `invalid_input` |
-| `unsupported` | per plan / per response (unknown crop, point outside the Union County weather cell or NC) | `unsupported` |
+| `unsupported` | per plan / per response (unknown crop, or a point outside North Carolina: code `unsupported_location`) | `unsupported` |
+| `unavailable` | an NC point whose grid cell has no committed snapshot: code `no_weather_snapshot`, `meta.snapshot_hash` null | `unavailable` |
 | `unknown_evidence` | a rule or metric that lacks an input | `unknown` (or `manual_check` for qualitative rules) |
 | `unavailable_data` | weather window missing, provider down, catalog rows missing (`reason: catalog_missing`) | `unavailable` / `partial` |
 | `inapplicable` | a rule that does not apply to this crop, region or system | `inapplicable` |
@@ -76,7 +77,7 @@ Other statuses: `complete`, `partial`, `insufficient_data` (era or cutoff has to
 
 | Provider | Used for | Timeout | Cache policy | Offline behaviour |
 |---|---|---|---|---|
-| NASA POWER Daily | weather history (build only) | 120 s, 3 retries (2 s, 4 s, 8 s backoff) | permanent: the committed snapshot in `data/snapshots/` | never called at serve time; `python -m fieldshift.weather build` is the only fetch |
+| NASA POWER Daily | weather history (build only) | 120 s, 3 retries (2 s, 4 s, 8 s backoff) | permanent: the committed snapshot in `data/snapshots/` | never called at serve time; `python -m fieldshift.weather build` (Union) and `build-locations` (the counties) are the only fetches |
 | USDA SDA | soil | 15 s | 30 days on disk (`data/cache/sda`, gitignored) | `cached(<time>)` if a valid copy exists, else `unavailable` |
 | NWS API | forecast / alerts | 10 s | 15 min / 5 min | `unavailable` |
 | US Drought Monitor | county drought | 10 s | 6 h | `unavailable` |
@@ -97,3 +98,13 @@ The access log records method, path (no query string), status and duration only;
 ## 8. Known gaps
 
 Winter wheat double-crop and SMAP (Phase 12) are not built; the wheat path returns `unavailable: catalog_missing`. Catalog gaps are listed at the top of `docs/phase-cards.md` and in `docs/catalog-gaps.md`.
+
+## Weather locations (per-county snapshots)
+
+`data/snapshots/index.json` lists every place with a committed snapshot: `union`, `iredell`, `rowan`, `johnston`, `wayne`, `duplin`, `pitt`, `robeson` (county-centre points from the web place picker, not farms). One snapshot is stored per NASA POWER grid cell (0.5 x 0.625 degrees): Johnston and Wayne share a cell, so Wayne is served from `data/snapshots/johnston/` and carries the same `snapshot_hash`. Each snapshot has the same source, span (1981-01-01 to 2025-06-30), manifest format and hash rule as Union County's.
+
+- **Choosing a place.** Compare, replay, sensitivity, years and the Phase 9 routes read `location_id` (an index id; `union_county_sample` still means Union) or a latitude/longitude (`location: {latitude, longitude}` in a body, or `latitude`/`longitude` in a query). The lookup is by grid cell, so any point inside a served cell uses that snapshot. No place means the Union County default, exactly as before.
+- **Meta.** `meta.snapshot_hash` is the snapshot actually used. `weather_location` says which place answered, its region, grid cell and hash, and where the thresholds come from.
+- **Thresholds.** Each place gets its own frozen `ThresholdSet`: dry-spring cutoffs from its own 1981-2025 baseline, heavy rain the fixed 76.2 mm. Locations are never mixed in a threshold set, era comparison or shared-year set (one request is one place).
+- **No snapshot.** A North Carolina point whose cell has no snapshot returns HTTP 200 `unavailable`, code `no_weather_snapshot`, `reason_text`, `meta.snapshot_hash: null`. A point outside NC stays `unsupported_location`. An unknown `location_id`, or an id and a point that disagree, is HTTP 400 `invalid_input`.
+- **Adding a county.** Add it to `PLACES` in `fieldshift/weather/locations.py`, then `python -m fieldshift.weather build-locations` (needs the network once; refuses under `FIELDSHIFT_OFFLINE=1`; fetches only missing cells; compares a place that shares a cell with the stored history and stops if they differ). `python -m fieldshift.weather verify-locations` checks the index and every snapshot offline. Regenerate the contract afterwards.
