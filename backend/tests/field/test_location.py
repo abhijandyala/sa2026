@@ -141,6 +141,27 @@ def test_approximate_region(lat, lon, tag):
     assert approximate_region(lat, lon) == tag
 
 
+#: Demo counties (county seats' area points) and the region guidance must use for each.
+COUNTY_POINTS = [
+    ("union", 34.98, -80.55, "piedmont"),
+    ("iredell", 35.81, -80.87, "piedmont"),
+    ("rowan", 35.64, -80.53, "piedmont"),
+    ("johnston", 35.52, -78.37, "coastal_plain"),
+    ("wayne", 35.36, -77.99, "coastal_plain"),
+    ("duplin", 34.94, -77.93, "coastal_plain"),
+    ("pitt", 35.59, -77.37, "coastal_plain"),
+    ("robeson", 34.64, -79.10, "coastal_plain"),
+]
+
+
+@pytest.mark.parametrize("name,lat,lon,region", COUNTY_POINTS, ids=[c[0] for c in COUNTY_POINTS])
+def test_demo_county_points_get_the_right_region(name, lat, lon, region, tmp_path):
+    assert in_nc_bounds(lat, lon)
+    assert approximate_region(lat, lon) == region
+    res = resolve_location(lat, lon, cache_dir=tmp_path, fetch=no_network, offline=True)
+    assert res.guidance.region == region and res.guidance.supported
+
+
 # ------------------------------------------------------------------ evidence
 
 
